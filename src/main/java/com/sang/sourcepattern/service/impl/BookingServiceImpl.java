@@ -79,6 +79,23 @@ public class BookingServiceImpl implements BookingService {
      */
     private static final String STAFF_SLOT_PREFIX  = "staff_slot:";
 
+    /** In-memory fallback khi Redis không chạy (dành cho môi trường dev) */
+    @NonFinal
+    java.util.concurrent.ConcurrentHashMap<String, PendingBooking> localPendingMap =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    @NonFinal
+    java.util.concurrent.ConcurrentHashMap<String, String> localSlotLocks =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private boolean isRedisAvailable() {
+        try {
+            redisTemplate.hasKey("__ping__");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     // ─── PendingBooking DTO (lưu vào Redis) ──────────────────────────────────
 
     @Data
@@ -112,19 +129,73 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void savePending(long orderCode, PendingBooking pending) {
-        redisTemplate.opsForValue().set(redisKey(orderCode), pending, PENDING_TTL_MINUTES, TimeUnit.MINUTES);
+        try {
+            redisTemplate.opsForValue().set(redisKey(orderCode), pending, PENDING_TTL_MINUTES, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            log.warn("Redis unavailable, using in-memory store for orderCode={}", orderCode);
+            localPendingMap.put(redisKey(orderCode), pending);
+        }
     }
 
     private PendingBooking getPending(long orderCode) {
-        Object raw = redisTemplate.opsForValue().get(redisKey(orderCode));
-        if (raw == null) return null;
-        if (raw instanceof PendingBooking pb) return pb;
-        // Fallback: Jackson deserialization via RedisTemplate
-        return null;
+        try {
+            Object raw = redisTemplate.opsForValue().get(redisKey(orderCode));
+            if (raw instanceof PendingBooking pb) return pb;
+            if (raw != null) return null;
+        } catch (Exception e) {
+            log.warn("Redis unavailable, reading from in-memory store for orderCode={}", orderCode);
+        }
+        return localPendingMap.get(redisKey(orderCode));
     }
 
     private void deletePending(long orderCode) {
-        redisTemplate.delete(redisKey(orderCode));
+        try {
+            redisTemplate.delete(redisKey(orderCode));
+        } catch (Exception e) {
+            log.warn("Redis unavailable, skipping delete for orderCode={}", orderCode);
+        }
+        localPendingMap.remove(redisKey(orderCode));
+    }
+
+    // ─── Cash pending helpers ─────────────────────────────────────────────────
+
+    private void saveCashPending(long orderCode, PendingBooking pending) {
+        try {
+            redisTemplate.opsForValue().set(
+                    CASH_PENDING_PREFIX + orderCode, pending,
+                    PENDING_TTL_MINUTES, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            log.warn("Redis unavailable, using in-memory store for cash orderCode={}", orderCode);
+            localPendingMap.put(CASH_PENDING_PREFIX + orderCode, pending);
+        }
+    }
+
+    private PendingBooking getCashPending(long orderCode) {
+        try {
+            Object raw = redisTemplate.opsForValue().get(CASH_PENDING_PREFIX + orderCode);
+            if (raw instanceof PendingBooking pb) return pb;
+            if (raw != null) return null;
+        } catch (Exception e) {
+            log.warn("Redis unavailable, reading in-memory cash pending for orderCode={}", orderCode);
+        }
+        return localPendingMap.get(CASH_PENDING_PREFIX + orderCode);
+    }
+
+    private void deleteCashPending(long orderCode) {
+        try {
+            redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+        } catch (Exception e) {
+            log.warn("Redis unavailable, skipping cash pending delete for orderCode={}", orderCode);
+        }
+        localPendingMap.remove(CASH_PENDING_PREFIX + orderCode);
+    }
+
+    private boolean isSlotRedisLocked(String slotKey) {
+        try {
+            return Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
+        } catch (Exception e) {
+            return localSlotLocks.containsKey(slotKey);
+        }
     }
 
     // ─── Staff slot lock (Redis) ──────────────────────────────────────────────
@@ -145,14 +216,29 @@ public class BookingServiceImpl implements BookingService {
      */
     private boolean tryLockStaffSlot(int staffId, LocalDateTime appointmentTime, long orderCode) {
         String key = staffSlotKey(staffId, appointmentTime);
-        Boolean set = redisTemplate.opsForValue()
-                .setIfAbsent(key, String.valueOf(orderCode), PENDING_TTL_MINUTES, TimeUnit.MINUTES);
-        return Boolean.TRUE.equals(set);
+        try {
+            Boolean set = redisTemplate.opsForValue()
+                    .setIfAbsent(key, String.valueOf(orderCode), PENDING_TTL_MINUTES, TimeUnit.MINUTES);
+            if (Boolean.TRUE.equals(set)) {
+                localSlotLocks.put(key, String.valueOf(orderCode));
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            log.warn("Redis unavailable, using in-memory slot lock for key={}", key);
+            return localSlotLocks.putIfAbsent(key, String.valueOf(orderCode)) == null;
+        }
     }
 
     /** Giải phóng slot của staff khi booking bị huỷ hoặc confirm xong */
     private void releaseStaffSlot(int staffId, LocalDateTime appointmentTime) {
-        redisTemplate.delete(staffSlotKey(staffId, appointmentTime));
+        String key = staffSlotKey(staffId, appointmentTime);
+        try {
+            redisTemplate.delete(key);
+        } catch (Exception e) {
+            log.warn("Redis unavailable, skipping Redis slot release for key={}", key);
+        }
+        localSlotLocks.remove(key);
     }
 
     // ─── General helpers ──────────────────────────────────────────────────────
@@ -305,8 +391,7 @@ public class BookingServiceImpl implements BookingService {
 
         // Kiểm tra Redis — pending booking đang giữ slot (chưa thanh toán)
         String slotKey = staffSlotKey(staffId, appointmentTime);
-        Boolean slotTaken = redisTemplate.hasKey(slotKey);
-        if (Boolean.TRUE.equals(slotTaken)) {
+        if (isSlotRedisLocked(slotKey)) {
             throw new AppException(ErrorCode.STAFF_BOOKING_CONFLICT);
         }
     }
@@ -331,7 +416,7 @@ public class BookingServiceImpl implements BookingService {
                     s.getId(), windowStart, windowEnd) > 0;
             if (dbBusy) return false;
             String slotKey = staffSlotKey(s.getId(), appointmentTime);
-            return !Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
+            return !isSlotRedisLocked(slotKey);
         });
 
         if (!anyFree) {
@@ -596,8 +681,7 @@ public class BookingServiceImpl implements BookingService {
                     boolean dbBusy = bookingRepository.countConflictingBookingForStaff(s.getId(), ws, we) > 0;
                     String slotKey = STAFF_SLOT_PREFIX + s.getId() + ":"
                                  + pending.getAppointmentDatetime().withSecond(0).withNano(0).toString();
-                    boolean redisBusy = Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
-                    return !dbBusy && !redisBusy;
+                    return !dbBusy && !isSlotRedisLocked(slotKey);
                 }).collect(Collectors.toList());
 
                 if (!availableStaff.isEmpty()) {
@@ -617,7 +701,7 @@ public class BookingServiceImpl implements BookingService {
                 uv.setUsedAt(LocalDateTime.now());
                 userVoucherRepository.save(uv);
                 appliedVoucher = uv.getVoucher();
-                
+
                 int rawAmount = resolveTotalPrice(pendingServiceIds).intValue();
                 if ("PERCENTAGE".equalsIgnoreCase(appliedVoucher.getDiscountType())) {
                     discountAmount = rawAmount * (appliedVoucher.getDiscountValue() / 100.0);
@@ -778,8 +862,7 @@ public class BookingServiceImpl implements BookingService {
                     boolean dbBusy = bookingRepository.countConflictingBookingForStaff(s.getId(), ws, we) > 0;
                     String slotKey = STAFF_SLOT_PREFIX + s.getId() + ":"
                                  + pending.getAppointmentDatetime().withSecond(0).withNano(0).toString();
-                    boolean redisBusy = Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
-                    return !dbBusy && !redisBusy;
+                    return !dbBusy && !isSlotRedisLocked(slotKey);
                 }).collect(Collectors.toList());
 
                 if (!availableStaff.isEmpty()) {
@@ -799,7 +882,7 @@ public class BookingServiceImpl implements BookingService {
                 uv.setUsedAt(LocalDateTime.now());
                 userVoucherRepository.save(uv);
                 appliedVoucher = uv.getVoucher();
-                
+
                 int rawAmount = resolveTotalPrice(pendingServiceIds).intValue();
                 if ("PERCENTAGE".equalsIgnoreCase(appliedVoucher.getDiscountType())) {
                     discountAmount = rawAmount * (appliedVoucher.getDiscountValue() / 100.0);
@@ -956,28 +1039,24 @@ public class BookingServiceImpl implements BookingService {
                 request.getNote(), depositVnd, description,
                 request.getCheckOut(), request.getCageSize(), request.getRoomType(), null
         );
-        redisTemplate.opsForValue().set(
-                CASH_PENDING_PREFIX + orderCode, pending,
-                PENDING_TTL_MINUTES, java.util.concurrent.TimeUnit.MINUTES);
+        saveCashPending(orderCode, pending);
 
         // ── Giữ slot staff trong Redis (atomic SET NX) ────────────────────────
         if (request.getStaffId() != null) {
             boolean locked = tryLockStaffSlot(request.getStaffId(),
                     request.getAppointmentDatetime(), orderCode);
             if (!locked) {
-                redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+                deleteCashPending(orderCode);
                 throw new AppException(ErrorCode.STAFF_BOOKING_CONFLICT);
             }
         }
-
-
 
         PayOSCreateResponse payosResponse;
         try {
             payosResponse = payOSService.createPaymentLink(
                     orderCode, depositVnd, description, returnUrl, cancelUrl);
         } catch (Exception e) {
-            redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+            deleteCashPending(orderCode);
             if (request.getStaffId() != null) {
                 releaseStaffSlot(request.getStaffId(), request.getAppointmentDatetime());
             }
@@ -986,7 +1065,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (payosResponse == null || !payosResponse.isSuccess() || payosResponse.getData() == null) {
-            redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+            deleteCashPending(orderCode);
             if (request.getStaffId() != null) {
                 releaseStaffSlot(request.getStaffId(), request.getAppointmentDatetime());
             }
@@ -1024,13 +1103,11 @@ public class BookingServiceImpl implements BookingService {
         });
 
         // Lấy pending từ Redis
-        Object raw = redisTemplate.opsForValue().get(CASH_PENDING_PREFIX + orderCode);
-        if (raw == null) {
+        PendingBooking pending = getCashPending(orderCode);
+        if (pending == null) {
             log.warn("Cash pending booking not found in Redis for orderCode={}", orderCode);
             throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
         }
-        PendingBooking pending = (raw instanceof PendingBooking pb) ? pb : null;
-        if (pending == null) throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
 
         if (pending.getUserId() != user.getId()) {
             throw new AppException(ErrorCode.BOOKING_NOT_BELONG_TO_USER);
@@ -1051,7 +1128,7 @@ public class BookingServiceImpl implements BookingService {
         log.info("PayOS confirmCashDeposit — orderCode={} status={}", orderCode, payosStatus);
 
         if (!"PAID".equals(payosStatus)) {
-            redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+            deleteCashPending(orderCode);
             if (pending.getStaffId() != null) {
                 releaseStaffSlot(pending.getStaffId(), pending.getAppointmentDatetime());
             }
@@ -1069,7 +1146,7 @@ public class BookingServiceImpl implements BookingService {
             LocalDateTime ws = pending.getAppointmentDatetime();
             LocalDateTime we = pending.getAppointmentDatetime().plusMinutes(pendingTotalDuration);
             if (!isBoarding && bookingRepository.countConflictingBookingForStaff(pending.getStaffId(), ws, we) > 0) {
-                redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+                deleteCashPending(orderCode);
                 releaseStaffSlot(pending.getStaffId(), pending.getAppointmentDatetime());
                 throw new AppException(ErrorCode.STAFF_BOOKING_CONFLICT);
             }
@@ -1090,8 +1167,7 @@ public class BookingServiceImpl implements BookingService {
                     boolean dbBusy = !isBoarding && bookingRepository.countConflictingBookingForStaff(s.getId(), ws, we) > 0;
                     String slotKey = STAFF_SLOT_PREFIX + s.getId() + ":"
                             + pending.getAppointmentDatetime().withSecond(0).withNano(0).toString();
-                    boolean redisBusy = Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
-                    return !dbBusy && !redisBusy;
+                    return !dbBusy && !isSlotRedisLocked(slotKey);
                 }).collect(Collectors.toList());
                 if (!availableStaff.isEmpty()) {
                     staff = availableStaff.get(ThreadLocalRandom.current().nextInt(availableStaff.size()));
@@ -1154,7 +1230,7 @@ public class BookingServiceImpl implements BookingService {
                 .completedAt(LocalDateTime.now())
                 .build());
 
-        redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+        deleteCashPending(orderCode);
         if (staff != null) {
             releaseStaffSlot(staff.getId(), pending.getAppointmentDatetime());
         }
@@ -1577,7 +1653,7 @@ public class BookingServiceImpl implements BookingService {
                         // Check Redis slot
                         String slotKey = STAFF_SLOT_PREFIX + s.getId() + ":"
                                 + appointmentDatetime.withSecond(0).withNano(0).toString();
-                        boolean redisBusy = Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
+                        boolean redisBusy = isSlotRedisLocked(slotKey);
 
                         available = !dbBusy && !redisBusy;
                     }
@@ -1719,8 +1795,7 @@ public class BookingServiceImpl implements BookingService {
                 // Check Redis: slot đang bị giữ bởi pending booking không?
                 String slotKey = STAFF_SLOT_PREFIX + s.getId() + ":"
                         + slotStart.withSecond(0).withNano(0).toString();
-                boolean redisBusy = Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
-                return !redisBusy;
+                return !isSlotRedisLocked(slotKey);
             });
 
             if (hasAvailableStaff) {
@@ -1811,9 +1886,15 @@ public class BookingServiceImpl implements BookingService {
         List<LocalDateTime> availableSlots = new java.util.ArrayList<>();
         java.time.LocalTime cursor = open;
 
+        LocalDateTime now = LocalDateTime.now();
         while (!cursor.plusMinutes(finalTotalDuration).isAfter(close)) {
             LocalDateTime slotStart = LocalDateTime.of(date, cursor);
             LocalDateTime slotEnd   = slotStart.plusMinutes(finalTotalDuration);
+
+            if (slotStart.isBefore(now)) {
+                cursor = cursor.plusMinutes(SLOT_STEP);
+                continue;
+            }
 
             boolean hasAvailableStaff = activeStaff.stream().anyMatch(s -> {
                 boolean dbBusy = bookingRepository.countConflictingBookingForStaff(
@@ -1821,7 +1902,7 @@ public class BookingServiceImpl implements BookingService {
                 if (dbBusy) return false;
                 String slotKey = STAFF_SLOT_PREFIX + s.getId() + ":"
                         + slotStart.withSecond(0).withNano(0).toString();
-                return !Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
+                return !isSlotRedisLocked(slotKey);
             });
 
             if (hasAvailableStaff) {
@@ -1844,13 +1925,11 @@ public class BookingServiceImpl implements BookingService {
         });
 
         // Lấy pending từ Redis
-        Object raw = redisTemplate.opsForValue().get(CASH_PENDING_PREFIX + orderCode);
-        if (raw == null) {
+        PendingBooking pending = getCashPending(orderCode);
+        if (pending == null) {
             log.warn("Cash pending booking not found in Redis for orderCode={}", orderCode);
             throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
         }
-        PendingBooking pending = (raw instanceof PendingBooking pb) ? pb : null;
-        if (pending == null) throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
 
         if (pending.getUserId() != user.getId()) {
             throw new AppException(ErrorCode.BOOKING_NOT_BELONG_TO_USER);
@@ -1867,7 +1946,7 @@ public class BookingServiceImpl implements BookingService {
             LocalDateTime ws = pending.getAppointmentDatetime();
             LocalDateTime we = pending.getAppointmentDatetime().plusMinutes(pendingTotalDuration);
             if (bookingRepository.countConflictingBookingForStaff(pending.getStaffId(), ws, we) > 0) {
-                redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+                deleteCashPending(orderCode);
                 releaseStaffSlot(pending.getStaffId(), pending.getAppointmentDatetime());
                 throw new AppException(ErrorCode.STAFF_BOOKING_CONFLICT);
             }
@@ -1888,8 +1967,7 @@ public class BookingServiceImpl implements BookingService {
                     boolean dbBusy = bookingRepository.countConflictingBookingForStaff(s.getId(), ws, we) > 0;
                     String slotKey = STAFF_SLOT_PREFIX + s.getId() + ":"
                             + pending.getAppointmentDatetime().withSecond(0).withNano(0).toString();
-                    boolean redisBusy = Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
-                    return !dbBusy && !redisBusy;
+                    return !dbBusy && !isSlotRedisLocked(slotKey);
                 }).collect(Collectors.toList());
                 if (!availableStaff.isEmpty()) {
                     staff = availableStaff.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(availableStaff.size()));
@@ -1947,7 +2025,7 @@ public class BookingServiceImpl implements BookingService {
                 .completedAt(LocalDateTime.now())
                 .build());
 
-        redisTemplate.delete(CASH_PENDING_PREFIX + orderCode);
+        deleteCashPending(orderCode);
         if (staff != null) {
             releaseStaffSlot(staff.getId(), pending.getAppointmentDatetime());
         }
@@ -2095,8 +2173,7 @@ public class BookingServiceImpl implements BookingService {
                     boolean dbBusy = bookingRepository.countConflictingBookingForStaff(s.getId(), ws, we) > 0;
                     String slotKey = STAFF_SLOT_PREFIX + s.getId() + ":"
                                  + request.getAppointmentDatetime().withSecond(0).withNano(0).toString();
-                    boolean redisBusy = Boolean.TRUE.equals(redisTemplate.hasKey(slotKey));
-                    return !dbBusy && !redisBusy;
+                    return !dbBusy && !isSlotRedisLocked(slotKey);
                 }).collect(Collectors.toList());
 
                 if (!availableStaff.isEmpty()) {
