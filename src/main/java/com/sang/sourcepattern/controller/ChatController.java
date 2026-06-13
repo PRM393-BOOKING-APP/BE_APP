@@ -246,7 +246,7 @@ public class ChatController {
                     com.sang.sourcepattern.entity.Shop shop = shopRepository.findById(id).orElse(null);
                     if (shop == null) return null;
                     
-                    Message lastMsg = messageRepository.findFirstByShopIdAndChannelTypeAndRecipientEmailOrderByCreatedAtDesc(id, "CUSTOMER_CHAT", myEmail);
+                    Message lastMsg = messageRepository.findRealLastMessage(id, "CUSTOMER_CHAT", myEmail);
                     long unreadCount = messageRepository.countUnreadForCustomer(id, "CUSTOMER_CHAT", myEmail);
                     
                     return com.sang.sourcepattern.dto.response.ConversationResponse.builder()
@@ -288,12 +288,22 @@ public class ChatController {
             return ApiResponse.<Void>builder().message("Access denied").build();
         }
 
-        String readerRole = roles.contains("ADMIN") ? "ADMIN" : 
-                           roles.contains("STAFF") ? "STAFF" : 
-                           roles.contains("USER") ? "USER" : "SHOP_OWNER";
+        String readerRole;
+        String targetCustomer;
+
+        if (recipientEmail != null && !recipientEmail.trim().isEmpty()) {
+            if (!roles.contains("ADMIN") && !roles.contains("SHOP_OWNER") && !roles.contains("STAFF")) {
+                return ApiResponse.<Void>builder().code(403).message("Access denied").build();
+            }
+            readerRole = roles.contains("ADMIN") ? "ADMIN" : 
+                        roles.contains("SHOP_OWNER") ? "SHOP_OWNER" : "STAFF";
+            targetCustomer = recipientEmail;
+        } else {
+            readerRole = "USER";
+            targetCustomer = myEmail;
+        }
 
         if ("CUSTOMER_CHAT".equals(channelType) || (shopId == 0 && "ADMIN_SUPPORT".equals(channelType))) {
-            String targetCustomer = roles.contains("USER") ? myEmail : recipientEmail;
             messageRepository.markRecipientAllAsRead(shopId, channelType, targetCustomer, readerRole);
         } else {
             messageRepository.markAllAsRead(shopId, channelType, readerRole);
@@ -340,7 +350,7 @@ public class ChatController {
 
         List<UserResponse> response = allowedUsers.stream()
                 .map(u -> {
-                    Message lastMsg = messageRepository.findFirstByShopIdAndChannelTypeAndRecipientEmailOrderByCreatedAtDesc(shopId, "CUSTOMER_CHAT", u.getEmail());
+                    Message lastMsg = messageRepository.findRealLastMessage(shopId, "CUSTOMER_CHAT", u.getEmail());
                     long unreadCount = messageRepository.countUnreadForShopFromCustomer(shopId, "CUSTOMER_CHAT", u.getEmail());
                     return UserResponse.builder()
                         .id(u.getId())

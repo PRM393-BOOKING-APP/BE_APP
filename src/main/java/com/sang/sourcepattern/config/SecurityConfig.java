@@ -86,7 +86,9 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000", 
-                "https://www.peteye.com.vn", 
+                "https://www.peteye.com.vn",
+                "http://localhost:*",
+                "http://127.0.0.1:*",
                 "https://peteye.com.vn",
                 "https://*.vercel.app" // Cho phép tất cả các domain preview từ Vercel
         ));
