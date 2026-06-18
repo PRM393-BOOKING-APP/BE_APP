@@ -358,3 +358,34 @@ INSERT INTO booking_services (booking_id, service_id) VALUES
 
 INSERT INTO payment (id, booking_id, amount, method, status, description, payment_time) VALUES
 (2, 10, 150000.00, 'PAYOS', 'SUCCESS', 'Test Payment for shop cancel refund flow', NOW());
+
+-- ============================================================
+-- THÊM BOOKINGS CHO CÁC TRẠNG THÁI CÒN THIẾU
+-- ============================================================
+
+-- Booking 11: CANCEL_REQUESTED — Khách đã yêu cầu hủy, shop chưa duyệt
+-- Đã thanh toán PAYOS nên cần hoàn tiền khi shop đồng ý hủy
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id, appointment_datetime, status, note, created_at, created_by) VALUES
+(11, 3, 1, 1, 1,
+ DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 10 HOUR,
+ 'CANCEL_REQUESTED',
+ 'Cắt tỉa lông - Khách yêu cầu hủy do thay đổi kế hoạch',
+ DATE_SUB(NOW(), INTERVAL 2 HOUR), 'USER');
+
+INSERT INTO booking_services (booking_id, service_id) VALUES (11, 2);
+
+INSERT INTO payment (id, booking_id, amount, method, status, description, payment_time) VALUES
+(3, 11, 250000.00, 'PAYOS', 'SUCCESS', 'Payment for booking 11 - pending cancel', DATE_SUB(NOW(), INTERVAL 3 HOUR));
+
+-- Booking 12: WAITING_REFUND — Shop đã đồng ý hủy, đang chờ Admin xử lý hoàn tiền
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id, appointment_datetime, status, note, created_at, created_by) VALUES
+(12, 3, 1, 1, 3,
+ DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 14 HOUR,
+ 'WAITING_REFUND',
+ 'Gói Spa thư giãn - Đã duyệt hủy, đang chờ hoàn tiền',
+ DATE_SUB(NOW(), INTERVAL 1 DAY), 'USER');
+
+INSERT INTO booking_services (booking_id, service_id) VALUES (12, 3);
+
+INSERT INTO payment (id, booking_id, amount, method, status, description, payment_time) VALUES
+(4, 12, 450000.00, 'PAYOS', 'SUCCESS', 'Payment for booking 12 - awaiting refund', DATE_SUB(NOW(), INTERVAL 25 HOUR));

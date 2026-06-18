@@ -98,12 +98,9 @@ public class ShopServiceImpl implements ShopService {
                 .max(java.time.LocalDateTime::compareTo)
                 .orElse(null);
 
-        String tier = "NEW";
-        if (totalSpent.compareTo(new java.math.BigDecimal("5000000")) >= 0 || userBookings.size() >= 20) {
-            tier = "VIP";
-        } else if (userBookings.size() >= 10) {
-            tier = "REGULAR";
-        }
+        String tier = (customer.getCurrentTier() != null)
+                ? customer.getCurrentTier().getName()
+                : "BRONZE";
 
         CustomerItemResponse info = CustomerItemResponse.builder()
                 .id(customer.getId())
@@ -154,13 +151,10 @@ public class ShopServiceImpl implements ShopService {
                     .max(java.time.LocalDateTime::compareTo)
                     .orElse(null);
 
-            // Determine Tier logic
-            String tier = "NEW";
-            if (totalSpent.compareTo(new java.math.BigDecimal("5000000")) >= 0 || userBookings.size() >= 20) {
-                tier = "VIP";
-            } else if (userBookings.size() >= 10) {
-                tier = "REGULAR";
-            }
+            // Tier từ membership level của user (DB), không tính từ booking tại shop
+            String tier = (user.getCurrentTier() != null)
+                    ? user.getCurrentTier().getName()
+                    : "BRONZE";
 
             java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
