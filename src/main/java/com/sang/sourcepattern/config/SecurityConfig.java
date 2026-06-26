@@ -37,6 +37,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/swagger-ui.html",
+            "/auth/test", // Thêm test endpoint
             "/services/shop/**",
             "/services/{id}",
             "/shops/public",
@@ -85,16 +86,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
-                "http://localhost:3000", 
-                "https://www.peteye.com.vn",
-                "http://localhost:*",
+                "http://localhost:*", // Cho phép tất cả localhost ports (Flutter, React, v.v.)
                 "http://127.0.0.1:*",
+                "http://localhost:3000",
+                "https://www.peteye.com.vn", 
                 "https://peteye.com.vn",
                 "https://*.vercel.app" // Cho phép tất cả các domain preview từ Vercel
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        config.setAllowedHeaders(List.of("*")); // Cho phép tất cả headers
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L); // Cache preflight response
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

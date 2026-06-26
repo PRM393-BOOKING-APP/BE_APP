@@ -31,6 +31,14 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
     UserService userService;
 
+    @GetMapping("/test")
+    public ApiResponse<String> test() {
+        return ApiResponse.<String>builder()
+                .result("Backend is working!")
+                .message("Test endpoint successful")
+                .build();
+    }
+
     @PostMapping("/login")
     public ApiResponse<AuthenticationResponse> login(@RequestBody @Valid AuthenticationRequest request) {
         return ApiResponse.<AuthenticationResponse>builder()
