@@ -38,14 +38,15 @@ public class ReviewServiceImpl implements ReviewService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        Shop shop = shopRepository.findById(request.getShopId())
-                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
-        // Logic: Verify the specific booking
         com.sang.sourcepattern.entity.Booking booking = bookingRepository.findById(request.getBookingId())
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
-        if (booking.getUser().getId() != user.getId() || booking.getShop().getId() != shop.getId()) {
+        Shop shop = booking.getShop();
+        if (shop == null) {
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+        }
+
+        if (booking.getUser().getId() != user.getId()) {
             throw new AppException(ErrorCode.BOOKING_NOT_BELONG_TO_USER);
         }
 
