@@ -12,6 +12,8 @@ import com.sang.sourcepattern.repository.BookingRepository;
 import com.sang.sourcepattern.repository.CareLogRepository;
 import com.sang.sourcepattern.repository.StaffRepository;
 import com.sang.sourcepattern.repository.UserRepository;
+import com.sang.sourcepattern.repository.ShopRepository;
+import com.sang.sourcepattern.entity.Shop;
 import com.sang.sourcepattern.service.CareLogService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class CareLogServiceImpl implements CareLogService {
     BookingRepository bookingRepository;
     StaffRepository staffRepository;
     UserRepository userRepository;
+    ShopRepository shopRepository;
 
     @Override
     public CareLogResponse addLog(int bookingId, CareLogRequest request, String email) {
@@ -40,7 +43,19 @@ public class CareLogServiceImpl implements CareLogService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Staff staff = staffRepository.findByUser(user)
-                .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
+                .orElseGet(() -> {
+                    Shop shop = shopRepository.findByOwnerId(user.getId())
+                            .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
+                    Staff newStaff = Staff.builder()
+                            .shop(shop)
+                            .user(user)
+                            .fullName(user.getFullName())
+                            .role("SHOP_OWNER")
+                            .phone(user.getPhone())
+                            .isActive(true)
+                            .build();
+                    return staffRepository.save(newStaff);
+                });
 
         CareLog careLog = CareLog.builder()
                 .booking(booking)
@@ -63,10 +78,14 @@ public class CareLogServiceImpl implements CareLogService {
     }
 
     private CareLogResponse mapToResponse(CareLog careLog) {
+        String staffName = "Unknown";
+        if (careLog.getStaff() != null && careLog.getStaff().getUser() != null) {
+            staffName = careLog.getStaff().getUser().getFullName();
+        }
         return CareLogResponse.builder()
                 .id(careLog.getId())
                 .bookingId(careLog.getBooking().getId())
-                .staffName(careLog.getStaff().getUser().getFullName())
+                .staffName(staffName)
                 .type(careLog.getType())
                 .note(careLog.getNote())
                 .timestamp(careLog.getTimestamp())

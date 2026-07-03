@@ -46,6 +46,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     // Keep old methods for backward compatibility
     List<Booking> findByUserId(int userId);
     List<Booking> findByShopId(int shopId);
+    List<Booking> findByPetIdOrderByAppointmentDatetimeDesc(int petId);
     Optional<Booking> findByPayosOrderCode(Long payosOrderCode);
 
     @Query("SELECT DISTINCT b FROM Booking b LEFT JOIN FETCH b.services WHERE b.status = :status")

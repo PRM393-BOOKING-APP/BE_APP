@@ -2237,4 +2237,10 @@ public class BookingServiceImpl implements BookingService {
                 java.util.Map.of("message", "BOOKING_UPDATED", "bookingId", bookingId));
         }
     }
+
+    @Override
+    public List<BookingResponse> getBookingsByPet(int petId) {
+        List<Booking> bookings = bookingRepository.findByPetIdOrderByAppointmentDatetimeDesc(petId);
+        return bookings.stream().map(this::toResponse).collect(Collectors.toList());
+    }
 }

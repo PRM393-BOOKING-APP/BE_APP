@@ -145,6 +145,15 @@ public class BookingController {
                 .build();
     }
 
+    @GetMapping("/pet/{petId}")
+    @PreAuthorize("hasAnyRole('USER', 'SHOP_OWNER', 'STAFF', 'ADMIN')")
+    @Operation(summary = "Get all bookings for a specific pet")
+    public ApiResponse<List<BookingResponse>> getBookingsByPet(@PathVariable int petId) {
+        return ApiResponse.<List<BookingResponse>>builder()
+                .result(bookingService.getBookingsByPet(petId))
+                .build();
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'SHOP_OWNER', 'STAFF', 'ADMIN')")
     @Operation(summary = "Get booking detail by id")

@@ -16,6 +16,8 @@ import com.sang.sourcepattern.repository.PetMedicalRecordRepository;
 import com.sang.sourcepattern.repository.PetVaccinationRepository;
 import com.sang.sourcepattern.repository.StaffRepository;
 import com.sang.sourcepattern.repository.UserRepository;
+import com.sang.sourcepattern.repository.ShopRepository;
+import com.sang.sourcepattern.entity.Shop;
 import com.sang.sourcepattern.service.MedicalRecordService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -35,12 +37,25 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     BookingRepository bookingRepository;
     UserRepository userRepository;
     StaffRepository staffRepository;
+    ShopRepository shopRepository;
 
     private Staff resolveStaff(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return staffRepository.findByUser(user)
-                .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
+                .orElseGet(() -> {
+                    Shop shop = shopRepository.findByOwnerId(user.getId())
+                            .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
+                    Staff newStaff = Staff.builder()
+                            .shop(shop)
+                            .user(user)
+                            .fullName(user.getFullName())
+                            .role("SHOP_OWNER")
+                            .phone(user.getPhone())
+                            .isActive(true)
+                            .build();
+                    return staffRepository.save(newStaff);
+                });
     }
 
     @Override

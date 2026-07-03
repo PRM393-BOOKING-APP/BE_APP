@@ -27,8 +27,8 @@ public class CareLogController {
     CareLogService careLogService;
 
     @PostMapping("/{bookingId}")
-    @PreAuthorize("hasRole('STAFF')")
-    @Operation(summary = "Staff: Add a care log for a booking")
+    @PreAuthorize("hasAnyRole('STAFF', 'SHOP_OWNER')")
+    @Operation(summary = "Staff/Shop: Add a care log for a booking")
     public ApiResponse<CareLogResponse> addLog(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable int bookingId,

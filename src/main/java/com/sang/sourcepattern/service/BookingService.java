@@ -63,6 +63,9 @@ public interface BookingService {
     com.sang.sourcepattern.dto.response.PageResponse<BookingResponse> getMyBookings(
             String userEmail, int page, int size, String status);
 
+    /** Get bookings for a specific pet */
+    List<BookingResponse> getBookingsByPet(int petId);
+
     /** Get a single booking detail */
     BookingResponse getBookingById(int bookingId, String userEmail);
 

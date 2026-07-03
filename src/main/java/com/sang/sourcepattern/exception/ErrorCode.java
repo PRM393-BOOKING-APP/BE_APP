@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 
 @Getter
-public enum ErrorCode {
+public enum     ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999,"Lỗi không xác định", HttpStatus.INTERNAL_SERVER_ERROR),
     USER_EXISTED(1001, "Tài khoản đã tồn tại", HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND(1002, "Không tìm thấy vai trò", HttpStatus.NOT_FOUND),
