@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface PetMedicalRecordRepository extends JpaRepository<PetMedicalRecord, Integer> {
     List<PetMedicalRecord> findByPetIdOrderByVisitDateDesc(Integer petId);
+    List<PetMedicalRecord> findByBookingIdOrderByVisitDateDesc(Integer bookingId);
     int countByBookingId(Integer bookingId);
 }

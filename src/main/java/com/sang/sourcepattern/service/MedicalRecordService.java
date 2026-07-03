@@ -11,5 +11,6 @@ public interface MedicalRecordService {
     PetMedicalRecordResponse addMedicalRecord(int bookingId, PetMedicalRecordDTO request, String userEmail);
     PetVaccinationResponse addVaccination(int bookingId, PetVaccinationDTO request, String userEmail);
     List<PetMedicalRecordResponse> getMedicalRecordsByPet(int petId);
+    List<PetMedicalRecordResponse> getMedicalRecordsByBooking(int bookingId);
     List<PetVaccinationResponse> getVaccinationsByPet(int petId);
 }
