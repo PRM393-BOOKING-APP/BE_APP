@@ -98,9 +98,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        if (user.getLockoutUntil() != null) {
+            if (user.getLockoutUntil().isAfter(java.time.LocalDateTime.now())) {
+                throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+            } else {
+                user.setFailedLoginAttempts(0);
+                user.setLockoutUntil(null);
+                userRepository.save(user);
+            }
+        }
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
+            if (user.getFailedLoginAttempts() >= 5) {
+                user.setLockoutUntil(java.time.LocalDateTime.now().plusSeconds(60));
+                userRepository.save(user);
+                throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+            }
+            userRepository.save(user);
             throw new AppException(ErrorCode.WRONG_PASSWORD);
         }
+
+        user.setFailedLoginAttempts(0);
+        user.setLockoutUntil(null);
+        userRepository.save(user);
 
         // Check email verified trước — áp dụng cho cả user lẫn shop owner
         if (!user.isEmailVerified()) {

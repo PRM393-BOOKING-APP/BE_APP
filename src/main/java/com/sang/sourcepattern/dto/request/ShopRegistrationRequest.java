@@ -2,6 +2,7 @@ package com.sang.sourcepattern.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -23,6 +24,7 @@ public class ShopRegistrationRequest {
     String email;
 
     @NotBlank(message = "PHONE_REQUIRED")
+    @Pattern(regexp = "^(03|05|07|08|09)[1-9]{8}$", message = "INVALID_PHONE")
     String phone;
 
     @NotBlank(message = "ADDRESS_REQUIRED")
@@ -34,10 +36,14 @@ public class ShopRegistrationRequest {
     @Size(min = 10, message = "DESCRIPTION_TOO_SHORT")
     String description;
 
-    @Size(min = 6, message = "INVALID_PASSWORD")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,16}$", message = "INVALID_PASSWORD")
     String password;
 
     String licenseImageUrl;
 
     String licenseNumber;
+
+    String logoUrl;
+
+    String bannerUrl;
 }

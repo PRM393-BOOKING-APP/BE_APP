@@ -55,6 +55,11 @@ public class User {
     @Builder.Default
     Double totalSpending = 0.0;
 
+    @Builder.Default
+    int failedLoginAttempts = 0;
+
+    LocalDateTime lockoutUntil;
+
     @ManyToMany
     @Builder.Default
     Set<Role> roles = new HashSet<>();
