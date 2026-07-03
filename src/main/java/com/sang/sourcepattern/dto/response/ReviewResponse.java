@@ -21,4 +21,5 @@ public class ReviewResponse {
     LocalDateTime createdAt;
     String reply;
     LocalDateTime repliedAt;
+    String imageUrl;
 }

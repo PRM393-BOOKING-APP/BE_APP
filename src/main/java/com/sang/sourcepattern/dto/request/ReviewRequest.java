@@ -21,4 +21,6 @@ public class ReviewRequest {
     
     @NotBlank
     String comment;
+    
+    String imageUrl;
 }

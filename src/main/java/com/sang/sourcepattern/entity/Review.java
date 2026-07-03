@@ -38,4 +38,7 @@ public class Review {
 
     String reply;
     LocalDateTime repliedAt;
+    
+    @Column(length = 1000)
+    String imageUrl;
 }

@@ -110,6 +110,13 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     }
 
     @Override
+    public List<PetMedicalRecordResponse> getMedicalRecordsByBooking(int bookingId) {
+        return medicalRecordRepository.findByBookingIdOrderByVisitDateDesc(bookingId).stream()
+                .map(this::toMedicalResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<PetVaccinationResponse> getVaccinationsByPet(int petId) {
         return vaccinationRepository.findByPetIdOrderByDateDesc(petId).stream()
                 .map(this::toVaccinationResponse)

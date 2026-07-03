@@ -68,6 +68,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .service(service) // Link the service
                 .rating(request.getRating())
                 .comment(request.getComment())
+                .imageUrl(request.getImageUrl())
                 .build();
 
         review = reviewRepository.save(review);
@@ -153,6 +154,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .createdAt(review.getCreatedAt())
                 .reply(review.getReply())
                 .repliedAt(review.getRepliedAt())
+                .imageUrl(review.getImageUrl())
                 .build();
     }
 }
