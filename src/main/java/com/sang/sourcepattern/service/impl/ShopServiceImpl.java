@@ -241,7 +241,7 @@ public class ShopServiceImpl implements ShopService {
 
         long totalBookings = allBookings.size();
         long pendingBookings = allBookings.stream()
-                .filter(b -> "CONFIRMED".equals(b.getStatus()) || "PENDING_PAYMENT".equals(b.getStatus()))
+                .filter(b -> "WAITING_SHOP_APPROVAL".equals(b.getStatus()))
                 .count();
 
         long totalCustomers = allBookings.stream()
