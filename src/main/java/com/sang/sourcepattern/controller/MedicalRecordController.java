@@ -46,6 +46,13 @@ public class MedicalRecordController {
                 .build();
     }
 
+    @GetMapping("/booking/{bookingId}")
+    public ApiResponse<List<PetMedicalRecordResponse>> getMedicalRecordsByBooking(@PathVariable int bookingId) {
+        return ApiResponse.<List<PetMedicalRecordResponse>>builder()
+                .result(medicalRecordService.getMedicalRecordsByBooking(bookingId))
+                .build();
+    }
+
     @GetMapping("/vaccinations/pet/{petId}")
     public ApiResponse<List<PetVaccinationResponse>> getVaccinationsByPet(@PathVariable int petId) {
         return ApiResponse.<List<PetVaccinationResponse>>builder()

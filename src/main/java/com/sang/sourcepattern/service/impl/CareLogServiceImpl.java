@@ -39,8 +39,19 @@ public class CareLogServiceImpl implements CareLogService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        Staff staff = staffRepository.findByUser(user)
-                .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
+        // A hired Staff member always wins. If the caller isn't Staff but is
+        // the SHOP_OWNER of this booking's shop, allow it too — this project
+        // has no separate Staff mobile app, so the shop owner does the work
+        // a staff member would otherwise do.
+        Staff staff = staffRepository.findByUser(user).orElse(null);
+        if (staff == null) {
+            boolean isShopOwner = booking.getShop() != null
+                    && booking.getShop().getOwner() != null
+                    && booking.getShop().getOwner().getId() == user.getId();
+            if (!isShopOwner) {
+                throw new AppException(ErrorCode.STAFF_NOT_FOUND);
+            }
+        }
 
         CareLog careLog = CareLog.builder()
                 .booking(booking)
@@ -63,10 +74,19 @@ public class CareLogServiceImpl implements CareLogService {
     }
 
     private CareLogResponse mapToResponse(CareLog careLog) {
+        String staffName;
+        if (careLog.getStaff() != null) {
+            staffName = careLog.getStaff().getUser().getFullName();
+        } else if (careLog.getBooking() != null && careLog.getBooking().getShop() != null) {
+            staffName = careLog.getBooking().getShop().getShopName() + " (Chủ cửa hàng)";
+        } else {
+            staffName = null;
+        }
+
         return CareLogResponse.builder()
                 .id(careLog.getId())
                 .bookingId(careLog.getBooking().getId())
-                .staffName(careLog.getStaff().getUser().getFullName())
+                .staffName(staffName)
                 .type(careLog.getType())
                 .note(careLog.getNote())
                 .timestamp(careLog.getTimestamp())

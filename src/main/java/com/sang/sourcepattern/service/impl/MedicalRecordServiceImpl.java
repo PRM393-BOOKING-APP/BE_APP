@@ -23,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,19 +37,38 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     UserRepository userRepository;
     StaffRepository staffRepository;
 
-    private Staff resolveStaff(String userEmail) {
+    /**
+     * Resolves the acting Staff for a medical entry. A hired Staff member
+     * always wins. If the caller isn't Staff, but is the SHOP_OWNER of the
+     * shop this booking belongs to, they're allowed to record entries too
+     * (returns null — staff is nullable — and callers fall back to the
+     * booking's shop for display purposes). Anyone else is rejected.
+     */
+    private Staff resolveStaffOrShopOwner(String userEmail, Booking booking) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return staffRepository.findByUser(user)
-                .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
+
+        Optional<Staff> staffOpt = staffRepository.findByUser(user);
+        if (staffOpt.isPresent()) {
+            return staffOpt.get();
+        }
+
+        boolean isShopOwner = booking.getShop() != null
+                && booking.getShop().getOwner() != null
+                && booking.getShop().getOwner().getId() == user.getId();
+        if (isShopOwner) {
+            return null;
+        }
+
+        throw new AppException(ErrorCode.STAFF_NOT_FOUND);
     }
 
     @Override
     public PetMedicalRecordResponse addMedicalRecord(int bookingId, PetMedicalRecordDTO request, String userEmail) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-        
-        Staff staff = resolveStaff(userEmail);
+
+        Staff staff = resolveStaffOrShopOwner(userEmail, booking);
 
         PetMedicalRecord record = PetMedicalRecord.builder()
                 .pet(booking.getPet())
@@ -69,8 +89,11 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     public PetVaccinationResponse addVaccination(int bookingId, PetVaccinationDTO request, String userEmail) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
-        
-        Staff staff = resolveStaff(userEmail);
+
+        Staff staff = resolveStaffOrShopOwner(userEmail, booking);
+        String clinicName = staff != null && staff.getShop() != null
+                ? staff.getShop().getShopName()
+                : (booking.getShop() != null ? booking.getShop().getShopName() : null);
 
         PetVaccination vaccination = PetVaccination.builder()
                 .pet(booking.getPet())
@@ -78,7 +101,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .staff(staff)
                 .name(request.getName())
                 .drug(request.getDrug())
-                .clinic(staff.getShop().getShopName()) // Auto-fill clinic name based on shop
+                .clinic(clinicName)
                 .date(request.getDate() != null ? request.getDate() : java.time.LocalDateTime.now())
                 .status(request.getStatus() != null ? request.getStatus() : "done")
                 .build();
@@ -90,6 +113,13 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     public List<PetMedicalRecordResponse> getMedicalRecordsByPet(int petId) {
         return medicalRecordRepository.findByPetIdOrderByVisitDateDesc(petId).stream()
+                .map(this::toMedicalResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PetMedicalRecordResponse> getMedicalRecordsByBooking(int bookingId) {
+        return medicalRecordRepository.findByBookingIdOrderByVisitDateDesc(bookingId).stream()
                 .map(this::toMedicalResponse)
                 .collect(Collectors.toList());
     }

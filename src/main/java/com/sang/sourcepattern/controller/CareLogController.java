@@ -21,14 +21,14 @@ import java.util.List;
 @RequestMapping("/care-logs")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Tag(name = "Care Log Management", description = "APIs for Staff to record pet care activities")
+@Tag(name = "Care Log Management", description = "APIs for Staff/Shop Owner to record pet care activities")
 public class CareLogController {
 
     CareLogService careLogService;
 
     @PostMapping("/{bookingId}")
-    @PreAuthorize("hasRole('STAFF')")
-    @Operation(summary = "Staff: Add a care log for a booking")
+    @PreAuthorize("hasAnyRole('STAFF', 'SHOP_OWNER')")
+    @Operation(summary = "Staff or Shop Owner: Add a care log for a booking")
     public ApiResponse<CareLogResponse> addLog(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable int bookingId,
