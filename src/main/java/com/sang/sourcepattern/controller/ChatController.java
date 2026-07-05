@@ -101,9 +101,7 @@ public class ChatController {
                 .targetId(request.getTargetId())
                 .senderRole(senderRole)
                 .content(request.getContent())
-                .attachmentUrl(request.getAttachmentUrl())
-                .attachmentType(request.getAttachmentType())
-                .attachmentName(request.getAttachmentName())
+
                 .build());
 
         // Broadcast destination
@@ -382,9 +380,7 @@ public class ChatController {
                 .targetId(m.getTargetId())
                 .senderRole(m.getSenderRole())
                 .content(m.getContent())
-                .attachmentUrl(m.getAttachmentUrl())
-                .attachmentType(m.getAttachmentType())
-                .attachmentName(m.getAttachmentName())
+
                 .createdAt(m.getCreatedAt())
                 .isRead(m.isRead())
                 .build();

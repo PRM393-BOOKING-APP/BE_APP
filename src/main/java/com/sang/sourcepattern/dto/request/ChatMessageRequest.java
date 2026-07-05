@@ -14,7 +14,5 @@ public class ChatMessageRequest {
     String recipientEmail;
     Integer targetId;
     String content;
-    String attachmentUrl;
-    String attachmentType;
-    String attachmentName;
+
 }
