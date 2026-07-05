@@ -65,6 +65,7 @@ public enum     ErrorCode {
     PET_ID_REQUIRED(5010, "Mã thú cưng không được để trống", HttpStatus.BAD_REQUEST),
     APPOINTMENT_DATETIME_REQUIRED(5011, "Ngày giờ hẹn không được để trống", HttpStatus.BAD_REQUEST),
     APPOINTMENT_MUST_BE_FUTURE(5012, "Thời gian hẹn phải ở trong tương lai", HttpStatus.BAD_REQUEST),
+    PAYMENT_PENDING(5014, "Thanh toán chưa hoàn tất, vui lòng tiếp tục thanh toán trên màn hình quét mã PayOS.", HttpStatus.BAD_REQUEST),
 
 //   Email verification errors
     EMAIL_NOT_VERIFIED(6001, "Email chưa được xác minh. Vui lòng kiểm tra hộp thư của bạn.", HttpStatus.FORBIDDEN),

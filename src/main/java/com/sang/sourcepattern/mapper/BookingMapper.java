@@ -40,6 +40,7 @@ public class BookingMapper {
 
         return BookingResponse.builder()
                 .id(booking.getId())
+                .isReviewed(booking.getReview() != null)
                 .userId(booking.getUser().getId())
                 .shopId(booking.getShop().getId())
                 .shopName(booking.getShop().getShopName())

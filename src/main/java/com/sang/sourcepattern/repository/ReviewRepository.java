@@ -14,5 +14,5 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     Page<Review> findByShopIdOrderByCreatedAtDesc(int shopId, Pageable pageable);
     List<Review> findAllByOrderByCreatedAtDesc(Pageable pageable);
     long countByShopId(int shopId);
-    boolean existsByUserIdAndShopId(int userId, int shopId);
+    boolean existsByBookingId(int bookingId);
 }

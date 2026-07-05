@@ -54,8 +54,8 @@ public class ReviewServiceImpl implements ReviewService {
             throw new AppException(ErrorCode.REVIEW_NOT_ALLOWED);
         }
 
-        // Anti-spam: Check if user already reviewed this shop (keep 1 per shop for now)
-        if (reviewRepository.existsByUserIdAndShopId(user.getId(), shop.getId())) {
+        // Anti-spam: Check if booking is already reviewed
+        if (reviewRepository.existsByBookingId(booking.getId())) {
             throw new AppException(ErrorCode.REVIEW_ALREADY_EXISTED);
         }
 
@@ -63,6 +63,7 @@ public class ReviewServiceImpl implements ReviewService {
                 ? booking.getServices().iterator().next() : null;
 
         Review review = Review.builder()
+                .booking(booking)
                 .user(user)
                 .shop(shop)
                 .service(service) // Link the service
@@ -145,6 +146,7 @@ public class ReviewServiceImpl implements ReviewService {
     private ReviewResponse toReviewResponse(Review review) {
         return ReviewResponse.builder()
                 .id(review.getId())
+                .bookingId(review.getBooking() != null ? review.getBooking().getId() : 0)
                 .userName(review.getUser().getFullName())
                 .userAvatar(review.getUser().getAvatar())
                 .serviceName(review.getService() != null ? review.getService().getServiceName() : null)

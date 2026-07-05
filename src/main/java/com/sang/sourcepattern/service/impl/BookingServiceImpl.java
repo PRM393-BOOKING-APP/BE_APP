@@ -631,6 +631,9 @@ public class BookingServiceImpl implements BookingService {
         log.info("PayOS confirmPayment — orderCode={} status={}", orderCode, payosStatus);
 
         if (!"PAID".equals(payosStatus)) {
+            if ("PENDING".equals(payosStatus)) {
+                throw new AppException(ErrorCode.PAYMENT_PENDING);
+            }
             deletePending(orderCode);
             throw new AppException(ErrorCode.BOOKING_NOT_FOUND);
         }
@@ -1128,6 +1131,9 @@ public class BookingServiceImpl implements BookingService {
         log.info("PayOS confirmCashDeposit — orderCode={} status={}", orderCode, payosStatus);
 
         if (!"PAID".equals(payosStatus)) {
+            if ("PENDING".equals(payosStatus)) {
+                throw new AppException(ErrorCode.PAYMENT_PENDING);
+            }
             deleteCashPending(orderCode);
             if (pending.getStaffId() != null) {
                 releaseStaffSlot(pending.getStaffId(), pending.getAppointmentDatetime());

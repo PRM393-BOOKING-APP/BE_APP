@@ -101,4 +101,7 @@ public class Booking {
 
     @Builder.Default
     String createdBy = "USER";
+
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    Review review;
 }

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReviewResponse {
     int id;
+    int bookingId;
     String userName;
     String userAvatar;
     String serviceName;

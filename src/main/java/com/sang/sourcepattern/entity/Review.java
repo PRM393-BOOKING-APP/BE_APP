@@ -30,6 +30,10 @@ public class Review {
     @JoinColumn(name = "service_id")
     Service service;
 
+    @OneToOne
+    @JoinColumn(name = "booking_id")
+    Booking booking;
+
     int rating;
     String comment;
 

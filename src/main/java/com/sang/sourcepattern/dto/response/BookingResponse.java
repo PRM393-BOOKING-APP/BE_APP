@@ -61,6 +61,8 @@ public class BookingResponse {
     // Category from primary service (BOARDING, CLINIC, GROOMING, etc.)
     String category;
 
+    boolean isReviewed;
+
     // Multi-service fields
     @Data
     @Builder
