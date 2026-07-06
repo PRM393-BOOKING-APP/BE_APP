@@ -39,4 +39,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
            "WHERE t.type = 'BOOKING_PAYMENT' AND t.status = 'SUCCESS'")
     BigDecimal sumTotalRevenue();
+
+    /** Tổng doanh thu toàn hệ thống trong hôm nay */
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
+           "WHERE t.type = 'BOOKING_PAYMENT' AND t.status = 'SUCCESS' " +
+           "AND t.createdAt >= CURRENT_DATE")
+    BigDecimal sumTotalRevenueToday();
+
+    Page<Transaction> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    Page<Transaction> findAllByTypeOrderByCreatedAtDesc(String type, Pageable pageable);
 }

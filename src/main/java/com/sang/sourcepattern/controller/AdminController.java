@@ -6,35 +6,25 @@ import com.sang.sourcepattern.dto.response.MonthlyRevenueResponse;
 import com.sang.sourcepattern.dto.response.ApiResponse;
 import com.sang.sourcepattern.dto.response.NotificationBroadcastResponse;
 import com.sang.sourcepattern.dto.response.PageResponse;
-import com.sang.sourcepattern.entity.Notification;
-import com.sang.sourcepattern.exception.AppException;
-import com.sang.sourcepattern.exception.ErrorCode;
-import com.sang.sourcepattern.repository.BookingRepository;
-import com.sang.sourcepattern.repository.MessageRepository;
-import com.sang.sourcepattern.repository.NotificationRepository;
-import com.sang.sourcepattern.repository.PaymentRepository;
-import com.sang.sourcepattern.repository.ShopRepository;
-import com.sang.sourcepattern.repository.UserRepository;
+import com.sang.sourcepattern.dto.response.ShopResponse;
+import com.sang.sourcepattern.dto.response.TransactionResponse;
+import com.sang.sourcepattern.dto.response.WithdrawalRequestResponse;
+import com.sang.sourcepattern.entity.Transaction;
+import com.sang.sourcepattern.enums.ShopStatus;
+import com.sang.sourcepattern.service.AdminService;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-
-import com.sang.sourcepattern.entity.User;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Year;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 @RestController
 @RequestMapping("/admin")
@@ -44,14 +34,7 @@ import org.springframework.data.domain.PageRequest;
 @Tag(name = "Admin")
 public class AdminController {
 
-    PaymentRepository paymentRepository;
-    BookingRepository bookingRepository;
-    UserRepository userRepository;
-    ShopRepository shopRepository;
-    NotificationRepository notificationRepository;
-    MessageRepository messageRepository;
-    com.sang.sourcepattern.service.GoongMapService goongMapService;
-    com.sang.sourcepattern.mapper.ShopMapper shopMapper;
+    AdminService adminService;
 
     // ─── Dashboard ───────────────────────────────────────────────────────────
 
@@ -60,156 +43,8 @@ public class AdminController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     ) {
-        LocalDateTime now = LocalDateTime.now();
-
-        LocalDateTime periodEnd = (endDate != null) ? endDate.atTime(23, 59, 59) : now;
-        LocalDateTime periodStart = (startDate != null) ? startDate.atStartOfDay() : periodEnd.minusDays(30);
-
-        long daysDiff = java.time.temporal.ChronoUnit.DAYS.between(periodStart.toLocalDate(), periodEnd.toLocalDate()) + 1;
-        if (daysDiff <= 0) daysDiff = 1;
-
-        LocalDateTime prevStart = periodStart.minusDays(daysDiff);
-        LocalDateTime prevEnd = periodStart.minusSeconds(1);
-
-        // Core stats
-        BigDecimal totalRevenue = bookingRepository.sumTotalRevenue();
-        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
-        long totalUsers = userRepository.count();
-        long totalShops = shopRepository.count();
-        long totalBookings = bookingRepository.count();
-        long pendingShops = shopRepository.findAll().stream()
-                .filter(s -> s.getStatus() == com.sang.sourcepattern.enums.ShopStatus.PENDING).count();
-        long unreadMessages = messageRepository
-                .countByShopIdAndChannelTypeAndIsReadFalseAndSenderRoleNot(0, "ADMIN_SUPPORT", "ADMIN");
-
-        // Period stats
-        BigDecimal periodRevenue = bookingRepository.sumRevenueBetween(periodStart, periodEnd);
-        if (periodRevenue == null) periodRevenue = BigDecimal.ZERO;
-        long periodUsers = userRepository.countUsersBetween(periodStart, periodEnd);
-        long periodBookings = bookingRepository.countBookingsBetween(periodStart, periodEnd);
-
-        // Calculate Revenue Trend (Current vs Prev period)
-        BigDecimal revPrev = bookingRepository.sumRevenueBetween(prevStart, prevEnd);
-        double revTrendVal = 0.0;
-        if (revPrev != null && revPrev.compareTo(BigDecimal.ZERO) > 0 && periodRevenue.compareTo(BigDecimal.ZERO) > 0) {
-            revTrendVal = periodRevenue.subtract(revPrev).doubleValue() / revPrev.doubleValue() * 100;
-        } else if ((revPrev == null || revPrev.compareTo(BigDecimal.ZERO) == 0) && periodRevenue.compareTo(BigDecimal.ZERO) > 0) {
-            revTrendVal = 100.0;
-        }
-        String totalRevenueTrend = String.format("%s%.1f%%", revTrendVal >= 0 ? "+" : "", revTrendVal);
-        Boolean totalRevenueTrendUp = revTrendVal >= 0;
-
-        // Calculate Users Trend
-        long usersPrev = userRepository.countUsersBetween(prevStart, prevEnd);
-        double usersTrendVal = 0.0;
-        if (usersPrev > 0) {
-            usersTrendVal = (double) (periodUsers - usersPrev) / usersPrev * 100;
-        } else if (usersPrev == 0 && periodUsers > 0) {
-            usersTrendVal = 100.0;
-        }
-        String totalUsersTrend = String.format("%s%.1f%%", usersTrendVal >= 0 ? "+" : "", usersTrendVal);
-        Boolean totalUsersTrendUp = usersTrendVal >= 0;
-
-        // Calculate Bookings Trend
-        long bookingsPrev = bookingRepository.countBookingsBetween(prevStart, prevEnd);
-        double bookingsTrendVal = 0.0;
-        if (bookingsPrev > 0) {
-            bookingsTrendVal = (double) (periodBookings - bookingsPrev) / bookingsPrev * 100;
-        } else if (bookingsPrev == 0 && periodBookings > 0) {
-            bookingsTrendVal = 100.0;
-        }
-        String totalBookingsTrend = String.format("%s%.1f%%", bookingsTrendVal >= 0 ? "+" : "", bookingsTrendVal);
-        Boolean totalBookingsTrendUp = bookingsTrendVal >= 0;
-
-        long periodShops = shopRepository.countShopsBetween(periodStart, periodEnd);
-        long periodPendingShops = shopRepository.countShopsByStatusBetween(com.sang.sourcepattern.enums.ShopStatus.PENDING, periodStart, periodEnd);
-        long periodMessages = messageRepository.countMessagesBetween(periodStart, periodEnd);
-        
-        long totalMessages = messageRepository.count();
-
-        // Calculate Shops Trend
-        long shopsPrev = shopRepository.countShopsBetween(prevStart, prevEnd);
-        double shopsTrendVal = 0.0;
-        if (shopsPrev > 0) { shopsTrendVal = (double) (periodShops - shopsPrev) / shopsPrev * 100; }
-        else if (shopsPrev == 0 && periodShops > 0) { shopsTrendVal = 100.0; }
-        String totalShopsTrend = String.format("%s%.1f%%", shopsTrendVal >= 0 ? "+" : "", shopsTrendVal);
-        Boolean totalShopsTrendUp = shopsTrendVal >= 0;
-
-        // Calculate Pending Shops Trend
-        long pendingShopsPrev = shopRepository.countShopsByStatusBetween(com.sang.sourcepattern.enums.ShopStatus.PENDING, prevStart, prevEnd);
-        double pendingShopsTrendVal = 0.0;
-        if (pendingShopsPrev > 0) { pendingShopsTrendVal = (double) (periodPendingShops - pendingShopsPrev) / pendingShopsPrev * 100; }
-        else if (pendingShopsPrev == 0 && periodPendingShops > 0) { pendingShopsTrendVal = 100.0; }
-        String pendingShopsTrend = String.format("%s%.1f%%", pendingShopsTrendVal >= 0 ? "+" : "", pendingShopsTrendVal);
-        Boolean pendingShopsTrendUp = pendingShopsTrendVal >= 0;
-
-        // Calculate Messages Trend
-        long messagesPrev = messageRepository.countMessagesBetween(prevStart, prevEnd);
-        double messagesTrendVal = 0.0;
-        if (messagesPrev > 0) { messagesTrendVal = (double) (periodMessages - messagesPrev) / messagesPrev * 100; }
-        else if (messagesPrev == 0 && periodMessages > 0) { messagesTrendVal = 100.0; }
-        String totalMessagesTrend = String.format("%s%.1f%%", messagesTrendVal >= 0 ? "+" : "", messagesTrendVal);
-        Boolean totalMessagesTrendUp = messagesTrendVal >= 0;
-
-        // Calculate Sparklines (Last 8 days)
-        List<Double> totalRevenueSparkData = new java.util.ArrayList<>();
-        List<Long> totalUsersSparkData = new java.util.ArrayList<>();
-        List<Long> totalBookingsSparkData = new java.util.ArrayList<>();
-        List<Long> totalShopsSparkData = new java.util.ArrayList<>();
-        List<Long> pendingShopsSparkData = new java.util.ArrayList<>();
-        List<Long> totalMessagesSparkData = new java.util.ArrayList<>();
-
-        for (int i = 7; i >= 0; i--) {
-            LocalDateTime dayStart = LocalDate.now().minusDays(i).atStartOfDay();
-            LocalDateTime dayEnd = LocalDate.now().minusDays(i).atTime(23, 59, 59);
-            
-            BigDecimal dayRev = bookingRepository.sumRevenueBetween(dayStart, dayEnd);
-            totalRevenueSparkData.add(dayRev != null ? dayRev.doubleValue() : 0.0);
-            
-            totalUsersSparkData.add(userRepository.countUsersBetween(dayStart, dayEnd));
-            totalBookingsSparkData.add(bookingRepository.countBookingsBetween(dayStart, dayEnd));
-            totalShopsSparkData.add(shopRepository.countShopsBetween(dayStart, dayEnd));
-            pendingShopsSparkData.add(shopRepository.countShopsByStatusBetween(com.sang.sourcepattern.enums.ShopStatus.PENDING, dayStart, dayEnd));
-            totalMessagesSparkData.add(messageRepository.countMessagesBetween(dayStart, dayEnd));
-        }
-
-        Map<String, Object> result = new java.util.HashMap<>();
-        result.put("totalRevenue", totalRevenue);
-        result.put("periodRevenue", periodRevenue);
-        result.put("totalRevenueTrend", totalRevenueTrend);
-        result.put("totalRevenueTrendUp", totalRevenueTrendUp);
-        result.put("totalRevenueSparkData", totalRevenueSparkData);
-
-        result.put("totalUsers", totalUsers);
-        result.put("periodUsers", periodUsers);
-        result.put("totalUsersTrend", totalUsersTrend);
-        result.put("totalUsersTrendUp", totalUsersTrendUp);
-        result.put("totalUsersSparkData", totalUsersSparkData);
-
-        result.put("totalShops", totalShops);
-        result.put("totalShopsTrend", totalShopsTrend);
-        result.put("totalShopsTrendUp", totalShopsTrendUp);
-        result.put("totalShopsSparkData", totalShopsSparkData);
-
-        result.put("totalBookings", totalBookings);
-        result.put("periodBookings", periodBookings);
-        result.put("totalBookingsTrend", totalBookingsTrend);
-        result.put("totalBookingsTrendUp", totalBookingsTrendUp);
-        result.put("totalBookingsSparkData", totalBookingsSparkData);
-
-        result.put("pendingShops", pendingShops);
-        result.put("pendingShopsTrend", pendingShopsTrend);
-        result.put("pendingShopsTrendUp", pendingShopsTrendUp);
-        result.put("pendingShopsSparkData", pendingShopsSparkData);
-
-        result.put("unreadMessages", unreadMessages);
-        result.put("totalMessages", totalMessages);
-        result.put("totalMessagesTrend", totalMessagesTrend);
-        result.put("totalMessagesTrendUp", totalMessagesTrendUp);
-        result.put("totalMessagesSparkData", totalMessagesSparkData);
-
         return ApiResponse.<Map<String, Object>>builder()
-                .result(result)
+                .result(adminService.getDashboard(startDate, endDate))
                 .build();
     }
 
@@ -218,226 +53,141 @@ public class AdminController {
     @GetMapping("/dashboard/revenue-monthly")
     public ApiResponse<List<MonthlyRevenueResponse>> getMonthlyRevenue(
             @RequestParam(required = false) Integer year) {
-
-        int targetYear = (year != null) ? year : Year.now().getValue();
-
-        // Build map month -> revenue từ query
-        Map<Integer, BigDecimal> revenueMap = new java.util.HashMap<>();
-        for (Object[] row : bookingRepository.adminCommissionByMonth(targetYear)) {
-            int month = ((Number) row[0]).intValue();
-            BigDecimal revenue = new BigDecimal(row[1].toString());
-            revenueMap.put(month, revenue);
-        }
-
-        // Trả đủ 12 tháng, tháng không có thì 0
-        List<MonthlyRevenueResponse> result = new java.util.ArrayList<>();
-        for (int m = 1; m <= 12; m++) {
-            result.add(MonthlyRevenueResponse.builder()
-                    .month(m)
-                    .revenue(revenueMap.getOrDefault(m, BigDecimal.ZERO))
-                    .build());
-        }
-
-        return ApiResponse.<List<MonthlyRevenueResponse>>builder().result(result).build();
+        return ApiResponse.<List<MonthlyRevenueResponse>>builder()
+                .result(adminService.getMonthlyRevenue(year))
+                .build();
     }
 
     @GetMapping("/dashboard/bookings-weekly")
     public ApiResponse<List<DailyBookingResponse>> getWeeklyBookings() {
-
-        LocalDate today = LocalDate.now();
-        LocalDateTime from = today.minusDays(6).atStartOfDay();
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        // Build map date -> count từ query
-        Map<String, Long> countMap = new java.util.HashMap<>();
-        for (Object[] row : bookingRepository.bookingCountByDate(from)) {
-            String date = row[0].toString().substring(0, 10); // đảm bảo format yyyy-MM-dd
-            long count = ((Number) row[1]).longValue();
-            countMap.put(date, count);
-        }
-
-        // Trả đủ 7 ngày, ngày không có thì 0
-        List<DailyBookingResponse> result = new java.util.ArrayList<>();
-        for (int i = 6; i >= 0; i--) {
-            String date = today.minusDays(i).format(fmt);
-            result.add(DailyBookingResponse.builder()
-                    .date(date)
-                    .count(countMap.getOrDefault(date, 0L))
-                    .build());
-        }
-
-        return ApiResponse.<List<DailyBookingResponse>>builder().result(result).build();
+        return ApiResponse.<List<DailyBookingResponse>>builder()
+                .result(adminService.getWeeklyBookings())
+                .build();
     }
 
     // ─── Shops Management ───────────────────────────────────────────────────
 
     @GetMapping("/shops")
-    public ApiResponse<PageResponse<com.sang.sourcepattern.dto.response.ShopResponse>> getShops(
-            @RequestParam(required = false) com.sang.sourcepattern.enums.ShopStatus status,
+    public ApiResponse<PageResponse<ShopResponse>> getShops(
+            @RequestParam(required = false) ShopStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
-        org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
-        Page<com.sang.sourcepattern.entity.Shop> shopPage;
-        
-        if (status != null) {
-            shopPage = shopRepository.findByStatus(status, pageable);
-        } else {
-            shopPage = shopRepository.findAll(pageable);
-        }
-        
-        List<com.sang.sourcepattern.dto.response.ShopResponse> content = shopPage.getContent().stream()
-                .map(shopMapper::toShopResponse)
-                .toList();
-                
-        return ApiResponse.<PageResponse<com.sang.sourcepattern.dto.response.ShopResponse>>builder()
-                .result(PageResponse.<com.sang.sourcepattern.dto.response.ShopResponse>builder()
-                        .content(content)
-                        .page(shopPage.getNumber())
-                        .size(shopPage.getSize())
-                        .totalElements(shopPage.getTotalElements())
-                        .totalPages(shopPage.getTotalPages())
-                        .last(shopPage.isLast())
-                        .build())
+        return ApiResponse.<PageResponse<ShopResponse>>builder()
+                .result(adminService.getShops(status, page, size))
                 .build();
     }
 
     @PutMapping("/shops/{id}/status")
-    public ApiResponse<com.sang.sourcepattern.dto.response.ShopResponse> updateShopStatus(
+    public ApiResponse<ShopResponse> updateShopStatus(
             @PathVariable int id,
-            @RequestParam com.sang.sourcepattern.enums.ShopStatus status) {
-            
-        com.sang.sourcepattern.entity.Shop shop = shopRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-                
-        shop.setStatus(status);
-        if (status == com.sang.sourcepattern.enums.ShopStatus.APPROVED) {
-            shop.setVerified(true);
-        } else if (status == com.sang.sourcepattern.enums.ShopStatus.REJECTED) {
-            shop.setVerified(false);
-        }
-        
-        shopRepository.save(shop);
-        
-        return ApiResponse.<com.sang.sourcepattern.dto.response.ShopResponse>builder()
-                .result(shopMapper.toShopResponse(shop))
+            @RequestParam ShopStatus status) {
+        return ApiResponse.<ShopResponse>builder()
+                .result(adminService.updateShopStatus(id, status))
                 .message("Shop status updated successfully")
                 .build();
     }
 
-    // ─── Notifications ───────────────────────────────────────────────────────    /** Admin xem danh sách thông báo đã gửi — group theo đợt gửi, phân trang */
+    // ─── Notifications ───────────────────────────────────────────────────────    
+
     @GetMapping("/notifications")
     public ApiResponse<PageResponse<NotificationBroadcastResponse>> getAllNotifications(
             @RequestParam(defaultValue = "0") int page) {
-
-        Page<Notification> pageResult = notificationRepository
-                .findDistinctBroadcasts(PageRequest.of(page, 10));
-
-        List<NotificationBroadcastResponse> content = pageResult.getContent().stream()
-                .map(n -> NotificationBroadcastResponse.builder()
-                        .broadcastId(n.getBroadcastId())
-                        .title(n.getTitle())
-                        .content(n.getContent())
-                        .notificationType(n.getNotificationType() != null ? n.getNotificationType().name() : null)
-                        .totalSent(notificationRepository.countByBroadcastId(n.getBroadcastId()))
-                        .totalRead(notificationRepository.countByBroadcastIdAndIsReadTrue(n.getBroadcastId()))
-                        .createdAt(n.getCreatedAt())
-                        .build())
-                .toList();
-
         return ApiResponse.<PageResponse<NotificationBroadcastResponse>>builder()
-                .result(PageResponse.<NotificationBroadcastResponse>builder()
-                        .content(content)
-                        .page(pageResult.getNumber())
-                        .size(pageResult.getSize())
-                        .totalElements(pageResult.getTotalElements())
-                        .totalPages(pageResult.getTotalPages())
-                        .last(pageResult.isLast())
-                        .build())
+                .result(adminService.getAllNotifications(page))
                 .build();
     }
 
-    /** Admin gửi thông báo — tạo 1 bản/user nhưng group bằng broadcastId */
     @PostMapping("/notifications")
     public ApiResponse<Void> sendNotification(@RequestBody @Valid SendNotificationRequest request) {
-        List<User> targets = switch (request.getTargetType()) {
-            case SINGLE -> {
-                if (request.getUserId() == null)
-                    throw new AppException(ErrorCode.USER_NOT_EXISTED);
-                User user = userRepository.findById(request.getUserId())
-                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-                yield List.of(user);
-            }
-            case ALL_USERS -> userRepository.findByRoleName("USER");
-            case ALL_SHOPS -> userRepository.findByRoleName("SHOP_OWNER");
-            case ALL -> userRepository.findAll();
-        };
-
-        String broadcastId = UUID.randomUUID().toString();
-
-        List<Notification> notifications = targets.stream()
-                .map(user -> Notification.builder()
-                        .user(user)
-                        .title(request.getTitle())
-                        .content(request.getContent())
-                        .broadcastId(broadcastId)
-                        .notificationType(request.getNotificationType() != null
-                                ? Notification.NotificationType.valueOf(request.getNotificationType().name())
-                                : Notification.NotificationType.GENERAL)
-                        .build())
-                .toList();
-
-        notificationRepository.saveAll(notifications);
-
+        adminService.sendNotification(request);
         return ApiResponse.<Void>builder()
-                .message("Sent to " + notifications.size() + " user(s)")
+                .message("Notifications sent successfully")
                 .build();
     }
 
-    /** Xóa toàn bộ thông báo thuộc 1 đợt gửi */
     @DeleteMapping("/notifications/{broadcastId}")
     public ApiResponse<Void> deleteNotification(@PathVariable String broadcastId) {
-        List<Notification> group = notificationRepository.findByBroadcastId(broadcastId);
-        notificationRepository.deleteAll(group);
+        int count = adminService.deleteNotification(broadcastId);
         return ApiResponse.<Void>builder()
-                .message("Deleted " + group.size() + " notification(s)")
+                .message("Deleted " + count + " notification(s)")
                 .build();
     }
 
     // ─── Geocode all shops ───────────────────────────────────────────────────
 
-    /** Admin geocode lại tất cả shop để lấy tọa độ từ Goong API */
     @PostMapping("/shops/geocode-all")
     public ApiResponse<Map<String, Object>> geocodeAllShops() {
-        List<com.sang.sourcepattern.entity.Shop> shops = shopRepository.findAll();
-        int success = 0;
-        int failed = 0;
-
-        for (com.sang.sourcepattern.entity.Shop shop : shops) {
-            if (shop.getAddress() != null && !shop.getAddress().isEmpty()) {
-                com.sang.sourcepattern.dto.response.goong.LatLong location = 
-                        goongMapService.geocodeAddress(shop.getAddress());
-                
-                if (location != null) {
-                    shop.setLatitude(location.getLatitude());
-                    shop.setLongitude(location.getLongitude());
-                    shopRepository.save(shop);
-                    success++;
-                } else {
-                    failed++;
-                }
-            } else {
-                failed++;
-            }
-        }
-
+        Map<String, Object> result = adminService.geocodeAllShops();
         return ApiResponse.<Map<String, Object>>builder()
-                .result(Map.of(
-                        "total", shops.size(),
-                        "success", success,
-                        "failed", failed
-                ))
-                .message("Geocoded " + success + " shops successfully")
+                .result(result)
+                .message("Geocoded " + result.get("success") + " shops successfully")
+                .build();
+    }
+
+    // ─── Finance Overview ────────────────────────────────────────────────────
+
+    @GetMapping("/finance/overview")
+    public ApiResponse<Map<String, Object>> getFinanceOverview() {
+        return ApiResponse.<Map<String, Object>>builder()
+                .code(1000)
+                .result(adminService.getFinanceOverview())
+                .build();
+    }
+
+    @GetMapping("/finance/transactions")
+    public ApiResponse<Page<TransactionResponse>> getFinanceTransactions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String type) {
+        return ApiResponse.<Page<TransactionResponse>>builder()
+                .code(1000)
+                .result(adminService.getFinanceTransactions(page, size, type))
+                .build();
+    }
+
+    // ─── Withdrawals ─────────────────────────────────────────────────────────
+
+    @GetMapping("/finance/withdrawals/shop")
+    public ApiResponse<Page<WithdrawalRequestResponse>> getShopWithdrawals(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status) {
+        return ApiResponse.<Page<WithdrawalRequestResponse>>builder()
+                .code(1000)
+                .result(adminService.getShopWithdrawals(page, size, status))
+                .build();
+    }
+
+    @PutMapping("/finance/withdrawals/shop/{id}/status")
+    public ApiResponse<WithdrawalRequestResponse> updateShopWithdrawalStatus(
+            @PathVariable int id,
+            @RequestParam String status,
+            @RequestParam(required = false) String adminNote) {
+        return ApiResponse.<WithdrawalRequestResponse>builder()
+                .code(1000)
+                .result(adminService.updateShopWithdrawalStatus(id, status, adminNote))
+                .build();
+    }
+
+    @GetMapping("/finance/withdrawals/user")
+    public ApiResponse<Page<WithdrawalRequestResponse>> getUserWithdrawals(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status) {
+        return ApiResponse.<Page<WithdrawalRequestResponse>>builder()
+                .code(1000)
+                .result(adminService.getUserWithdrawals(page, size, status))
+                .build();
+    }
+
+    @PutMapping("/finance/withdrawals/user/{id}/status")
+    public ApiResponse<WithdrawalRequestResponse> updateUserWithdrawalStatus(
+            @PathVariable int id,
+            @RequestParam String status,
+            @RequestParam(required = false) String adminNote) {
+        return ApiResponse.<WithdrawalRequestResponse>builder()
+                .code(1000)
+                .result(adminService.updateUserWithdrawalStatus(id, status, adminNote))
                 .build();
     }
 }

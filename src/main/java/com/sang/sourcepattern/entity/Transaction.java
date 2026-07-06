@@ -53,6 +53,11 @@ public class Transaction {
     @JoinColumn(name = "shop_id")
     Shop shop;
 
+    /** User thực hiện giao dịch (đối với User Withdrawal) */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    User user;
+
     /** WithdrawalRequest liên quan (chỉ với WITHDRAWAL) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "withdrawal_id")

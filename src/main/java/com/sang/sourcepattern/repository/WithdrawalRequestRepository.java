@@ -4,6 +4,8 @@ import com.sang.sourcepattern.entity.WithdrawalRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -19,6 +21,21 @@ public interface WithdrawalRequestRepository extends JpaRepository<WithdrawalReq
     List<WithdrawalRequest> findByStatusOrderByCreatedAtDesc(String status);
 
     List<WithdrawalRequest> findAllByOrderByCreatedAtDesc();
+
+    long countByStatus(String status);
+    
+    long countByTypeAndStatus(String type, String status);
+
+    Page<WithdrawalRequest> findByTypeOrderByCreatedAtDesc(String type, Pageable pageable);
+
+    Page<WithdrawalRequest> findByTypeAndStatusOrderByCreatedAtDesc(String type, String status, Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(w.amount), 0) FROM WithdrawalRequest w WHERE w.status IN ('APPROVED', 'SUCCESS', 'PAYING')")
+    BigDecimal sumTotalApprovedWithdrawals();
+
+    Page<WithdrawalRequest> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
+    Page<WithdrawalRequest> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
 
     Optional<WithdrawalRequest> findByPayosOrderCode(Long payosOrderCode);
 

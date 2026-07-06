@@ -29,6 +29,13 @@ public class WithdrawalRequest {
     @JoinColumn(name = "shop_id")
     Shop shop;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
+
+    @Builder.Default
+    String type = "SHOP"; // "SHOP" or "USER"
+
     /** Số tiền muốn rút */
     @Column(precision = 18, scale = 2)
     BigDecimal amount;
