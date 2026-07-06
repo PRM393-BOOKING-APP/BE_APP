@@ -50,7 +50,11 @@ public class BookingMapper {
                 .services(serviceDtos)
                 .petId(booking.getPet().getId())
                 .petName(booking.getPet().getName())
-                .customerName(booking.getUser() != null ? booking.getUser().getFullName() : null)
+                .customerName(booking.getUser() != null ? 
+                    (booking.getUser().getFullName() != null && !booking.getUser().getFullName().trim().isEmpty() 
+                        ? booking.getUser().getFullName() 
+                        : booking.getUser().getEmail()) 
+                    : null)
                 .customerEmail(booking.getUser() != null ? booking.getUser().getEmail() : null)
                 .customerPhone(booking.getUser() != null ? booking.getUser().getPhone() : null)
                 .staffId(booking.getStaff() != null ? booking.getStaff().getId() : null)

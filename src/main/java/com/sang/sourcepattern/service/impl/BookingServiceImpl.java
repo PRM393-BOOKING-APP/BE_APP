@@ -323,6 +323,13 @@ public class BookingServiceImpl implements BookingService {
                 .services(serviceDtos)
                 .petId(booking.getPet().getId())
                 .petName(booking.getPet().getName())
+                .customerName(booking.getUser() != null ? 
+                    (booking.getUser().getFullName() != null && !booking.getUser().getFullName().trim().isEmpty() 
+                        ? booking.getUser().getFullName() 
+                        : booking.getUser().getEmail()) 
+                    : null)
+                .customerEmail(booking.getUser() != null ? booking.getUser().getEmail() : null)
+                .customerPhone(booking.getUser() != null ? booking.getUser().getPhone() : null)
                 .staffId(booking.getStaff() != null ? booking.getStaff().getId() : null)
                 .staffName(booking.getStaff() != null ? booking.getStaff().getFullName() : null)
                 .appointmentDatetime(booking.getAppointmentDatetime())
@@ -404,7 +411,7 @@ public class BookingServiceImpl implements BookingService {
     private void checkShopHasAvailableStaff(int shopId, LocalDateTime appointmentTime, int durationMinutes, boolean isBoarding) {
         List<Staff> activeStaff = staffRepository.findByShopIdAndIsActiveTrue(shopId);
         if (activeStaff.isEmpty()) {
-            throw new AppException(ErrorCode.NO_STAFF_AVAILABLE);
+            return;
         }
         // Không bypass khi isBoarding — query SQL đã tự loại trừ boarding/hotel
 
@@ -730,7 +737,7 @@ public class BookingServiceImpl implements BookingService {
                 .checkIn(pending.getCheckIn())
                 .checkOut(pending.getCheckOut())
                 .note(pending.getNote())
-                .status((staff != null && !"AUTO".equals(shop.getAssignmentMode())) ? "WAITING_SHOP_APPROVAL" : "CONFIRMED")
+                .status("AUTO".equals(shop.getAssignmentMode()) ? "CONFIRMED" : "WAITING_SHOP_APPROVAL")
                 .payosOrderCode(orderCode)
                 .appliedVoucher(appliedVoucher)
                 .discountAmount(discountAmount)
@@ -910,7 +917,7 @@ public class BookingServiceImpl implements BookingService {
                 .note(pending.getNote())
                 .cageSize(pending.getCageSize())
                 .roomType(pending.getRoomType())
-                .status((staff != null && !"AUTO".equals(shop.getAssignmentMode())) ? "WAITING_SHOP_APPROVAL" : "CONFIRMED")
+                .status("AUTO".equals(shop.getAssignmentMode()) ? "CONFIRMED" : "WAITING_SHOP_APPROVAL")
                 .payosOrderCode(orderCode)
                 .appliedVoucher(appliedVoucher)
                 .discountAmount(discountAmount)
@@ -1201,7 +1208,7 @@ public class BookingServiceImpl implements BookingService {
                 .note(pending.getNote())
                 .cageSize(pending.getCageSize())
                 .roomType(pending.getRoomType())
-                .status((staff != null && !"AUTO".equals(shop.getAssignmentMode())) ? "WAITING_SHOP_APPROVAL" : "CONFIRMED")
+                .status("AUTO".equals(shop.getAssignmentMode()) ? "CONFIRMED" : "WAITING_SHOP_APPROVAL")
                 .payosOrderCode(orderCode)
                 .build();
         booking = bookingRepository.save(booking);
@@ -1778,10 +1785,10 @@ public class BookingServiceImpl implements BookingService {
         // ── Lấy danh sách staff active ────────────────────────────────────────
         List<Staff> activeStaff = staffRepository.findByShopIdAndIsActiveTrue(shopId);
 
-        // Nếu shop không có nhân viên nào → không có slot nào available
-        if (activeStaff.isEmpty()) {
-            return java.util.Collections.emptyList();
-        }
+        // Nếu shop không có nhân viên nào → vẫn cho phép đặt (owner tự xử lý)
+        // if (activeStaff.isEmpty()) {
+        //     return java.util.Collections.emptyList();
+        // }
 
         // ── Sinh slots và lọc ─────────────────────────────────────────────────
         List<LocalDateTime> availableSlots = new java.util.ArrayList<>();
@@ -1791,8 +1798,9 @@ public class BookingServiceImpl implements BookingService {
             LocalDateTime slotStart = LocalDateTime.of(date, cursor);
             LocalDateTime slotEnd   = slotStart.plusMinutes(durationMinutes);
 
-            // Kiểm tra xem có ít nhất 1 staff rảnh trong slot này không
-            boolean hasAvailableStaff = activeStaff.stream().anyMatch(s -> {
+            // Kiểm tra xem có ít nhất 1 staff rảnh trong slot này không,
+            // hoặc nếu shop không có staff nào thì mặc định available (owner tự xử lý)
+            boolean hasAvailableStaff = activeStaff.isEmpty() || activeStaff.stream().anyMatch(s -> {
                 // Check DB: có booking trùng giờ không?
                 boolean dbBusy = bookingRepository.countConflictingBookingForStaff(
                         s.getId(), slotStart, slotEnd) > 0;
@@ -1879,9 +1887,10 @@ public class BookingServiceImpl implements BookingService {
 
         // ── Lấy danh sách staff active ────────────────────────────────────────
         List<Staff> activeStaff = staffRepository.findByShopIdAndIsActiveTrue(shopId);
-        if (activeStaff.isEmpty()) {
-            return java.util.Collections.emptyList();
-        }
+        // Nếu shop không có nhân viên nào → vẫn cho phép đặt (owner tự xử lý)
+        // if (activeStaff.isEmpty()) {
+        //     return java.util.Collections.emptyList();
+        // }
 
         // ── Sinh slots theo bước 60 phút, check conflict với totalDuration ────
         // Bước 60 phút để UI hiển thị đẹp (08:00, 09:00, 10:00...)
@@ -1902,7 +1911,7 @@ public class BookingServiceImpl implements BookingService {
                 continue;
             }
 
-            boolean hasAvailableStaff = activeStaff.stream().anyMatch(s -> {
+            boolean hasAvailableStaff = activeStaff.isEmpty() || activeStaff.stream().anyMatch(s -> {
                 boolean dbBusy = bookingRepository.countConflictingBookingForStaff(
                         s.getId(), slotStart, slotEnd) > 0;
                 if (dbBusy) return false;
@@ -1996,7 +2005,7 @@ public class BookingServiceImpl implements BookingService {
                 .checkIn(pending.getCheckIn())
                 .checkOut(pending.getCheckOut())
                 .note(pending.getNote())
-                .status((staff != null && !"AUTO".equals(shop.getAssignmentMode())) ? "WAITING_SHOP_APPROVAL" : "CONFIRMED")
+                .status("AUTO".equals(shop.getAssignmentMode()) ? "CONFIRMED" : "WAITING_SHOP_APPROVAL")
                 .payosOrderCode(orderCode)
                 .build();
         booking = bookingRepository.save(booking);
