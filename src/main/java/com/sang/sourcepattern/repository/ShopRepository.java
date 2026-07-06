@@ -91,6 +91,8 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
     /** Paginated: pending shops for admin */
     Page<Shop> findByStatusNot(com.sang.sourcepattern.enums.ShopStatus status, Pageable pageable);
 
+    Page<Shop> findByStatus(com.sang.sourcepattern.enums.ShopStatus status, Pageable pageable);
+
     @Query("SELECT COUNT(s) FROM Shop s WHERE s.createdAt BETWEEN :start AND :end")
     long countShopsBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
 

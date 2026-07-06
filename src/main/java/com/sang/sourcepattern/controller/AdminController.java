@@ -51,6 +51,7 @@ public class AdminController {
     NotificationRepository notificationRepository;
     MessageRepository messageRepository;
     com.sang.sourcepattern.service.GoongMapService goongMapService;
+    com.sang.sourcepattern.mapper.ShopMapper shopMapper;
 
     // ─── Dashboard ───────────────────────────────────────────────────────────
 
@@ -266,6 +267,62 @@ public class AdminController {
         }
 
         return ApiResponse.<List<DailyBookingResponse>>builder().result(result).build();
+    }
+
+    // ─── Shops Management ───────────────────────────────────────────────────
+
+    @GetMapping("/shops")
+    public ApiResponse<PageResponse<com.sang.sourcepattern.dto.response.ShopResponse>> getShops(
+            @RequestParam(required = false) com.sang.sourcepattern.enums.ShopStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
+        Page<com.sang.sourcepattern.entity.Shop> shopPage;
+        
+        if (status != null) {
+            shopPage = shopRepository.findByStatus(status, pageable);
+        } else {
+            shopPage = shopRepository.findAll(pageable);
+        }
+        
+        List<com.sang.sourcepattern.dto.response.ShopResponse> content = shopPage.getContent().stream()
+                .map(shopMapper::toShopResponse)
+                .toList();
+                
+        return ApiResponse.<PageResponse<com.sang.sourcepattern.dto.response.ShopResponse>>builder()
+                .result(PageResponse.<com.sang.sourcepattern.dto.response.ShopResponse>builder()
+                        .content(content)
+                        .page(shopPage.getNumber())
+                        .size(shopPage.getSize())
+                        .totalElements(shopPage.getTotalElements())
+                        .totalPages(shopPage.getTotalPages())
+                        .last(shopPage.isLast())
+                        .build())
+                .build();
+    }
+
+    @PutMapping("/shops/{id}/status")
+    public ApiResponse<com.sang.sourcepattern.dto.response.ShopResponse> updateShopStatus(
+            @PathVariable int id,
+            @RequestParam com.sang.sourcepattern.enums.ShopStatus status) {
+            
+        com.sang.sourcepattern.entity.Shop shop = shopRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+                
+        shop.setStatus(status);
+        if (status == com.sang.sourcepattern.enums.ShopStatus.APPROVED) {
+            shop.setVerified(true);
+        } else if (status == com.sang.sourcepattern.enums.ShopStatus.REJECTED) {
+            shop.setVerified(false);
+        }
+        
+        shopRepository.save(shop);
+        
+        return ApiResponse.<com.sang.sourcepattern.dto.response.ShopResponse>builder()
+                .result(shopMapper.toShopResponse(shop))
+                .message("Shop status updated successfully")
+                .build();
     }
 
     // ─── Notifications ───────────────────────────────────────────────────────    /** Admin xem danh sách thông báo đã gửi — group theo đợt gửi, phân trang */
