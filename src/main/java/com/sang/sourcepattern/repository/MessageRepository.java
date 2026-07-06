@@ -44,4 +44,7 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
     @Transactional
     @Query("UPDATE Message m SET m.isRead = true WHERE m.shopId = :shopId AND m.channelType = :channelType AND m.recipientEmail = :recipientEmail AND m.senderRole <> :readerRole AND m.isRead = false")
     void markRecipientAllAsRead(@Param("shopId") int shopId, @Param("channelType") String channelType, @Param("recipientEmail") String recipientEmail, @Param("readerRole") String readerRole);
+
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.createdAt BETWEEN :start AND :end")
+    long countMessagesBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
 }

@@ -76,4 +76,7 @@ public class Shop {
 
     @OneToMany(mappedBy = "shop")
     List<Cage> cages;
+
+    @Builder.Default
+    java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
 }

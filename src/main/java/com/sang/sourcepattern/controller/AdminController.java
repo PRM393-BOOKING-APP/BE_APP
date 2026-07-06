@@ -120,10 +120,43 @@ public class AdminController {
         String totalBookingsTrend = String.format("%s%.1f%%", bookingsTrendVal >= 0 ? "+" : "", bookingsTrendVal);
         Boolean totalBookingsTrendUp = bookingsTrendVal >= 0;
 
+        long periodShops = shopRepository.countShopsBetween(periodStart, periodEnd);
+        long periodPendingShops = shopRepository.countShopsByStatusBetween(com.sang.sourcepattern.enums.ShopStatus.PENDING, periodStart, periodEnd);
+        long periodMessages = messageRepository.countMessagesBetween(periodStart, periodEnd);
+        
+        long totalMessages = messageRepository.count();
+
+        // Calculate Shops Trend
+        long shopsPrev = shopRepository.countShopsBetween(prevStart, prevEnd);
+        double shopsTrendVal = 0.0;
+        if (shopsPrev > 0) { shopsTrendVal = (double) (periodShops - shopsPrev) / shopsPrev * 100; }
+        else if (shopsPrev == 0 && periodShops > 0) { shopsTrendVal = 100.0; }
+        String totalShopsTrend = String.format("%s%.1f%%", shopsTrendVal >= 0 ? "+" : "", shopsTrendVal);
+        Boolean totalShopsTrendUp = shopsTrendVal >= 0;
+
+        // Calculate Pending Shops Trend
+        long pendingShopsPrev = shopRepository.countShopsByStatusBetween(com.sang.sourcepattern.enums.ShopStatus.PENDING, prevStart, prevEnd);
+        double pendingShopsTrendVal = 0.0;
+        if (pendingShopsPrev > 0) { pendingShopsTrendVal = (double) (periodPendingShops - pendingShopsPrev) / pendingShopsPrev * 100; }
+        else if (pendingShopsPrev == 0 && periodPendingShops > 0) { pendingShopsTrendVal = 100.0; }
+        String pendingShopsTrend = String.format("%s%.1f%%", pendingShopsTrendVal >= 0 ? "+" : "", pendingShopsTrendVal);
+        Boolean pendingShopsTrendUp = pendingShopsTrendVal >= 0;
+
+        // Calculate Messages Trend
+        long messagesPrev = messageRepository.countMessagesBetween(prevStart, prevEnd);
+        double messagesTrendVal = 0.0;
+        if (messagesPrev > 0) { messagesTrendVal = (double) (periodMessages - messagesPrev) / messagesPrev * 100; }
+        else if (messagesPrev == 0 && periodMessages > 0) { messagesTrendVal = 100.0; }
+        String totalMessagesTrend = String.format("%s%.1f%%", messagesTrendVal >= 0 ? "+" : "", messagesTrendVal);
+        Boolean totalMessagesTrendUp = messagesTrendVal >= 0;
+
         // Calculate Sparklines (Last 8 days)
         List<Double> totalRevenueSparkData = new java.util.ArrayList<>();
         List<Long> totalUsersSparkData = new java.util.ArrayList<>();
         List<Long> totalBookingsSparkData = new java.util.ArrayList<>();
+        List<Long> totalShopsSparkData = new java.util.ArrayList<>();
+        List<Long> pendingShopsSparkData = new java.util.ArrayList<>();
+        List<Long> totalMessagesSparkData = new java.util.ArrayList<>();
 
         for (int i = 7; i >= 0; i--) {
             LocalDateTime dayStart = LocalDate.now().minusDays(i).atStartOfDay();
@@ -134,12 +167,10 @@ public class AdminController {
             
             totalUsersSparkData.add(userRepository.countUsersBetween(dayStart, dayEnd));
             totalBookingsSparkData.add(bookingRepository.countBookingsBetween(dayStart, dayEnd));
+            totalShopsSparkData.add(shopRepository.countShopsBetween(dayStart, dayEnd));
+            pendingShopsSparkData.add(shopRepository.countShopsByStatusBetween(com.sang.sourcepattern.enums.ShopStatus.PENDING, dayStart, dayEnd));
+            totalMessagesSparkData.add(messageRepository.countMessagesBetween(dayStart, dayEnd));
         }
-
-        // Mock sparklines for items without historical query
-        List<Integer> totalShopsSparkData = List.of(8, 10, 11, 14, 15, 18, 20, (int)totalShops);
-        List<Integer> pendingShopsSparkData = List.of(12, 10, 9, 7, 8, 5, 4, (int)pendingShops);
-        List<Integer> unreadMessagesSparkData = List.of(4, 6, 5, 8, 7, 5, 4, (int)unreadMessages);
 
         Map<String, Object> result = new java.util.HashMap<>();
         result.put("totalRevenue", totalRevenue);
@@ -155,8 +186,8 @@ public class AdminController {
         result.put("totalUsersSparkData", totalUsersSparkData);
 
         result.put("totalShops", totalShops);
-        result.put("totalShopsTrend", "+4.5%");
-        result.put("totalShopsTrendUp", true);
+        result.put("totalShopsTrend", totalShopsTrend);
+        result.put("totalShopsTrendUp", totalShopsTrendUp);
         result.put("totalShopsSparkData", totalShopsSparkData);
 
         result.put("totalBookings", totalBookings);
@@ -166,11 +197,15 @@ public class AdminController {
         result.put("totalBookingsSparkData", totalBookingsSparkData);
 
         result.put("pendingShops", pendingShops);
-        result.put("pendingShopsTrend", "-18.4%");
-        result.put("pendingShopsTrendUp", false);
+        result.put("pendingShopsTrend", pendingShopsTrend);
+        result.put("pendingShopsTrendUp", pendingShopsTrendUp);
         result.put("pendingShopsSparkData", pendingShopsSparkData);
 
         result.put("unreadMessages", unreadMessages);
+        result.put("totalMessages", totalMessages);
+        result.put("totalMessagesTrend", totalMessagesTrend);
+        result.put("totalMessagesTrendUp", totalMessagesTrendUp);
+        result.put("totalMessagesSparkData", totalMessagesSparkData);
 
         return ApiResponse.<Map<String, Object>>builder()
                 .result(result)
