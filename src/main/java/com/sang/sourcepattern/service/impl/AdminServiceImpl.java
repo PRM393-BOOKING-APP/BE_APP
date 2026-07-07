@@ -329,15 +329,38 @@ public class AdminServiceImpl implements AdminService {
                 .findDistinctBroadcasts(PageRequest.of(page, 10));
 
         List<NotificationBroadcastResponse> content = pageResult.getContent().stream()
-                .map(n -> NotificationBroadcastResponse.builder()
+                .map(n -> {
+                    String bId = n.getBroadcastId();
+                    String targetStr = "ALL";
+                    if (bId != null && bId.startsWith("SINGLE_")) {
+                        targetStr = "SINGLE:" + (n.getUser() != null && n.getUser().getEmail() != null ? n.getUser().getEmail() : String.valueOf(n.getUser().getId()));
+                    } else if (bId != null && bId.startsWith("ALL_USERS_")) {
+                        targetStr = "ALL_USERS";
+                    } else if (bId != null && bId.startsWith("ALL_SHOPS_")) {
+                        targetStr = "ALL_SHOPS";
+                    } else if (bId != null && bId.startsWith("ALL_")) {
+                        targetStr = "ALL";
+                    } else {
+                        // fallback cho dữ liệu cũ không có prefix
+                        long totalSent = notificationRepository.countByBroadcastId(n.getBroadcastId());
+                        if (totalSent == 1 && n.getUser() != null) {
+                            targetStr = "SINGLE:" + (n.getUser().getEmail() != null ? n.getUser().getEmail() : String.valueOf(n.getUser().getId()));
+                        }
+                    }
+                    
+                    long totalSent = notificationRepository.countByBroadcastId(n.getBroadcastId());
+                    
+                    return NotificationBroadcastResponse.builder()
                         .broadcastId(n.getBroadcastId())
                         .title(n.getTitle())
                         .content(n.getContent())
+                        .targetType(targetStr)
                         .notificationType(n.getNotificationType() != null ? n.getNotificationType().name() : null)
-                        .totalSent(notificationRepository.countByBroadcastId(n.getBroadcastId()))
+                        .totalSent(totalSent)
                         .totalRead(notificationRepository.countByBroadcastIdAndIsReadTrue(n.getBroadcastId()))
                         .createdAt(n.getCreatedAt())
-                        .build())
+                        .build();
+                })
                 .collect(Collectors.toList());
 
         return PageResponse.<NotificationBroadcastResponse>builder()
@@ -355,10 +378,16 @@ public class AdminServiceImpl implements AdminService {
     public void sendNotification(SendNotificationRequest request) {
         List<User> targets = switch (request.getTargetType()) {
             case SINGLE -> {
-                if (request.getUserId() == null)
+                User user;
+                if (request.getUserId() != null) {
+                    user = userRepository.findById(request.getUserId())
+                            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                } else if (request.getTargetEmail() != null && !request.getTargetEmail().isEmpty()) {
+                    user = userRepository.findByEmail(request.getTargetEmail())
+                            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                } else {
                     throw new AppException(ErrorCode.USER_NOT_EXISTED);
-                User user = userRepository.findById(request.getUserId())
-                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                }
                 yield List.of(user);
             }
             case ALL_USERS -> userRepository.findByRoleName("USER");
@@ -366,7 +395,7 @@ public class AdminServiceImpl implements AdminService {
             case ALL -> userRepository.findAll();
         };
 
-        String broadcastId = UUID.randomUUID().toString();
+        String broadcastId = request.getTargetType().name() + "_" + UUID.randomUUID().toString();
 
         List<Notification> notifications = targets.stream()
                 .map(user -> Notification.builder()

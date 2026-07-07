@@ -31,6 +31,9 @@ public class SendNotificationRequest {
     /** Chỉ cần khi targetType = SINGLE */
     Integer userId;
 
+    /** Tùy chọn gửi theo Email khi targetType = SINGLE */
+    String targetEmail;
+
     /** Loại thông báo, mặc định là GENERAL nếu không truyền */
     @Builder.Default
     NotificationType notificationType = NotificationType.GENERAL;
