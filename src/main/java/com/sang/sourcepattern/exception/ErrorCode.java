@@ -15,6 +15,7 @@ public enum     ErrorCode {
     INVALID_KEY(1005, "Khóa không hợp lệ", HttpStatus.BAD_REQUEST),
     ACCOUNT_LOCKED(1014, "Tài khoản của bạn đã bị khóa 60 giây do đăng nhập sai nhiều lần", HttpStatus.FORBIDDEN),
     USER_NOT_EXISTED(10010, "Email không tồn tại",HttpStatus.NOT_FOUND),
+    USER_NOT_LINKED_TO_SHOP(10011, "Khách hàng này chưa từng dùng dịch vụ hoặc đặt lịch tại Shop của bạn", HttpStatus.BAD_REQUEST),
 //   Create user errors
     EMAIL_INVALID(1006, "Email không hợp lệ", HttpStatus.BAD_REQUEST),
     EMAIL_REQUIRED(1009, "Email không được để trống", HttpStatus.BAD_REQUEST),

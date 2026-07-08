@@ -28,4 +28,5 @@ public class WithdrawalRequestResponse {
     String type;
     Integer userId;
     String userEmail;
+    Integer bookingId;
 }

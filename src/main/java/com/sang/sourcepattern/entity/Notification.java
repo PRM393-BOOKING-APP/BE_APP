@@ -37,8 +37,10 @@ public class Notification {
     @Builder.Default
     NotificationType notificationType = NotificationType.GENERAL;
 
+    String customTypeName;
+
     public enum NotificationType {
-        GENERAL, PROMOTION, REMINDER, SYSTEM, BOOKING
+        GENERAL, PROMOTION, REMINDER, SYSTEM, BOOKING, CUSTOM
     }
 
     @Builder.Default

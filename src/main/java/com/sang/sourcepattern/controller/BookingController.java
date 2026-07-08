@@ -171,10 +171,18 @@ public class BookingController {
     @Operation(summary = "Cancel a booking")
     public ApiResponse<BookingResponse> cancelBooking(
             @PathVariable int id,
+            @RequestBody @Valid CancelBookingRequest request,
             @AuthenticationPrincipal Jwt jwt) {
 
         return ApiResponse.<BookingResponse>builder()
-                .result(bookingService.cancelBooking(id, jwt.getClaim("email")))
+                .result(bookingService.cancelBooking(
+                        id, 
+                        jwt.getClaim("email"),
+                        request.getReason(),
+                        request.getBankName(),
+                        request.getBankAccount(),
+                        request.getAccountHolder()
+                ))
                 .message("Booking cancelled")
                 .build();
     }

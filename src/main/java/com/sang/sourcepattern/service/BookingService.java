@@ -70,7 +70,7 @@ public interface BookingService {
     BookingResponse getBookingById(int bookingId, String userEmail);
 
     /** Cancel a booking */
-    BookingResponse cancelBooking(int bookingId, String userEmail);
+    BookingResponse cancelBooking(int bookingId, String userEmail, String reason, String bankName, String bankAccount, String accountHolder);
 
     /** Shop proactively cancels a booking */
     BookingResponse shopCancelBooking(int bookingId, String reason, String requesterEmail);
