@@ -361,6 +361,7 @@ public class BookingServiceImpl implements BookingService {
                 .cageSize(booking.getCageSize())
                 .roomType(booking.getRoomType())
                 .category(isLodging ? "BOARDING" : (primaryService != null ? primaryService.getCategory() : null))
+                .isReviewed(booking.getReview() != null)
                 .build();
     }
 
