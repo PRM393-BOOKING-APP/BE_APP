@@ -431,6 +431,168 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    // ─── Voucher helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Validates a UserVoucher and returns the discount amount to deduct.
+     * Enforces: ownership, not-used, not-expired, minOrderValue, maxDiscountAmount cap.
+     *
+     * @param userVoucherId ID of the UserVoucher to apply
+     * @param user          the authenticated user
+     * @param rawAmount     full order amount before discount (in VND)
+     * @return discount amount (double), always >= 0
+     */
+    private double validateAndCalculateDiscount(Integer userVoucherId, User user, int rawAmount) {
+        UserVoucher uv = userVoucherRepository.findById(userVoucherId)
+                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+
+        if (uv.getUser().getId() != user.getId()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        if (uv.isUsed()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        // Check expiry
+        if (uv.getExpiresAt() != null && uv.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        Voucher v = uv.getVoucher();
+
+        // Check voucher template is still active
+        if (!v.isActive()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        if (v.getMinOrderValue() != null && rawAmount < v.getMinOrderValue()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        double discount;
+        if ("PERCENTAGE".equalsIgnoreCase(v.getDiscountType())) {
+            discount = rawAmount * (v.getDiscountValue() / 100.0);
+            // Apply cap
+            if (v.getMaxDiscountAmount() != null && discount > v.getMaxDiscountAmount()) {
+                discount = v.getMaxDiscountAmount();
+            }
+        } else {
+            discount = v.getDiscountValue();
+        }
+
+        return Math.min(discount, rawAmount); // discount cannot exceed order total
+    }
+
+    /**
+     * Refund voucher to user if eligible based on cancellation policy.
+     * 
+     * Refund policy:
+     * - PENDING_PAYMENT: always refund (not paid yet)
+     * - WAITING_SHOP_APPROVAL: always refund (shop hasn't accepted)
+     * - CONFIRMED: refund if cancelled >= 24h before appointment
+     * - IN_PROGRESS, COMPLETED: never refund
+     * - Shop cancels: always refund (shop's fault)
+     *
+     * @param booking the booking being cancelled
+     * @param cancelledBy email of who initiated cancellation
+     */
+    private void refundVoucherIfEligible(Booking booking, String cancelledBy) {
+        if (booking.getAppliedVoucher() == null) {
+            return; // No voucher was used
+        }
+
+        boolean shouldRefund = false;
+        String reason = "";
+
+        String status = booking.getStatus();
+        boolean cancelledByShop = cancelledBy != null && 
+            (cancelledBy.contains("@peteye.vn") || 
+             staffRepository.findByUserEmail(cancelledBy).isPresent());
+
+        // Case 1: Shop cancels - always refund
+        if (cancelledByShop) {
+            shouldRefund = true;
+            reason = "Shop đã hủy booking";
+        }
+        // Case 2: PENDING_PAYMENT - always refund
+        else if ("PENDING_PAYMENT".equals(status)) {
+            shouldRefund = true;
+            reason = "Booking chưa thanh toán";
+        }
+        // Case 3: WAITING_SHOP_APPROVAL - always refund
+        else if ("WAITING_SHOP_APPROVAL".equals(status)) {
+            shouldRefund = true;
+            reason = "Hủy trước khi shop duyệt";
+        }
+        // Case 4: CONFIRMED - check 24h rule
+        else if ("CONFIRMED".equals(status)) {
+            if (booking.getAppointmentDatetime() != null) {
+                java.time.Duration hoursUntil = java.time.Duration.between(
+                    LocalDateTime.now(),
+                    booking.getAppointmentDatetime()
+                );
+                if (hoursUntil.toHours() >= 24) {
+                    shouldRefund = true;
+                    reason = "Hủy trước 24 giờ";
+                } else {
+                    reason = "Hủy trong vòng 24 giờ - không hoàn voucher";
+                }
+            }
+        }
+        // Case 5: Other statuses (IN_PROGRESS, COMPLETED, etc.) - no refund
+        else {
+            reason = "Trạng thái không cho phép hoàn voucher";
+        }
+
+        if (shouldRefund) {
+            // Ưu tiên dùng tham chiếu trực tiếp booking → UserVoucher (chính xác tuyệt đối).
+            // Chỉ suy đoán theo "bản dùng gần nhất" cho các booking cũ được tạo trước khi
+            // có cột appliedUserVoucher, để không bỏ sót việc hoàn voucher cho dữ liệu cũ.
+            UserVoucher uv = booking.getAppliedUserVoucher();
+
+            if (uv == null) {
+                java.util.List<UserVoucher> candidates = userVoucherRepository
+                    .findByUserId(booking.getUser().getId())
+                    .stream()
+                    .filter(c -> c.getVoucher().getId() == booking.getAppliedVoucher().getId())
+                    .filter(UserVoucher::isUsed)
+                    .filter(c -> c.getUsedAt() != null)
+                    .sorted((a, b) -> b.getUsedAt().compareTo(a.getUsedAt())) // Most recent first
+                    .collect(java.util.stream.Collectors.toList());
+                uv = candidates.isEmpty() ? null : candidates.get(0);
+            }
+
+            if (uv != null) {
+                uv.setUsed(false);
+                uv.setUsedAt(null);
+                userVoucherRepository.save(uv);
+
+                // Send notification
+                Notification notif = Notification.builder()
+                    .user(booking.getUser())
+                    .title("Voucher đã được hoàn lại")
+                    .content(String.format(
+                        "Voucher %s đã được hoàn vào tài khoản của bạn. Lý do: %s (Booking #%d)",
+                        uv.getVoucher().getCode(),
+                        reason,
+                        booking.getId()
+                    ))
+                    .notificationType(Notification.NotificationType.PROMOTION)
+                    .build();
+                notificationRepository.save(notif);
+
+                log.info("Refunded voucher {} to user {} for booking {} - Reason: {}",
+                    uv.getVoucher().getCode(),
+                    booking.getUser().getEmail(),
+                    booking.getId(),
+                    reason);
+            } else {
+                log.warn("Could not find UserVoucher to refund for booking {}", booking.getId());
+            }
+        } else {
+            log.info("Voucher NOT refunded for booking {} - Reason: {}", booking.getId(), reason);
+        }
+    }
+
     // ─── Multi-service helpers ────────────────────────────────────────────────
 
     /**
@@ -528,26 +690,8 @@ public class BookingServiceImpl implements BookingService {
 
         // --- Voucher Logic ---
         if (request.getUserVoucherId() != null) {
-            UserVoucher uv = userVoucherRepository.findById(request.getUserVoucherId())
-                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
-            
-            if (uv.getUser().getId() != user.getId() || uv.isUsed()) {
-                throw new AppException(ErrorCode.INVALID_REQUEST);
-            }
-            
-            Voucher v = uv.getVoucher();
-            if (v.getMinOrderValue() != null && rawAmount < v.getMinOrderValue()) {
-                throw new AppException(ErrorCode.INVALID_REQUEST);
-            }
-            
-            double discount = 0;
-            if ("PERCENTAGE".equalsIgnoreCase(v.getDiscountType())) {
-                discount = rawAmount * (v.getDiscountValue() / 100.0);
-            } else {
-                discount = v.getDiscountValue();
-            }
-            
-            rawAmount -= discount;
+            double discount = validateAndCalculateDiscount(request.getUserVoucherId(), user, rawAmount);
+            rawAmount -= (int) discount;
         }
         // ---------------------
 
@@ -704,20 +848,18 @@ public class BookingServiceImpl implements BookingService {
 
         Double discountAmount = null;
         Voucher appliedVoucher = null;
+        UserVoucher appliedUserVoucher = null;
         if (pending.getUserVoucherId() != null) {
             UserVoucher uv = userVoucherRepository.findById(pending.getUserVoucherId()).orElse(null);
-            if (uv != null && !uv.isUsed()) {
+            if (uv != null && !uv.isUsed()
+                    && (uv.getExpiresAt() == null || uv.getExpiresAt().isAfter(LocalDateTime.now()))) {
+                int rawAmount = resolveTotalPrice(pendingServiceIds).intValue();
+                discountAmount = validateAndCalculateDiscount(pending.getUserVoucherId(), user, rawAmount);
                 uv.setUsed(true);
                 uv.setUsedAt(LocalDateTime.now());
                 userVoucherRepository.save(uv);
                 appliedVoucher = uv.getVoucher();
-
-                int rawAmount = resolveTotalPrice(pendingServiceIds).intValue();
-                if ("PERCENTAGE".equalsIgnoreCase(appliedVoucher.getDiscountType())) {
-                    discountAmount = rawAmount * (appliedVoucher.getDiscountValue() / 100.0);
-                } else {
-                    discountAmount = appliedVoucher.getDiscountValue();
-                }
+                appliedUserVoucher = uv;
             }
         }
 
@@ -740,6 +882,7 @@ public class BookingServiceImpl implements BookingService {
                 .status("AUTO".equals(shop.getAssignmentMode()) ? "CONFIRMED" : "WAITING_SHOP_APPROVAL")
                 .payosOrderCode(orderCode)
                 .appliedVoucher(appliedVoucher)
+                .appliedUserVoucher(appliedUserVoucher)
                 .discountAmount(discountAmount)
                 .build();
         booking = bookingRepository.save(booking);
@@ -775,6 +918,23 @@ public class BookingServiceImpl implements BookingService {
         // Giải phóng Redis slot (booking đã vào DB, không cần lock nữa)
         if (staff != null) {
             releaseStaffSlot(staff.getId(), pending.getAppointmentDatetime());
+        }
+
+        // --- Notification: voucher applied ---
+        if (appliedVoucher != null && discountAmount != null && discountAmount > 0) {
+            String discountText = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"))
+                    .format(discountAmount);
+            notificationRepository.save(Notification.builder()
+                    .user(user)
+                    .title("Voucher đã được áp dụng")
+                    .content(String.format(
+                        "Voucher %s đã giảm %s cho đơn đặt lịch #%d.",
+                        appliedVoucher.getCode(),
+                        discountText,
+                        booking.getId()
+                    ))
+                    .notificationType(Notification.NotificationType.PROMOTION)
+                    .build());
         }
 
         // --- Notification cho Shop Owner và Staff ---
@@ -885,20 +1045,18 @@ public class BookingServiceImpl implements BookingService {
 
         Double discountAmount = null;
         Voucher appliedVoucher = null;
+        UserVoucher appliedUserVoucher = null;
         if (pending.getUserVoucherId() != null) {
             UserVoucher uv = userVoucherRepository.findById(pending.getUserVoucherId()).orElse(null);
-            if (uv != null && !uv.isUsed()) {
+            if (uv != null && !uv.isUsed()
+                    && (uv.getExpiresAt() == null || uv.getExpiresAt().isAfter(LocalDateTime.now()))) {
+                int rawAmount = resolveTotalPrice(pendingServiceIds).intValue();
+                discountAmount = validateAndCalculateDiscount(pending.getUserVoucherId(), user, rawAmount);
                 uv.setUsed(true);
                 uv.setUsedAt(LocalDateTime.now());
                 userVoucherRepository.save(uv);
                 appliedVoucher = uv.getVoucher();
-
-                int rawAmount = resolveTotalPrice(pendingServiceIds).intValue();
-                if ("PERCENTAGE".equalsIgnoreCase(appliedVoucher.getDiscountType())) {
-                    discountAmount = rawAmount * (appliedVoucher.getDiscountValue() / 100.0);
-                } else {
-                    discountAmount = appliedVoucher.getDiscountValue();
-                }
+                appliedUserVoucher = uv;
             }
         }
 
@@ -920,6 +1078,7 @@ public class BookingServiceImpl implements BookingService {
                 .status("AUTO".equals(shop.getAssignmentMode()) ? "CONFIRMED" : "WAITING_SHOP_APPROVAL")
                 .payosOrderCode(orderCode)
                 .appliedVoucher(appliedVoucher)
+                .appliedUserVoucher(appliedUserVoucher)
                 .discountAmount(discountAmount)
                 .build();
         booking = bookingRepository.save(booking);
@@ -955,6 +1114,23 @@ public class BookingServiceImpl implements BookingService {
         // Giải phóng Redis slot (booking đã vào DB, không cần lock nữa)
         if (staff != null) {
             releaseStaffSlot(staff.getId(), pending.getAppointmentDatetime());
+        }
+
+        // --- Notification: voucher applied ---
+        if (appliedVoucher != null && discountAmount != null && discountAmount > 0) {
+            String discountText = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"))
+                    .format(discountAmount);
+            notificationRepository.save(Notification.builder()
+                    .user(user)
+                    .title("Voucher đã được áp dụng")
+                    .content(String.format(
+                        "Voucher %s đã giảm %s cho đơn đặt lịch #%d.",
+                        appliedVoucher.getCode(),
+                        discountText,
+                        booking.getId()
+                    ))
+                    .notificationType(Notification.NotificationType.PROMOTION)
+                    .build());
         }
 
         // --- Notification cho Shop Owner và Staff ---
@@ -1031,8 +1207,28 @@ public class BookingServiceImpl implements BookingService {
             checkShopHasAvailableStaff(request.getShopId(), request.getAppointmentDatetime(), totalDuration, isBoarding);
         }
 
-        // ── Tính tiền cọc = tổng phí hoa hồng admin cho các dịch vụ ─────────
+        // ── Tính tiền cọc = 10% tổng dịch vụ sau discount ──────────────────
+        BigDecimal totalServicePrice = resolveTotalPrice(effectiveServiceIds);
+
+        // Áp dụng voucher discount nếu có.
+        // Voucher không hợp lệ phải chặn đơn (giống luồng PayOS) thay vì âm thầm bỏ qua giảm giá —
+        // nếu không khách chọn voucher nhưng vẫn bị tính đủ tiền mà không được cảnh báo.
+        double voucherDiscount = 0;
+        if (request.getUserVoucherId() != null) {
+            voucherDiscount = validateAndCalculateDiscount(
+                request.getUserVoucherId(), user, totalServicePrice.intValue());
+        }
+
+        BigDecimal discountedTotal = totalServicePrice.subtract(BigDecimal.valueOf(voucherDiscount));
+        if (discountedTotal.compareTo(BigDecimal.ZERO) < 0) discountedTotal = BigDecimal.ZERO;
+
+        // Deposit = 10% of discounted total (same ratio as admin commission)
         BigDecimal rawDeposit = walletService.calculateAdminCommission(effectiveServiceIds);
+        // Recalculate deposit proportionally: deposit = rawDeposit * (discountedTotal / totalServicePrice)
+        if (totalServicePrice.compareTo(BigDecimal.ZERO) > 0 && voucherDiscount > 0) {
+            BigDecimal ratio = discountedTotal.divide(totalServicePrice, 10, java.math.RoundingMode.HALF_UP);
+            rawDeposit = rawDeposit.multiply(ratio);
+        }
         int depositVnd = rawDeposit.setScale(0, java.math.RoundingMode.CEILING).intValue();
         depositVnd = Math.max(depositVnd, 2000);
         if (depositVnd % 1000 != 0) depositVnd = ((depositVnd / 1000) + 1) * 1000;
@@ -1047,7 +1243,8 @@ public class BookingServiceImpl implements BookingService {
                 request.getPetId(), request.getStaffId(),
                 request.getAppointmentDatetime(), request.getCheckIn(), request.getCheckOut(),
                 request.getNote(), depositVnd, description,
-                request.getCheckOut(), request.getCageSize(), request.getRoomType(), null
+                request.getCheckOut(), request.getCageSize(), request.getRoomType(),
+                request.getUserVoucherId()
         );
         saveCashPending(orderCode, pending);
 
@@ -1381,6 +1578,9 @@ public class BookingServiceImpl implements BookingService {
         if ("COMPLETED".equals(booking.getStatus()) || "IN_PROGRESS".equals(booking.getStatus()))
             throw new AppException(ErrorCode.BOOKING_ALREADY_PAID);
 
+        // Refund voucher if eligible before changing status
+        refundVoucherIfEligible(booking, userEmail);
+
         boolean wasCancelRequested = "CANCEL_REQUESTED".equals(booking.getStatus());
         
         if (wasCancelRequested) {
@@ -1567,6 +1767,9 @@ public class BookingServiceImpl implements BookingService {
         if ("COMPLETED".equals(booking.getStatus()) || "CANCELLED".equals(booking.getStatus())) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
+
+        // Shop cancels → always refund voucher to customer
+        refundVoucherIfEligible(booking, requesterEmail);
 
         // Calculate penalty and refund
         // - refundAmount: số tiền Admin cần hoàn cho Khách (= toàn bộ tiền khách đã trả)

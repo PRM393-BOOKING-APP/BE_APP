@@ -42,6 +42,7 @@ public class UserServiceImpl implements UserService {
     EmailService emailService;
     UserTokenRepository userTokenRepository;
     com.sang.sourcepattern.repository.UserVoucherRepository userVoucherRepository;
+    com.sang.sourcepattern.repository.MembershipTierRepository membershipTierRepository;
     com.sang.sourcepattern.service.TierUpgradeService tierUpgradeService;
 
     @Override
@@ -56,6 +57,10 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setActive(true);         // active ngay, nhưng chưa dùng được đầy đủ cho đến khi verify email
         user.setEmailVerified(false);
+
+        // Gán hạng thấp nhất (BRONZE) ngay khi tạo tài khoản, thay vì để currentTier = null.
+        // Tránh việc các nơi khác phải tự đoán "BRONZE" bằng chuỗi cứng khi currentTier chưa có.
+        membershipTierRepository.findByName("BRONZE").ifPresent(user::setCurrentTier);
 
         HashSet<Role> roles = new HashSet<>();
         roles.add(roleRepository.findByName("USER").orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND)));

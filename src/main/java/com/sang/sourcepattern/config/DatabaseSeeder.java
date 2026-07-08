@@ -15,13 +15,13 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private final MembershipTierRepository membershipTierRepository;
     private final VoucherRepository voucherRepository;
-    private final com.sang.sourcepattern.repository.UserVoucherRepository userVoucherRepository;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // Clean up duplicate vouchers caused by the auto-heal bug
-        userVoucherRepository.deleteAll();
+        // Note: Do NOT delete user vouchers on startup - they are seeded via SQL
+        // and should persist across application restarts
+        
         if (membershipTierRepository.count() == 0) {
             MembershipTier dong = membershipTierRepository.save(MembershipTier.builder()
                     .name("Đồng").requiredSpending(0.0).benefits("Ưu đãi cơ bản, Tích lũy chi tiêu").build());

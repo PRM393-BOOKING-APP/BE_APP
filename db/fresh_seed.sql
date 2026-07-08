@@ -63,17 +63,17 @@ INSERT INTO membership_tier (id, name, required_spending, benefits) VALUES
 
 -- ============================================================================
 -- USERS  (password = "12345678" for all)
--- IDs: 1=admin, 2-4=owners, 5-8=customers, 9-12=staff accounts
+-- IDs: 1=admin, 2-4=owners, 5-8=customers
 -- ============================================================================
-INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending) VALUES
-(1,  'admin@peteye.vn',       '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Admin PetEye',         '0900000001', 'TP. Hồ Chí Minh', 1, 1, 1, 0),
-(2,  'owner1@peteye.vn',   '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Minh Tuấn',     '0901111001', '123 Lê Văn Sỹ, Quận 3, TP. Hồ Chí Minh',       1, 1, 1, 0),
-(3,  'owner2@peteye.vn','$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Thị Lan',         '0901111002', '45 Đinh Tiên Hoàng, Quận Bình Thạnh, TP. Hồ Chí Minh', 1, 1, 1, 0),
-(4,  'owner3@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Lê Hoàng Nam',         '0901111003', '88 Nguyễn Oanh, Quận Gò Vấp, TP. Hồ Chí Minh',     1, 1, 1, 0),
-(5,  'anhthu@gmail.com',      '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Phạm Anh Thư',         '0912345001', '10 Trần Huy Liệu, Quận Phú Nhuận, TP. Hồ Chí Minh',   1, 1, 3, 3500000),
-(6,  'binhminh@gmail.com',    '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Bình Minh',     '0912345002', '5 Võ Thị Sáu, Quận 1, TP. Hồ Chí Minh',        1, 1, 2, 1500000),
-(7,  'camly@gmail.com',       '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Vũ Cẩm Ly',            '0912345003', '22 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh',      1, 1, 2, 800000),
-(8,  'ducmanh@gmail.com',     '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Hoàng Đức Mạnh',       '0912345004', '7 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh', 1, 1, 1, 200000),
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
+                                                                                                                                                (1,  'admin@peteye.vn',       '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Admin PetEye',         '0900000001', 'TP. Hồ Chí Minh', 1, 1, 1, 0, 0),
+                                                                                                                                                (2,  'owner1@peteye.vn',   '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Minh Tuấn',     '0901111001', '123 Lê Văn Sỹ, Quận 3, TP. Hồ Chí Minh',       1, 1, 1, 0, 0),
+                                                                                                                                                (3,  'owner2@peteye.vn','$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Thị Lan',         '0901111002', '45 Đinh Tiên Hoàng, Quận Bình Thạnh, TP. Hồ Chí Minh', 1, 1, 1, 0, 0),
+                                                                                                                                                (4,  'owner3@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Lê Hoàng Nam',         '0901111003', '88 Nguyễn Oanh, Quận Gò Vấp, TP. Hồ Chí Minh',     1, 1, 1, 0, 0),
+                                                                                                                                                (5,  'anhthu@gmail.com',      '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Phạm Anh Thư',         '0912345001', '10 Trần Huy Liệu, Quận Phú Nhuận, TP. Hồ Chí Minh',   1, 1, 3, 3500000, 0),
+                                                                                                                                                (6,  'binhminh@gmail.com',    '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Bình Minh',     '0912345002', '5 Võ Thị Sáu, Quận 1, TP. Hồ Chí Minh',        1, 1, 2, 1500000, 0),
+                                                                                                                                                (7,  'camly@gmail.com',       '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Vũ Cẩm Ly',            '0912345003', '22 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh',      1, 1, 2, 800000, 0),
+                                                                                                                                                (8,  'ducmanh@gmail.com',     '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Hoàng Đức Mạnh',       '0912345004', '7 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh', 1, 1, 1, 200000, 0);
 -- ============================================================================
 -- USER ROLES
 -- ============================================================================
@@ -85,11 +85,7 @@ INSERT INTO user_roles (user_id, roles_id) VALUES
 (5,  3),
 (6,  3),
 (7,  3),
-(8,  3),
-(9,  4),
-(10, 4),
-(11, 4),
-(12, 4);
+(8,  3);
 
 -- ============================================================================
 -- SHOPS
@@ -206,6 +202,13 @@ INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_mi
 -- ============================================================================
 -- BOOKINGS
 -- ============================================================================
+
+-- ─── Staff records (linked to shop + user accounts) ───────────────────────
+INSERT INTO staff (id, shop_id, user_id, full_name, role, phone, is_active) VALUES
+(1, 1, 9,  'Trần Văn Hùng',  'GROOMER',      '0911001001', 1),
+(2, 1, 10, 'Lê Thị Mai',     'GROOMER',      '0911001002', 1),
+(3, 2, 11, 'Nguyễn Thị Hoa', 'VETERINARIAN', '0911001003', 1),
+(4, 3, 12, 'Phạm Văn Dũng',  'CARETAKER',    '0911001004', 1);
 
 -- 1. COMPLETED (5) -- booking IDs 1-5, thang 5/2026
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
@@ -574,6 +577,70 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================================
+-- VOUCHER & MEMBERSHIP TIER DEMO DATA
+-- Dùng để test toàn bộ luồng voucher trên app
+-- ============================================================================
+
+-- ============================================================================
+-- VOUCHERS (4 loại để cover đủ test cases)
+-- ============================================================================
+INSERT INTO voucher (id, code, discount_type, discount_value, min_order_value,
+                     max_discount_amount, valid_days, issue_quantity, target_tier_id, is_active) VALUES
+-- V1: GOLD tier, PERCENTAGE 10%, cap 35.000đ, min 200.000đ — dùng cho booking 350K → giảm 35K
+(1, 'GOLD_WELCOME',    'PERCENTAGE',   10,     200000, 35000,  30, 2, 3, 1),
+-- V2: SILVER tier, FIXED 30.000đ, min 150.000đ
+(2, 'SILVER_FIXED30',  'FIXED_AMOUNT', 30000,  150000, NULL,   14, 1, 2, 1),
+-- V3: PLATINUM tier, PERCENTAGE 15%, cap 50.000đ, min 300.000đ
+(3, 'PLATINUM_15PCT',  'PERCENTAGE',   15,     300000, 50000,  60, 3, 4, 1),
+-- V4: GOLD tier, PERCENTAGE 50%, cap 30.000đ — để test cap thực sự chặn
+(4, 'GOLD_BIG50',      'PERCENTAGE',   50,     100000, 30000,  30, 1, 3, 1),
+-- V5: BRONZE tier (hạng thấp nhất) — trước đây bộ seed không có voucher nào nhắm BRONZE
+(5, 'BRONZE_HELLO',    'FIXED_AMOUNT', 20000,  100000, NULL,   60, 1, 1, 1),
+-- V6: SILVER tier, đã bị admin VÔ HIỆU HÓA sẵn (is_active=0) — test hiển thị "đã ngừng áp dụng"
+(6, 'SILVER_REVOKED',  'FIXED_AMOUNT', 25000,  100000, NULL,   30, 1, 2, 0);
+
+-- ============================================================================
+-- USER_VOUCHER (pre-seed để test ngay, không cần trigger upgrade)
+-- ============================================================================
+INSERT INTO user_voucher (id, user_id, voucher_id, is_used, expires_at, used_at) VALUES
+-- user5 (Phạm Anh Thư, GOLD): có 2x GOLD_WELCOME (chưa dùng)
+(1,  5, 1, 0, DATE_ADD(NOW(), INTERVAL 25 DAY), NULL),
+(2,  5, 1, 0, DATE_ADD(NOW(), INTERVAL 25 DAY), NULL),
+-- user5: có 1x GOLD_BIG50 (chưa dùng) — test cap 30K trên booking 350K → giảm đúng 30K
+(3,  5, 4, 0, DATE_ADD(NOW(), INTERVAL 20 DAY), NULL),
+-- user5: có 1x GOLD_WELCOME đã DÙNG RỒI — test reject reuse
+(4,  5, 1, 1, DATE_ADD(NOW(), INTERVAL 25 DAY), NOW()),
+-- user5: có 1x GOLD_WELCOME HẾT HẠN — test reject expired
+(5,  5, 1, 0, '2026-01-01 00:00:00',            NULL),
+-- user6 (Nguyễn Bình Minh, SILVER): có 1x SILVER_FIXED30
+(6,  6, 2, 0, DATE_ADD(NOW(), INTERVAL 10 DAY), NULL),
+-- user7 (Vũ Cẩm Ly, SILVER): có 1x SILVER_FIXED30 đã dùng — empty valid list
+(7,  7, 2, 1, DATE_ADD(NOW(), INTERVAL 10 DAY), NOW()),
+-- user8 (Hoàng Đức Mạnh, BRONZE): không có voucher gì — test empty state
+-- user13 (Lý Thị Bích Vân, PLATINUM): 3x PLATINUM_15PCT
+(8,  13, 3, 0, DATE_ADD(NOW(), INTERVAL 55 DAY), NULL),
+(9,  13, 3, 0, DATE_ADD(NOW(), INTERVAL 55 DAY), NULL),
+(10, 13, 3, 0, DATE_ADD(NOW(), INTERVAL 55 DAY), NULL),
+-- user6: có thêm voucher sắp hết hạn (< 7 ngày) — test warning color trên app
+(11, 6, 1, 0, DATE_ADD(NOW(), INTERVAL 3 DAY),  NULL),
+-- user13: có thêm 1x SILVER_REVOKED (voucher template đã bị vô hiệu hóa từ trước) — vẫn giữ trong ví
+-- nhưng phải hiện rõ trạng thái "đã ngừng áp dụng", không được chọn khi đặt lịch
+(12, 13, 6, 0, DATE_ADD(NOW(), INTERVAL 55 DAY), NULL),
+-- user6: 1x SILVER_FIXED30 ĐÃ DÙNG, gắn với booking 11 (WAITING_SHOP_APPROVAL) bên dưới —
+-- dùng để test luồng "shop từ chối → voucher được hoàn lại"
+(13, 6, 2, 1, DATE_ADD(NOW(), INTERVAL 10 DAY), NOW());
+
+-- ============================================================================
+-- Gắn voucher đã dùng vào booking 11 (WAITING_SHOP_APPROVAL, Tắm & Sấy 150.000đ, user6)
+-- để có thể test ngay "shop từ chối → user_voucher.is_used quay lại 0" mà không cần
+-- tự đặt lịch mới từ đầu. min_order_value của SILVER_FIXED30 là 150.000đ nên vừa đủ áp dụng.
+-- ============================================================================
+UPDATE booking SET voucher_id = 2, applied_user_voucher_id = 13, discount_amount = 30000
+WHERE id = 11;
+UPDATE payment SET amount = 120000, description = 'Thanh toán Tắm & Sấy (đã áp SILVER_FIXED30 -30.000đ)'
+WHERE id = 11;
+
+-- ============================================================================
 -- SUMMARY
 -- Users    : 13 (1 admin, 3 owners, 5 customers, 4 staff)
 -- Shops    : 3  (SPA/MANUAL, CLINIC/AUTO, BOARDING+SPA/OPEN_POOL)
@@ -595,5 +662,10 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   SILVER  : Vũ Cẩm Ly (7), Nguyễn Bình Minh (6)
 --   GOLD    : Phạm Anh Thư (5)
 --   PLATINUM: Lý Thị Bích Vân (13)
+-- Vouchers : 6 (V1-V4 gốc + V5 BRONZE_HELLO + V6 SILVER_REVOKED [is_active=0, giữ bởi user13])
+--   Booking 11 (WAITING_SHOP_APPROVAL) đã gắn sẵn voucher SILVER_FIXED30 đã dùng (user6)
+--   để test "shop từ chối → voucher hoàn lại" ngay không cần thao tác tay từ đầu.
 -- All passwords: 12345678
+-- LƯU Ý: cần khởi động lại backend một lần (Hibernate ddl-auto=update) để tạo cột
+-- booking.applied_user_voucher_id TRƯỚC KHI chạy script này, nếu không UPDATE cuối sẽ lỗi.
 -- ============================================================================

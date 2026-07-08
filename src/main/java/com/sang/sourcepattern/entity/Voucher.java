@@ -37,6 +37,10 @@ public class Voucher {
     @Builder.Default
     Integer issueQuantity = 1;
 
+    /** false = deactivated — không phát thêm, user còn trong ví nhưng không apply được */
+    @Builder.Default
+    boolean isActive = true;
+
     @ManyToOne
     @JoinColumn(name = "target_tier_id")
     MembershipTier targetTier;
