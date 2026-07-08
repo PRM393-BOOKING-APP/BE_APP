@@ -24,6 +24,7 @@ public class TierUpgradeServiceImpl implements TierUpgradeService {
     MembershipTierRepository membershipTierRepository;
     VoucherRepository voucherRepository;
     UserVoucherRepository userVoucherRepository;
+    com.sang.sourcepattern.repository.NotificationRepository notificationRepository;
     com.sang.sourcepattern.service.SystemConfigService systemConfigService;
 
     @Override
@@ -77,6 +78,8 @@ public class TierUpgradeServiceImpl implements TierUpgradeService {
 
                 // Issue vouchers for the new tier
                 List<Voucher> tierVouchers = voucherRepository.findByTargetTierName(newTier.getName());
+                int totalIssued = 0;
+                java.util.List<String> voucherCodes = new java.util.ArrayList<>();
                 for (Voucher voucher : tierVouchers) {
                     for (int i = 0; i < voucher.getIssueQuantity(); i++) {
                         UserVoucher userVoucher = UserVoucher.builder()
@@ -86,12 +89,48 @@ public class TierUpgradeServiceImpl implements TierUpgradeService {
                                 .expiresAt(java.time.LocalDateTime.now().plusDays(voucher.getValidDays() != null ? voucher.getValidDays() : 30))
                                 .build();
                         userVoucherRepository.save(userVoucher);
+                        totalIssued++;
                     }
+                    voucherCodes.add(voucher.getIssueQuantity() + "x " + voucher.getCode());
                     log.info("Issued {}x voucher {} to user {}", voucher.getIssueQuantity(), voucher.getCode(), user.getEmail());
                 }
+
+                // Notify user about tier upgrade + vouchers.
+                // Dùng tên hạng tiếng Việt (khớp với nhãn hiển thị trên app) thay vì để
+                // nguyên chuỗi enum tiếng Anh (BRONZE/SILVER/GOLD/PLATINUM) trong nội dung thông báo.
+                String tierLabelVi = toVietnameseTierName(newTier.getName());
+                String voucherSummary = voucherCodes.isEmpty()
+                    ? ""
+                    : " Bạn nhận được: " + String.join(", ", voucherCodes) + ".";
+                Notification notif = Notification.builder()
+                    .user(user)
+                    .title("🎉 Chúc mừng! Bạn lên hạng " + tierLabelVi)
+                    .content(String.format(
+                        "Tài khoản của bạn vừa được nâng lên hạng %s.%s Vào mục 'Ưu đãi của tôi' để xem chi tiết.",
+                        tierLabelVi,
+                        voucherSummary
+                    ))
+                    .notificationType(Notification.NotificationType.PROMOTION)
+                    .build();
+                notificationRepository.save(notif);
             }
         }
 
         userRepository.save(user);
+    }
+
+    /**
+     * Map tên hạng lưu trong DB (tiếng Anh) sang nhãn tiếng Việt hiển thị cho khách hàng.
+     * Phải khớp với mapping phía app (my_vouchers_screen / profile_screen / admin_voucher_screen).
+     */
+    private String toVietnameseTierName(String tierName) {
+        if (tierName == null) return "";
+        return switch (tierName.toUpperCase()) {
+            case "BRONZE" -> "Đồng";
+            case "SILVER" -> "Bạc";
+            case "GOLD" -> "Vàng";
+            case "PLATINUM" -> "Bạch Kim";
+            default -> tierName;
+        };
     }
 }

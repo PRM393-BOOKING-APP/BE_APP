@@ -12,4 +12,5 @@ public class MembershipTierResponse {
     Long id;
     String name;
     Double requiredSpending;
+    String benefits;
 }

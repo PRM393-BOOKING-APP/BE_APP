@@ -56,4 +56,7 @@ public class BookingCreationRequest {
      */
     @Builder.Default
     String paymentMethod = "PAYOS";
+
+    /** Voucher ID để áp dụng giảm giá (optional, dùng cho cả PayOS và Cash) */
+    Integer userVoucherId;
 }

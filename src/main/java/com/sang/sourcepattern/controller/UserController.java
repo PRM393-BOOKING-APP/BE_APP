@@ -101,7 +101,7 @@ public class UserController {
 
     @GetMapping("/me/vouchers")
     @Transactional(readOnly = true)
-    public ApiResponse<List<com.sang.sourcepattern.entity.UserVoucher>> getMyVouchers(@AuthenticationPrincipal Jwt jwt) {
+    public ApiResponse<List<com.sang.sourcepattern.dto.response.UserVoucherResponse>> getMyVouchers(@AuthenticationPrincipal Jwt jwt) {
         String identifier = jwt.getSubject();
         User user;
         if (identifier.contains("@")) {
@@ -112,8 +112,26 @@ public class UserController {
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         }
 
-        List<com.sang.sourcepattern.entity.UserVoucher> vouchers = userVoucherRepository.findByUserIdAndIsUsedFalse(user.getId());
-        return ApiResponse.<List<com.sang.sourcepattern.entity.UserVoucher>>builder()
+        List<com.sang.sourcepattern.dto.response.UserVoucherResponse> vouchers =
+                userVoucherRepository.findValidVouchersByUserId(user.getId(), java.time.LocalDateTime.now())
+                        .stream()
+                        .map(uv -> com.sang.sourcepattern.dto.response.UserVoucherResponse.builder()
+                                .id(uv.getId())
+                                .code(uv.getVoucher().getCode())
+                                .discountType(uv.getVoucher().getDiscountType())
+                                .discountValue(uv.getVoucher().getDiscountValue())
+                                .minOrderValue(uv.getVoucher().getMinOrderValue())
+                                .maxDiscountAmount(uv.getVoucher().getMaxDiscountAmount())
+                                .targetTierName(uv.getVoucher().getTargetTier() != null
+                                        ? uv.getVoucher().getTargetTier().getName() : null)
+                                .isUsed(uv.isUsed())
+                                .expiresAt(uv.getExpiresAt())
+                                .usedAt(uv.getUsedAt())
+                                .voucherActive(uv.getVoucher().isActive())
+                                .build())
+                        .collect(java.util.stream.Collectors.toList());
+
+        return ApiResponse.<List<com.sang.sourcepattern.dto.response.UserVoucherResponse>>builder()
                 .result(vouchers)
                 .build();
     }

@@ -15,6 +15,7 @@ public class VoucherCreationRequest {
     String discountType;
     Double discountValue;
     Double minOrderValue;
+    Double maxDiscountAmount;
     Integer validDays;
     Integer issueQuantity;
 }

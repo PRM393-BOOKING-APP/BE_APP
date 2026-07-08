@@ -65,6 +65,15 @@ public class Booking {
     @JoinColumn(name = "voucher_id")
     Voucher appliedVoucher;
 
+    /**
+     * Bản UserVoucher (instance cụ thể) đã dùng cho booking này — dùng để hoàn voucher
+     * chính xác khi hủy/từ chối, thay vì suy đoán "bản gần dùng nhất" khi user giữ nhiều
+     * bản sao của cùng 1 voucher template.
+     */
+    @ManyToOne
+    @JoinColumn(name = "applied_user_voucher_id")
+    UserVoucher appliedUserVoucher;
+
     Double discountAmount;
 
     String cancellationReason;

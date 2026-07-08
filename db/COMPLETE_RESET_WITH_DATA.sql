@@ -146,6 +146,7 @@ CREATE TABLE IF NOT EXISTS `voucher` (
     `valid_days` INT,
     `issue_quantity` INT,
     `target_tier_id` INT,
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB;
 
