@@ -21,6 +21,10 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
     List<Message> findByShopIdAndChannelTypeAndRecipientEmailOrderByCreatedAtAsc(
             int shopId, String channelType, String recipientEmail);
             
+    @Query("SELECT m FROM Message m WHERE m.shopId = :shopId AND m.channelType = :channelType AND (m.senderEmail = :email OR m.recipientEmail = :email) ORDER BY m.createdAt ASC")
+    List<Message> findByShopIdAndChannelTypeAndParticipantEmailOrderByCreatedAtAsc(
+            @Param("shopId") int shopId, @Param("channelType") String channelType, @Param("email") String email);
+            
     long countByShopIdAndChannelTypeAndIsReadFalseAndSenderRoleNot(int shopId, String channelType, String senderRole);
 
     @org.springframework.data.jpa.repository.Query("SELECT DISTINCT m.shopId FROM Message m WHERE m.senderEmail = :email OR m.recipientEmail = :email")
@@ -35,6 +39,9 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
     @Query("SELECT COUNT(m) FROM Message m WHERE m.shopId = :shopId AND m.channelType = :channelType AND m.recipientEmail = :customerEmail AND m.isRead = false AND m.senderRole = 'USER'")
     long countUnreadForShopFromCustomer(@Param("shopId") int shopId, @Param("channelType") String channelType, @Param("customerEmail") String customerEmail);
 
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.shopId = :shopId AND m.channelType = :channelType AND (m.senderEmail = :userEmail OR m.recipientEmail = :userEmail) AND m.isRead = false AND m.senderRole <> 'ADMIN'")
+    long countUnreadForAdminFromUser(@Param("shopId") int shopId, @Param("channelType") String channelType, @Param("userEmail") String userEmail);
+
     @Modifying
     @Transactional
     @Query("UPDATE Message m SET m.isRead = true WHERE m.shopId = :shopId AND m.channelType = :channelType AND m.senderRole <> :readerRole AND m.isRead = false")
@@ -44,6 +51,11 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
     @Transactional
     @Query("UPDATE Message m SET m.isRead = true WHERE m.shopId = :shopId AND m.channelType = :channelType AND m.recipientEmail = :recipientEmail AND m.senderRole <> :readerRole AND m.isRead = false")
     void markRecipientAllAsRead(@Param("shopId") int shopId, @Param("channelType") String channelType, @Param("recipientEmail") String recipientEmail, @Param("readerRole") String readerRole);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Message m SET m.isRead = true WHERE m.shopId = :shopId AND m.channelType = :channelType AND (m.senderEmail = :participantEmail OR m.recipientEmail = :participantEmail) AND m.senderRole <> :readerRole AND m.isRead = false")
+    void markParticipantAllAsRead(@Param("shopId") int shopId, @Param("channelType") String channelType, @Param("participantEmail") String participantEmail, @Param("readerRole") String readerRole);
 
     @Query("SELECT COUNT(m) FROM Message m WHERE m.createdAt BETWEEN :start AND :end")
     long countMessagesBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);

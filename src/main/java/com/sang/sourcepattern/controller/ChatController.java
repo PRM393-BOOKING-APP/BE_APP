@@ -68,6 +68,10 @@ public class ChatController {
         if ("USER".equals(senderRole) && "CUSTOMER_CHAT".equals(request.getChannelType())) {
             finalRecipient = senderEmail;
         }
+        // If non-ADMIN is sending to ADMIN_SUPPORT, the recipient is themselves
+        if (!roles.contains("ADMIN") && "ADMIN_SUPPORT".equals(request.getChannelType())) {
+            finalRecipient = senderEmail;
+        }
 
         // BA Logic: STAFF cannot message ADMIN_SUPPORT
         if ("STAFF".equals(senderRole) && "ADMIN_SUPPORT".equals(request.getChannelType())) {
@@ -109,6 +113,8 @@ public class ChatController {
         if ("CUSTOMER_CHAT".equals(message.getChannelType())) {
             // Broadcast to a specific customer sub-topic
             destination = "/topic/chat/" + request.getShopId() + "/customer/" + message.getRecipientEmail();
+        } else if ("ADMIN_SUPPORT".equals(message.getChannelType())) {
+            destination = "/topic/chat/" + request.getShopId() + "/ADMIN_SUPPORT/" + message.getRecipientEmail();
         } else if ("DIRECT".equals(message.getChannelType())) {
             // 1-1 chat between Owner and Staff. We use the staff's email as the channel identifier.
             String staffEmail = roles.contains("SHOP_OWNER") ? message.getRecipientEmail() : senderEmail;
@@ -134,10 +140,15 @@ public class ChatController {
         if ("USER".equals(senderRole) && "CUSTOMER_CHAT".equals(request.getChannelType())) {
             finalRecipient = senderEmail;
         }
+        if (!roles.contains("ADMIN") && "ADMIN_SUPPORT".equals(request.getChannelType())) {
+            finalRecipient = senderEmail;
+        }
 
         String destination;
         if ("CUSTOMER_CHAT".equals(request.getChannelType())) {
             destination = "/topic/chat/" + request.getShopId() + "/typing/customer/" + finalRecipient;
+        } else if ("ADMIN_SUPPORT".equals(request.getChannelType())) {
+            destination = "/topic/chat/" + request.getShopId() + "/typing/ADMIN_SUPPORT/" + finalRecipient;
         } else if ("DIRECT".equals(request.getChannelType())) {
             String staffEmail = roles.contains("SHOP_OWNER") ? request.getRecipientEmail() : senderEmail;
             destination = "/topic/chat/" + request.getShopId() + "/typing/direct/" + staffEmail;
@@ -200,6 +211,9 @@ public class ChatController {
             if (roles.contains("STAFF")) {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
+            if (!roles.contains("ADMIN")) {
+                recipientEmail = myEmail;
+            }
         }
         
         List<Message> messages;
@@ -214,6 +228,9 @@ public class ChatController {
             messages.sort((a,b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
         } else if ("CUSTOMER_CHAT".equals(channelType)) {
             messages = messageRepository.findByShopIdAndChannelTypeAndRecipientEmailOrderByCreatedAtAsc(
+                    shopId, channelType, recipientEmail);
+        } else if ("ADMIN_SUPPORT".equals(channelType) && recipientEmail != null && !recipientEmail.trim().isEmpty()) {
+            messages = messageRepository.findByShopIdAndChannelTypeAndParticipantEmailOrderByCreatedAtAsc(
                     shopId, channelType, recipientEmail);
         } else {
             messages = messageRepository.findByShopIdAndChannelTypeOrderByCreatedAtAsc(shopId, channelType);
@@ -241,6 +258,19 @@ public class ChatController {
 
         List<com.sang.sourcepattern.dto.response.ConversationResponse> shops = shopIds.stream()
                 .map(id -> {
+                    if (id == 0) {
+                        Message lastMsg = messageRepository.findRealLastMessage(0, "ADMIN_SUPPORT", myEmail);
+                        long unreadCount = messageRepository.countUnreadForCustomer(0, "ADMIN_SUPPORT", myEmail);
+                        return com.sang.sourcepattern.dto.response.ConversationResponse.builder()
+                                .id(0)
+                                .shopName("Hỗ trợ PET_EYE (Admin)")
+                                .logoUrl(null)
+                                .lastMessage(lastMsg != null ? lastMsg.getContent() : "Nhấn vào đây để liên hệ hệ thống")
+                                .lastMessageAt(lastMsg != null ? lastMsg.getCreatedAt() : null)
+                                .unreadCount((int) unreadCount)
+                                .build();
+                    }
+
                     com.sang.sourcepattern.entity.Shop shop = shopRepository.findById(id).orElse(null);
                     if (shop == null) return null;
                     
@@ -302,7 +332,7 @@ public class ChatController {
         }
 
         if ("CUSTOMER_CHAT".equals(channelType) || (shopId == 0 && "ADMIN_SUPPORT".equals(channelType))) {
-            messageRepository.markRecipientAllAsRead(shopId, channelType, targetCustomer, readerRole);
+            messageRepository.markParticipantAllAsRead(shopId, channelType, targetCustomer, readerRole);
         } else {
             messageRepository.markAllAsRead(shopId, channelType, readerRole);
         }
@@ -348,8 +378,16 @@ public class ChatController {
 
         List<UserResponse> response = allowedUsers.stream()
                 .map(u -> {
-                    Message lastMsg = messageRepository.findRealLastMessage(shopId, "CUSTOMER_CHAT", u.getEmail());
-                    long unreadCount = messageRepository.countUnreadForShopFromCustomer(shopId, "CUSTOMER_CHAT", u.getEmail());
+                    String channelType = (shopId == 0) ? "ADMIN_SUPPORT" : "CUSTOMER_CHAT";
+                    Message lastMsg = messageRepository.findRealLastMessage(shopId, channelType, u.getEmail());
+                    long unreadCount;
+                    if (shopId == 0) {
+                        // Admin counting unread messages from this user (who could be USER, SHOP_OWNER, STAFF)
+                        unreadCount = messageRepository.countUnreadForAdminFromUser(shopId, channelType, u.getEmail());
+                    } else {
+                        // Shop counting unread messages from this user
+                        unreadCount = messageRepository.countUnreadForShopFromCustomer(shopId, channelType, u.getEmail());
+                    }
                     return UserResponse.builder()
                         .id(u.getId())
                         .email(u.getEmail())

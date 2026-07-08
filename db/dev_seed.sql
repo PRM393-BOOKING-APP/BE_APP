@@ -48,6 +48,8 @@ TRUNCATE TABLE user_roles;
 TRUNCATE TABLE role;
 TRUNCATE TABLE user;
 
+TRUNCATE TABLE message;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
