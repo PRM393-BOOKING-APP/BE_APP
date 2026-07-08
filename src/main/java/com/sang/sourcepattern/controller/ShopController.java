@@ -3,6 +3,7 @@ package com.sang.sourcepattern.controller;
 import com.sang.sourcepattern.dto.response.ApiResponse;
 import com.sang.sourcepattern.dto.request.ShopRegistrationRequest;
 import com.sang.sourcepattern.dto.request.ShopUpdateRequest;
+import com.sang.sourcepattern.dto.request.ShopBroadcastNotificationRequest;
 import com.sang.sourcepattern.dto.response.ShopDashboardResponse;
 import com.sang.sourcepattern.dto.response.CustomerDetailResponse;
 import com.sang.sourcepattern.dto.response.ShopCustomerResponse;
@@ -84,6 +85,19 @@ public class ShopController {
         return ApiResponse.<ShopResponse>builder()
                 .result(shopService.updateMyShop(jwt.getClaim("email"), request))
                 .message("Shop profile updated successfully")
+                .build();
+    }
+
+    @PostMapping("/my-shop/{shopId}/notifications/broadcast")
+    @PreAuthorize("hasRole('SHOP_OWNER')")
+    @Operation(summary = "Broadcast a notification to customers of this shop")
+    public ApiResponse<Void> sendBroadcastNotification(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable int shopId,
+            @RequestBody @Valid ShopBroadcastNotificationRequest request) {
+        shopService.sendBroadcastNotification(jwt.getClaim("email"), shopId, request);
+        return ApiResponse.<Void>builder()
+                .message("Notification broadcasted successfully")
                 .build();
     }
 

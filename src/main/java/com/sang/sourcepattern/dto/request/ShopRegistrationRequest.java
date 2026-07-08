@@ -24,7 +24,7 @@ public class ShopRegistrationRequest {
     String email;
 
     @NotBlank(message = "PHONE_REQUIRED")
-    @Pattern(regexp = "^(03|05|07|08|09)[1-9]{8}$", message = "INVALID_PHONE")
+    @Pattern(regexp = "^(03|05|07|08|09)[0-9]{8}$", message = "INVALID_PHONE")
     String phone;
 
     @NotBlank(message = "ADDRESS_REQUIRED")

@@ -15,6 +15,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import lombok.experimental.NonFinal;
 import com.sang.sourcepattern.dto.response.ShopDashboardResponse;
+import com.sang.sourcepattern.dto.request.ShopBroadcastNotificationRequest;
 import com.sang.sourcepattern.dto.response.CustomerDetailResponse;
 import com.sang.sourcepattern.dto.response.CustomerItemResponse;
 import com.sang.sourcepattern.dto.response.ShopCustomerResponse;
@@ -44,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +73,7 @@ public class ShopServiceImpl implements ShopService {
 
     com.sang.sourcepattern.service.EmailService emailService;
     com.sang.sourcepattern.service.GoongMapService goongMapService;
+    SimpMessagingTemplate messagingTemplate;
 
     @Override
     public CustomerDetailResponse getCustomerDetail(String ownerEmail, int customerId) {
@@ -760,5 +764,79 @@ public class ShopServiceImpl implements ShopService {
                 new LatLong(shop.getLatitude(), shop.getLongitude());
         
         return goongMapService.getDirections(origin, destination);
+    }
+
+    @Override
+    @Transactional
+    public void sendBroadcastNotification(String ownerEmail, int shopId, ShopBroadcastNotificationRequest request) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+
+        if (!shop.getOwner().getEmail().equals(ownerEmail)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        List<User> targets;
+        switch (request.getTargetType()) {
+            case SINGLE:
+                User targetUser;
+                if (request.getUserId() != null) {
+                    targetUser = userRepository.findById(request.getUserId())
+                            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                    if (!userRepository.existsBookingByShopIdAndUserId(shopId, targetUser.getId())) {
+                        throw new AppException(ErrorCode.USER_NOT_LINKED_TO_SHOP);
+                    }
+                } else if (request.getTargetEmail() != null && !request.getTargetEmail().isEmpty()) {
+                    targetUser = userRepository.findByEmail(request.getTargetEmail())
+                            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                    if (!userRepository.existsBookingByShopIdAndUserEmail(shopId, targetUser.getEmail())) {
+                        throw new AppException(ErrorCode.USER_NOT_LINKED_TO_SHOP);
+                    }
+                } else {
+                    throw new AppException(ErrorCode.USER_NOT_EXISTED);
+                }
+                targets = List.of(targetUser);
+                break;
+            case ALL_CUSTOMERS:
+                targets = userRepository.findUsersByShopId(shopId);
+                break;
+            case UPCOMING_BOOKINGS:
+                targets = userRepository.findUpcomingUsersByShopId(shopId);
+                break;
+            case COMPLETED_BOOKINGS:
+                targets = userRepository.findCompletedUsersByShopId(shopId);
+                break;
+            default:
+                targets = List.of();
+        }
+
+        if (targets.isEmpty()) {
+            return; // No users to notify
+        }
+
+        String broadcastId = "SHOP_" + request.getTargetType().name() + "_" + UUID.randomUUID().toString();
+
+        List<com.sang.sourcepattern.entity.Notification> notifications = targets.stream()
+                .map(user -> com.sang.sourcepattern.entity.Notification.builder()
+                        .user(user)
+                        .title(request.getTitle())
+                        .content(request.getContent())
+                        .broadcastId(broadcastId)
+                        .notificationType(request.getNotificationType() != null 
+                            ? request.getNotificationType() 
+                            : com.sang.sourcepattern.entity.Notification.NotificationType.GENERAL)
+                        .customTypeName(request.getNotificationType() == com.sang.sourcepattern.entity.Notification.NotificationType.CUSTOM 
+                            ? request.getCustomTypeName() 
+                            : null)
+                        .build())
+                .collect(java.util.stream.Collectors.toList());
+
+        notificationRepository.saveAll(notifications);
+        
+        // Push realtime
+        for (User u : targets) {
+            messagingTemplate.convertAndSend("/topic/user/" + u.getId() + "/notifications", 
+                "You have a new notification from " + shop.getShopName());
+        }
     }
 }
