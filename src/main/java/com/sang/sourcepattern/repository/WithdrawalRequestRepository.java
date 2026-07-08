@@ -30,8 +30,14 @@ public interface WithdrawalRequestRepository extends JpaRepository<WithdrawalReq
 
     Page<WithdrawalRequest> findByTypeAndStatusOrderByCreatedAtDesc(String type, String status, Pageable pageable);
 
-    @Query("SELECT COALESCE(SUM(w.amount), 0) FROM WithdrawalRequest w WHERE w.status IN ('APPROVED', 'SUCCESS', 'PAYING')")
-    BigDecimal sumTotalApprovedWithdrawals();
+    @Query("SELECT COALESCE(SUM(w.amount), 0) FROM WithdrawalRequest w WHERE w.type = 'SHOP' AND w.status IN ('APPROVED', 'SUCCESS', 'PAYING')")
+    BigDecimal sumTotalApprovedShopWithdrawals();
+
+    @Query("SELECT COALESCE(SUM(w.amount), 0) FROM WithdrawalRequest w WHERE w.type = 'USER' AND w.status IN ('APPROVED', 'SUCCESS', 'PAYING')")
+    BigDecimal sumTotalApprovedUserWithdrawals();
+
+    @Query("SELECT COALESCE(SUM(w.amount), 0) FROM WithdrawalRequest w WHERE w.type = 'USER' AND w.status IN ('APPROVED', 'SUCCESS', 'PAYING') AND w.processedAt >= CURRENT_DATE")
+    BigDecimal sumTotalApprovedUserWithdrawalsToday();
 
     Page<WithdrawalRequest> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
     Page<WithdrawalRequest> findAllByOrderByCreatedAtDesc(Pageable pageable);

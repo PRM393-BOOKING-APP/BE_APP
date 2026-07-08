@@ -26,4 +26,8 @@ public class TransactionResponse {
     Integer bookingId;
     String shopName;
     String serviceName;
+    
+    // User details (if applicable)
+    String userEmail;
+    String userName;
 }

@@ -69,6 +69,16 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     @Query("SELECT DISTINCT b FROM Booking b LEFT JOIN FETCH b.services WHERE b.status = 'COMPLETED'")
     List<Booking> findCompletedBookingsWithServices();
 
+    /** Tất cả booking đã thanh toán thành công (chưa bị hủy) — dùng để tính số dư Admin real-time */
+    @Query("""
+        SELECT DISTINCT b FROM Booking b LEFT JOIN FETCH b.services
+        WHERE b.status NOT IN ('CANCELLED', 'WAITING_REFUND', 'PENDING_PAYMENT')
+        AND EXISTS (
+            SELECT p FROM Payment p WHERE p.booking = b AND p.status = 'SUCCESS'
+        )
+    """)
+    List<Booking> findPaidBookingsWithServices();
+
     /** Tong doanh thu cua cac booking da hoan thanh */
     @Query("SELECT COALESCE(SUM(s.price), 0) FROM Booking b JOIN b.services s WHERE b.status = 'COMPLETED'")
     BigDecimal sumTotalCompletedRevenue();

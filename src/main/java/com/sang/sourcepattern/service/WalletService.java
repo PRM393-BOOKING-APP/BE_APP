@@ -34,6 +34,11 @@ public interface WalletService {
     void onBookingCompleted(int bookingId);
 
     /**
+     * Khi thanh toán thành công: cộng tiền lập tức vào ví Shop nếu thanh toán 100%.
+     */
+    void onPaymentSuccess(int bookingId);
+
+    /**
      * Khi booking CANCELLED: hoàn lại tiền frozen về 0 (không cộng available).
      * Gọi từ TaskServiceImpl khi status → CANCELLED.
      */
@@ -86,6 +91,9 @@ public interface WalletService {
      *  Trừ `availableBalance` và `totalEarned` của shop, ghi Transaction type=REFUND.
      */
     void confirmRefundForBooking(int bookingId);
+
+    /** Trừ lại số tiền đã cộng vào ví Shop khi hoàn tiền cho khách (áp dụng thanh toán 100%) */
+    void deductRefundedAmount(int bookingId, BigDecimal amount);
 
     /** Cộng tiền bồi thường cho Shop khi khách hàng bị phạt (e.g., LATE_NO_SHOW). */
     void creditShopPenalty(int bookingId, BigDecimal penaltyAmount, String reason);
