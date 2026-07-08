@@ -46,6 +46,7 @@ public class AdminServiceImpl implements AdminService {
     MessageRepository messageRepository;
     TransactionRepository transactionRepository;
     WithdrawalRequestRepository withdrawalRequestRepository;
+    WalletServiceImpl walletService;
 
     GoongMapService goongMapService;
     ShopMapper shopMapper;
@@ -500,6 +501,7 @@ public class AdminServiceImpl implements AdminService {
                 .status(w.getStatus())
                 .adminNote(w.getAdminNote())
                 .createdAt(w.getCreatedAt() != null ? w.getCreatedAt().toString() : null)
+                .bookingId(w.getBooking() != null ? w.getBooking().getId() : null)
                 .build();
     }
 
@@ -597,53 +599,79 @@ public class AdminServiceImpl implements AdminService {
     public WithdrawalRequestResponse updateUserWithdrawalStatus(int id, String status, String adminNote) {
         WithdrawalRequest request = withdrawalRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Withdrawal request not found"));
-        
-        if ("APPROVED".equals(status)) {
-            BigDecimal totalRevenue = transactionRepository.sumTotalRevenue();
-            if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
-            BigDecimal commission = totalRevenue.multiply(new BigDecimal("0.10"));
-            
-            BigDecimal totalWithdrawn = withdrawalRequestRepository.sumTotalApprovedWithdrawals();
-            if (totalWithdrawn == null) totalWithdrawn = BigDecimal.ZERO;
-            
-            BigDecimal systemBalance = totalRevenue.subtract(commission).subtract(totalWithdrawn);
-            
-            if (systemBalance.compareTo(request.getAmount()) < 0) {
-                throw new RuntimeException("Số dư hệ thống không đủ để duyệt yêu cầu này!");
-            }
+
+        if (!"PENDING".equals(request.getStatus())) {
+            throw new RuntimeException("Yêu cầu này đã được xử lý rồi!");
         }
-        
+
         request.setStatus(status);
         if (adminNote != null) {
             request.setAdminNote(adminNote);
         }
+        request.setProcessedAt(LocalDateTime.now());
         withdrawalRequestRepository.save(request);
 
-        if ("APPROVED".equals(status)) {
-            Transaction txn = Transaction.builder()
-                .type("WITHDRAWAL")
-                .status("SUCCESS")
-                .amount(request.getAmount())
-                .user(request.getUser())
-                .withdrawal(request)
-                .paymentMethod("TRANSFER")
-                .description("Rút tiền User")
-                .build();
-            transactionRepository.save(txn);
+        if ("APPROVED".equals(status) && request.getBooking() != null) {
+            Booking booking = request.getBooking();
+            int bookingId = booking.getId();
+
+            // Tính toán tiền phạt (penalty) dựa trên giờ hủy
+            java.math.BigDecimal totalPrice = (booking.getServices() != null && !booking.getServices().isEmpty())
+                    ? booking.getServices().stream()
+                        .map(s -> s.getPrice() != null ? s.getPrice() : java.math.BigDecimal.ZERO)
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
+                    : java.math.BigDecimal.ZERO;
+
+            long hoursToAppointment = 0;
+            if (booking.getAppointmentDatetime() != null && booking.getCancellationRequestedAt() != null) {
+                hoursToAppointment = java.time.Duration.between(
+                        booking.getCancellationRequestedAt(), booking.getAppointmentDatetime()).toHours();
+            }
+
+            if (hoursToAppointment < 5 && totalPrice.compareTo(java.math.BigDecimal.ZERO) > 0) {
+                // Hủy muộn: cộng 50% tiền bồi thường vào ví Shop
+                java.math.BigDecimal penalty = totalPrice.multiply(new java.math.BigDecimal("0.5"));
+                walletService.creditShopPenalty(bookingId, penalty, "hủy muộn");
+            }
+
+            // Chuyển Booking sang CANCELLED
+            booking.setStatus("CANCELLED");
+            bookingRepository.save(booking);
+
+            // Cập nhật Payment
+            paymentRepository.findByBookingId(bookingId).ifPresent(p -> {
+                p.setStatus("CANCELLED");
+                paymentRepository.save(p);
+            });
+
+            // Ghi Transaction hoàn tiền
+            Transaction refundTxn = Transaction.builder()
+                    .type("REFUND")
+                    .status("SUCCESS")
+                    .amount(request.getAmount())
+                    .user(request.getUser())
+                    .withdrawal(request)
+                    .paymentMethod("TRANSFER")
+                    .description(String.format("Admin hoàn tiền đơn hủy #%d cho %s",
+                            bookingId,
+                            request.getUser() != null ? request.getUser().getFullName() : "khách hàng"))
+                    .completedAt(LocalDateTime.now())
+                    .build();
+            transactionRepository.save(refundTxn);
         }
-        
+
+        // Thông báo User
         if ("APPROVED".equals(status) || "REJECTED".equals(status)) {
             User user = request.getUser();
             if (user != null) {
-                String title = "APPROVED".equals(status) ? "Yêu cầu rút tiền được duyệt" : "Yêu cầu rút tiền bị từ chối";
-                String content = "APPROVED".equals(status) 
-                    ? "Yêu cầu rút " + String.format("%,.0f đ", request.getAmount()) + " của bạn đã được admin duyệt."
-                    : "Yêu cầu rút " + String.format("%,.0f đ", request.getAmount()) + " của bạn đã bị từ chối.";
-                
+                String amountStr = String.format("%,.0f đ", request.getAmount());
+                String title = "APPROVED".equals(status) ? "Yêu cầu hoàn tiền được duyệt" : "Yêu cầu hoàn tiền bị từ chối";
+                String content = "APPROVED".equals(status)
+                        ? "Yêu cầu hoàn " + amountStr + " của bạn đã được Admin duyệt. Tiền sẽ chuyển về tài khoản của bạn."
+                        : "Yêu cầu hoàn " + amountStr + " của bạn đã bị từ chối.";
                 if (adminNote != null && !adminNote.trim().isEmpty()) {
                     content += " Lời nhắn từ Admin: " + adminNote;
                 }
-                
                 Notification notification = Notification.builder()
                         .user(user)
                         .title(title)

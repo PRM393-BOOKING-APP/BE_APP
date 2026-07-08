@@ -33,6 +33,10 @@ public class WithdrawalRequest {
     @JoinColumn(name = "user_id")
     User user;
 
+    @ManyToOne
+    @JoinColumn(name = "booking_id")
+    Booking booking;
+
     @Builder.Default
     String type = "SHOP"; // "SHOP" or "USER"
 
