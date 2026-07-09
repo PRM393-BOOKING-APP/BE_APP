@@ -58,15 +58,18 @@ public class UserServiceImpl implements UserService {
         user.setActive(true);         // active ngay, nhưng chưa dùng được đầy đủ cho đến khi verify email
         user.setEmailVerified(false);
 
-        // Gán hạng thấp nhất (BRONZE) ngay khi tạo tài khoản, thay vì để currentTier = null.
-        // Tránh việc các nơi khác phải tự đoán "BRONZE" bằng chuỗi cứng khi currentTier chưa có.
-        membershipTierRepository.findByName("BRONZE").ifPresent(user::setCurrentTier);
-
         HashSet<Role> roles = new HashSet<>();
         roles.add(roleRepository.findByName("USER").orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND)));
         user.setRoles(roles);
 
         User savedUser = userRepository.save(user);
+
+        // Để currentTier = null ở đây (thay vì gán cứng BRONZE) và gọi processTierUpgrade
+        // ngay bên dưới — service này tự nhận ra "null -> BRONZE" là một lần lên hạng,
+        // nên sẽ cấp voucher chào mừng hạng Đồng (BRONZE_HELLO) + gửi thông báo, đúng như
+        // hành vi khi user lên các hạng cao hơn. Nếu gán cứng currentTier=BRONZE trước, khối
+        // issue-voucher trong processTierUpgrade sẽ không bao giờ chạy cho user mới.
+        tierUpgradeService.processTierUpgrade(savedUser, 0);
 
         sendVerificationToken(savedUser);
 

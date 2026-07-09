@@ -197,6 +197,11 @@ INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_mi
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
 (13, 3, 'Spa Toàn Thân', 'SPA', 350000, 120,
     'Tắm thảo dược, massage, cắt móng, vệ sinh tai và tạo kiểu cho thú cưng đang lưu trú.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+-- Shop 1: dịch vụ giá cao, dùng để test nhanh việc lên hạng (vượt ngưỡng Bạc/Vàng/Bạch Kim
+-- chỉ với 1 booking, không cần cộng dồn nhiều đơn nhỏ)
+(14, 1, 'Gói Chăm Sóc Cao Cấp Trọn Gói', 'SPA', 4000000, 180,
+    'Gói cao cấp: tắm dưỡng chuyên sâu, trị liệu spa toàn thân, khám tổng quát và tư vấn dinh dưỡng riêng theo thể trạng thú cưng.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ============================================================================
@@ -573,6 +578,91 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 (30, 'IN_PROGRESS',          'COMPLETED',              '2026-05-30 15:10:00', 'staff1.spa@peteye.vn'),
 (31, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-06-16 11:05:00', 'SYSTEM'),
 (31, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-06-16 12:00:00', 'owner.spa@peteye.vn');
+
+-- ============================================================================
+-- 9. BỔ SUNG BOOKING COMPLETED để total_spending (hạng thành viên) KHỚP với
+-- tổng tiền thực tế cộng dồn từ booking_services/pet_service — trước đây total_spending
+-- của 5 khách hàng demo (user 5,6,7,8,13) được set tay, cao hơn hẳn tổng các booking
+-- COMPLETED thực có trong seed (vd user13: total_spending=15.000.000đ nhưng chỉ có
+-- booking COMPLETED tổng 1.000.000đ) — khiến trang "Quản lý khách hàng" (tính lại từ
+-- booking thật) hiện số nhỏ hơn nhiều so với hồ sơ/hạng thành viên. Mỗi user dưới đây
+-- được thêm đúng phần chênh lệch còn thiếu, tại Shop 1, để: total_spending (cột user)
+-- == tổng giá dịch vụ của MỌI booking COMPLETED của user đó cộng lại trên toàn hệ thống.
+-- ============================================================================
+INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
+                          active, camera_enabled, cage_size, room_type,
+                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description) VALUES
+(15, 1, 'Gói Trị Liệu Chuyên Sâu Cao Cấp', 'SPA', 3000000, 200,
+    'Liệu trình chăm sóc cao cấp dài ngày, phục hồi da lông và thể trạng toàn diện.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(16, 1, 'Gói Chăm Sóc Định Kỳ Nâng Cao', 'SPA', 1300000, 150,
+    'Gói chăm sóc định kỳ hàng tháng: tắm dưỡng, cắt tỉa, kiểm tra sức khỏe cơ bản.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(17, 1, 'Gói Vệ Sinh & Chăm Sóc Cơ Bản Nâng Cao', 'GROOMING', 300000, 100,
+    'Vệ sinh tai, cắt móng, tắm sấy và chải lông kỹ hơn gói cơ bản.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(18, 1, 'Cắt Móng & Vệ Sinh Tai', 'GROOMING', 50000, 15,
+    'Dịch vụ nhanh: cắt móng và vệ sinh tai cho thú cưng.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(19, 1, 'Gói Chăm Sóc VIP Toàn Diện Dài Hạn', 'SPA', 14000000, 300,
+    'Gói chăm sóc VIP trọn gói dài hạn: trị liệu, spa, tư vấn dinh dưỡng và ưu tiên lịch hẹn riêng.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, check_in, check_out,
+                     status, note, payos_order_code, created_at) VALUES
+-- user5 (anhthu, GOLD 3.5M): đã có 500K (booking 1,2) → cộng thêm 3.000.000đ
+(33, 5, 1, 1, 1, '2026-04-15 10:00:00', '2026-04-15 10:05:00', '2026-04-15 13:25:00',
+    'COMPLETED', 'Mochi trị liệu chuyên sâu định kỳ', 202604010, '2026-04-14 18:00:00'),
+-- user6 (binhminh, SILVER 1.5M): đã có 200K (booking 3, tại shop2) → cộng thêm 1.300.000đ tại shop1
+(34, 6, 1, 3, 1, '2026-04-18 09:00:00', '2026-04-18 09:05:00', '2026-04-18 11:35:00',
+    'COMPLETED', 'Luna chăm sóc định kỳ nâng cao', 202604011, '2026-04-17 19:00:00'),
+-- user7 (camly, SILVER 800K): đã có 500K (booking 4, tại shop2) → cộng thêm 300.000đ tại shop1
+(35, 7, 1, 4, 2, '2026-04-20 14:00:00', '2026-04-20 14:05:00', '2026-04-20 15:45:00',
+    'COMPLETED', 'Max vệ sinh & chăm sóc cơ bản nâng cao', 202604012, '2026-04-19 20:00:00'),
+-- user8 (ducmanh, BRONZE 200K): đã có 150K (booking 5) → cộng thêm 50.000đ
+(36, 8, 1, 5, 1, '2026-04-22 11:00:00', '2026-04-22 11:05:00', '2026-04-22 11:20:00',
+    'COMPLETED', 'Coco cắt móng & vệ sinh tai', 202604013, '2026-04-21 09:00:00'),
+-- user13 (vip.customer, PLATINUM 15M): đã có 1.000.000đ (booking 27-30) → cộng thêm 14.000.000đ
+(37, 13, 1, 6, 2, '2026-04-25 09:00:00', '2026-04-25 09:05:00', '2026-04-25 14:05:00',
+    'COMPLETED', 'Diamond gói chăm sóc VIP toàn diện dài hạn', 202604014, '2026-04-24 17:00:00');
+
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(33, 15),
+(34, 16),
+(35, 17),
+(36, 18),
+(37, 19);
+
+INSERT INTO payment (id, booking_id, amount, method, status, payos_order_code,
+                     gateway_transaction_id, payment_time, description) VALUES
+(33, 33, 3000000,  'PAYOS', 'SUCCESS', 202604010, 'TXN-SPA-011', '2026-04-14 18:05:00', 'Thanh toán Gói Trị Liệu Chuyên Sâu Cao Cấp'),
+(34, 34, 1300000,  'PAYOS', 'SUCCESS', 202604011, 'TXN-SPA-012', '2026-04-17 19:05:00', 'Thanh toán Gói Chăm Sóc Định Kỳ Nâng Cao'),
+(35, 35, 300000,   'PAYOS', 'SUCCESS', 202604012, 'TXN-SPA-013', '2026-04-19 20:05:00', 'Thanh toán Gói Vệ Sinh & Chăm Sóc Cơ Bản Nâng Cao'),
+(36, 36, 50000,    'PAYOS', 'SUCCESS', 202604013, 'TXN-SPA-014', '2026-04-21 09:05:00', 'Thanh toán Cắt Móng & Vệ Sinh Tai'),
+(37, 37, 14000000, 'PAYOS', 'SUCCESS', 202604014, 'TXN-VIP-006', '2026-04-24 17:05:00', 'Thanh toán Gói Chăm Sóc VIP Toàn Diện Dài Hạn');
+
+INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, changed_by) VALUES
+(33, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-04-14 18:05:00', 'SYSTEM'),
+(33, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-04-14 19:00:00', 'owner.spa@peteye.vn'),
+(33, 'CONFIRMED',             'IN_PROGRESS',            '2026-04-15 10:10:00', 'staff1.spa@peteye.vn'),
+(33, 'IN_PROGRESS',           'COMPLETED',              '2026-04-15 13:25:00', 'staff1.spa@peteye.vn'),
+(34, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-04-17 19:05:00', 'SYSTEM'),
+(34, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-04-17 20:00:00', 'owner.spa@peteye.vn'),
+(34, 'CONFIRMED',             'IN_PROGRESS',            '2026-04-18 09:10:00', 'staff1.spa@peteye.vn'),
+(34, 'IN_PROGRESS',           'COMPLETED',              '2026-04-18 11:35:00', 'staff1.spa@peteye.vn'),
+(35, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-04-19 20:05:00', 'SYSTEM'),
+(35, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-04-19 21:00:00', 'owner.spa@peteye.vn'),
+(35, 'CONFIRMED',             'IN_PROGRESS',            '2026-04-20 14:10:00', 'staff2.spa@peteye.vn'),
+(35, 'IN_PROGRESS',           'COMPLETED',              '2026-04-20 15:45:00', 'staff2.spa@peteye.vn'),
+(36, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-04-21 09:05:00', 'SYSTEM'),
+(36, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-04-21 10:00:00', 'owner.spa@peteye.vn'),
+(36, 'CONFIRMED',             'IN_PROGRESS',            '2026-04-22 11:10:00', 'staff1.spa@peteye.vn'),
+(36, 'IN_PROGRESS',           'COMPLETED',              '2026-04-22 11:20:00', 'staff1.spa@peteye.vn'),
+(37, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-04-24 17:05:00', 'SYSTEM'),
+(37, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-04-24 18:00:00', 'owner.spa@peteye.vn'),
+(37, 'CONFIRMED',             'IN_PROGRESS',            '2026-04-25 09:10:00', 'staff2.spa@peteye.vn'),
+(37, 'IN_PROGRESS',           'COMPLETED',              '2026-04-25 14:05:00', 'staff2.spa@peteye.vn');
 
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -1403,6 +1403,25 @@ public class BookingServiceImpl implements BookingService {
             }
         }
 
+        // ── Áp dụng voucher (nếu có) — cùng logic với confirmPayment/mockConfirmPayment,
+        // để voucher bị đánh dấu đã dùng và gắn vào booking cho luồng cọc tiền mặt. ───
+        Double discountAmount = null;
+        Voucher appliedVoucher = null;
+        UserVoucher appliedUserVoucher = null;
+        if (pending.getUserVoucherId() != null) {
+            UserVoucher uv = userVoucherRepository.findById(pending.getUserVoucherId()).orElse(null);
+            if (uv != null && !uv.isUsed()
+                    && (uv.getExpiresAt() == null || uv.getExpiresAt().isAfter(LocalDateTime.now()))) {
+                int rawAmount = resolveTotalPrice(pendingServiceIds).intValue();
+                discountAmount = validateAndCalculateDiscount(pending.getUserVoucherId(), user, rawAmount);
+                uv.setUsed(true);
+                uv.setUsedAt(LocalDateTime.now());
+                userVoucherRepository.save(uv);
+                appliedVoucher = uv.getVoucher();
+                appliedUserVoucher = uv;
+            }
+        }
+
         // ── Tạo Booking ───────────────────────────────────────────────────────
         java.util.Set<Service> servicesSet = pendingServiceIds.stream()
                 .map(id -> serviceRepository.findById(id).orElse(null))
@@ -1423,8 +1442,28 @@ public class BookingServiceImpl implements BookingService {
                 .roomType(pending.getRoomType())
                 .status("AUTO".equals(shop.getAssignmentMode()) ? "CONFIRMED" : "WAITING_SHOP_APPROVAL")
                 .payosOrderCode(orderCode)
+                .appliedVoucher(appliedVoucher)
+                .appliedUserVoucher(appliedUserVoucher)
+                .discountAmount(discountAmount)
                 .build();
         booking = bookingRepository.save(booking);
+
+        // --- Notification: voucher applied ---
+        if (appliedVoucher != null && discountAmount != null && discountAmount > 0) {
+            String discountText = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"))
+                    .format(discountAmount);
+            notificationRepository.save(Notification.builder()
+                    .user(user)
+                    .title("Voucher đã được áp dụng")
+                    .content(String.format(
+                        "Voucher %s đã giảm %s cho đơn đặt lịch #%d.",
+                        appliedVoucher.getCode(),
+                        discountText,
+                        booking.getId()
+                    ))
+                    .notificationType(Notification.NotificationType.PROMOTION)
+                    .build());
+        }
 
         // ── Tạo Payment: ghi nhận tiền cọc đã thanh toán qua PayOS ───────
         BigDecimal depositAmount = new BigDecimal(pending.getAmountVnd());
@@ -1834,9 +1873,6 @@ public class BookingServiceImpl implements BookingService {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
 
-        // Shop cancels → always refund voucher to customer
-        refundVoucherIfEligible(booking, requesterEmail);
-
         // Calculate penalty and refund
         // - refundAmount: số tiền Admin cần hoàn cho Khách (= toàn bộ tiền khách đã trả)
         // - penalty:      số tiền phạt trừ vào VÍ của Shop (= toàn bộ tiền khách đã trả, vì Shop có lỗi)
@@ -1906,7 +1942,9 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
         notificationRepository.saveAll(notifications);
 
-        // Notify User
+        // Notify User — phải tạo TRƯỚC khi hoàn voucher (refundVoucherIfEligible bên dưới cũng
+        // tạo 1 notification riêng), để "Shop đã hủy lịch của bạn" luôn đứng trước "đã hoàn voucher"
+        // theo đúng trình tự khách cần đọc, thay vì bị đảo thứ tự khi 2 bản ghi có cùng createdAt.
         if (booking.getUser() != null) {
             Notification notifToUser = Notification.builder()
                     .user(booking.getUser())
@@ -1917,6 +1955,9 @@ public class BookingServiceImpl implements BookingService {
                     .build();
             notificationRepository.save(notifToUser);
         }
+
+        // Shop cancels → always refund voucher to customer
+        refundVoucherIfEligible(booking, requesterEmail);
 
         log.info("Booking {} SHOP CANCELLED by {} - Reason: {}", bookingId, requesterEmail, reason);
         return toResponse(booking);
@@ -2283,6 +2324,25 @@ public class BookingServiceImpl implements BookingService {
             }
         }
 
+        // ── Áp dụng voucher (nếu có) — cùng logic với confirmPayment/mockConfirmPayment,
+        // để voucher bị đánh dấu đã dùng và gắn vào booking cho luồng cọc tiền mặt. ───
+        Double discountAmount = null;
+        Voucher appliedVoucher = null;
+        UserVoucher appliedUserVoucher = null;
+        if (pending.getUserVoucherId() != null) {
+            UserVoucher uv = userVoucherRepository.findById(pending.getUserVoucherId()).orElse(null);
+            if (uv != null && !uv.isUsed()
+                    && (uv.getExpiresAt() == null || uv.getExpiresAt().isAfter(LocalDateTime.now()))) {
+                int rawAmount = resolveTotalPrice(pendingServiceIds).intValue();
+                discountAmount = validateAndCalculateDiscount(pending.getUserVoucherId(), user, rawAmount);
+                uv.setUsed(true);
+                uv.setUsedAt(LocalDateTime.now());
+                userVoucherRepository.save(uv);
+                appliedVoucher = uv.getVoucher();
+                appliedUserVoucher = uv;
+            }
+        }
+
         // ── Tạo Booking ───────────────────────────────────────────────────────
         java.util.Set<Service> servicesSet = pendingServiceIds.stream()
                 .map(id -> serviceRepository.findById(id).orElse(null))
@@ -2298,8 +2358,28 @@ public class BookingServiceImpl implements BookingService {
                 .note(pending.getNote())
                 .status("AUTO".equals(shop.getAssignmentMode()) ? "CONFIRMED" : "WAITING_SHOP_APPROVAL")
                 .payosOrderCode(orderCode)
+                .appliedVoucher(appliedVoucher)
+                .appliedUserVoucher(appliedUserVoucher)
+                .discountAmount(discountAmount)
                 .build();
         booking = bookingRepository.save(booking);
+
+        // --- Notification: voucher applied ---
+        if (appliedVoucher != null && discountAmount != null && discountAmount > 0) {
+            String discountText = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"))
+                    .format(discountAmount);
+            notificationRepository.save(Notification.builder()
+                    .user(user)
+                    .title("Voucher đã được áp dụng")
+                    .content(String.format(
+                        "Voucher %s đã giảm %s cho đơn đặt lịch #%d.",
+                        appliedVoucher.getCode(),
+                        discountText,
+                        booking.getId()
+                    ))
+                    .notificationType(Notification.NotificationType.PROMOTION)
+                    .build());
+        }
 
         // ── Tạo Payment: ghi nhận tiền cọc (MOCK) ───────
         BigDecimal depositAmount = new BigDecimal(pending.getAmountVnd());

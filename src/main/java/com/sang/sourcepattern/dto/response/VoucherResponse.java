@@ -1,5 +1,6 @@
 package com.sang.sourcepattern.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,5 +17,8 @@ public class VoucherResponse {
     String discountType;
     Double discountValue;
     Integer validDays;
+    // Xem ghi chú trong UserVoucherResponse — không ép tên, Jackson sẽ serialize
+    // field này thành "used" thay vì "isUsed" (getter Lombok isUsed() bị Jackson bóc "is").
+    @JsonProperty("isUsed")
     Boolean isUsed;
 }

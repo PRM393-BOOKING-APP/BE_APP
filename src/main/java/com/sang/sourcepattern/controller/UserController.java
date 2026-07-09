@@ -112,8 +112,11 @@ public class UserController {
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         }
 
+        // Trả về TOÀN BỘ voucher của user (kể cả đã dùng/hết hạn/bị vô hiệu hóa) —
+        // "Ưu đãi của tôi" cần hiển thị đầy đủ với trạng thái tương ứng, không được
+        // âm thầm ẩn đi (khác với findActiveVouchersByUserId dùng riêng cho luồng chọn voucher đặt lịch).
         List<com.sang.sourcepattern.dto.response.UserVoucherResponse> vouchers =
-                userVoucherRepository.findValidVouchersByUserId(user.getId(), java.time.LocalDateTime.now())
+                userVoucherRepository.findByUserId(user.getId())
                         .stream()
                         .map(uv -> com.sang.sourcepattern.dto.response.UserVoucherResponse.builder()
                                 .id(uv.getId())
@@ -199,7 +202,7 @@ public class UserController {
         }
         
         Page<Notification> pageResult = notificationRepository
-                .findByUserIdOrderByCreatedAtDesc(user.getId(), PageRequest.of(page, 10));
+                .findByUserIdOrderByCreatedAtDescIdDesc(user.getId(), PageRequest.of(page, 10));
         return ApiResponse.<PageResponse<Notification>>builder()
                 .result(PageResponse.<Notification>builder()
                         .content(pageResult.getContent())

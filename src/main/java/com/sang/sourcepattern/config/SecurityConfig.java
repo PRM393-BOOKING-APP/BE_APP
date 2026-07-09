@@ -50,7 +50,9 @@ public class SecurityConfig {
             "/ws/**",
             "/v1/camera/**",
             "/reviews/shop/**",
-            "/reviews/latest"
+            "/reviews/latest",
+            "/public/membership-tiers",
+            "/admin/vouchers/public"
     };
 
 
