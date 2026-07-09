@@ -47,6 +47,7 @@ public class AdminServiceImpl implements AdminService {
     TransactionRepository transactionRepository;
     WithdrawalRequestRepository withdrawalRequestRepository;
     WalletServiceImpl walletService;
+    ShopWalletRepository shopWalletRepository;
 
     GoongMapService goongMapService;
     ShopMapper shopMapper;
@@ -429,19 +430,33 @@ public class AdminServiceImpl implements AdminService {
         if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
         if (todayRevenue == null) todayRevenue = BigDecimal.ZERO;
         
-        BigDecimal commission = totalRevenue.multiply(new BigDecimal("0.10"));
+        BigDecimal totalRefunded = withdrawalRequestRepository.sumTotalApprovedUserWithdrawals();
+        if (totalRefunded == null) totalRefunded = BigDecimal.ZERO;
         
-        BigDecimal totalWithdrawn = withdrawalRequestRepository.sumTotalApprovedWithdrawals();
-        if (totalWithdrawn == null) totalWithdrawn = BigDecimal.ZERO;
+        BigDecimal todayRefunded = withdrawalRequestRepository.sumTotalApprovedUserWithdrawalsToday();
+        if (todayRefunded == null) todayRefunded = BigDecimal.ZERO;
         
-        BigDecimal systemBalance = totalRevenue.subtract(commission).subtract(totalWithdrawn);
+        BigDecimal actualRevenue = totalRevenue.subtract(totalRefunded);
+        BigDecimal actualTodayRevenue = todayRevenue.subtract(todayRefunded);
+        
+        // Tổng tiền shop đã nhận (cũng chính là số tiền Admin nợ Shop)
+        BigDecimal totalEarnedByShops = shopWalletRepository.sumTotalEarned();
+        if (totalEarnedByShops == null) totalEarnedByShops = BigDecimal.ZERO;
+        
+        // Hoa hồng thực tế Admin giữ lại = Tổng doanh thu thực - Tổng tiền đã chia cho Shop
+        BigDecimal commission = actualRevenue.subtract(totalEarnedByShops);
+        if (commission.compareTo(BigDecimal.ZERO) < 0) commission = BigDecimal.ZERO;
+        
+        // Số dư hệ thống (tiền Admin đang giữ hộ Shop) = Tổng số dư khả dụng của tất cả Shop
+        BigDecimal systemBalance = shopWalletRepository.sumTotalAvailableBalance();
+        if (systemBalance == null) systemBalance = BigDecimal.ZERO;
         
         long pendingShopWithdrawals = withdrawalRequestRepository.countByTypeAndStatus("SHOP", "PENDING");
         long pendingUserWithdrawals = withdrawalRequestRepository.countByTypeAndStatus("USER", "PENDING");
         
         Map<String, Object> result = new HashMap<>();
         result.put("systemBalance", systemBalance);
-        result.put("todayRevenue", todayRevenue);
+        result.put("todayRevenue", actualTodayRevenue);
         result.put("commission", commission);
         result.put("pendingShopWithdrawals", pendingShopWithdrawals);
         result.put("pendingUserWithdrawals", pendingUserWithdrawals);
@@ -461,12 +476,34 @@ public class AdminServiceImpl implements AdminService {
         
         return transactions.map(t -> {
             String shopName = null;
+            String userEmail = null;
+            String userName = null;
+            String serviceName = null;
+
             if (t.getShop() != null) {
                 shopName = t.getShop().getShopName();
-            } else if (t.getUser() != null) {
-                shopName = t.getUser().getEmail();
             } else if (t.getBooking() != null && t.getBooking().getShop() != null) {
                 shopName = t.getBooking().getShop().getShopName();
+            }
+
+            if (t.getUser() != null) {
+                userEmail = t.getUser().getEmail();
+                userName = t.getUser().getFullName() != null
+                    ? t.getUser().getFullName()
+                    : t.getUser().getEmail();
+            } else if (t.getBooking() != null && t.getBooking().getUser() != null) {
+                userEmail = t.getBooking().getUser().getEmail();
+                userName = t.getBooking().getUser().getFullName() != null
+                    ? t.getBooking().getUser().getFullName()
+                    : t.getBooking().getUser().getEmail();
+            }
+
+            if (t.getBooking() != null && t.getBooking().getServices() != null
+                    && !t.getBooking().getServices().isEmpty()) {
+                serviceName = t.getBooking().getServices().stream()
+                    .filter(s -> s.getServiceName() != null)
+                    .map(s -> s.getServiceName())
+                    .findFirst().orElse(null);
             }
             
             return TransactionResponse.builder()
@@ -481,6 +518,9 @@ public class AdminServiceImpl implements AdminService {
                 .createdAt(t.getCreatedAt())
                 .bookingId(t.getBooking() != null ? t.getBooking().getId() : null)
                 .shopName(shopName)
+                .serviceName(serviceName)
+                .userEmail(userEmail)
+                .userName(userName)
                 .build();
         });
     }
@@ -526,12 +566,16 @@ public class AdminServiceImpl implements AdminService {
         if ("APPROVED".equals(status)) {
             BigDecimal totalRevenue = transactionRepository.sumTotalRevenue();
             if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
-            BigDecimal commission = totalRevenue.multiply(new BigDecimal("0.10"));
+            BigDecimal totalRefunded = withdrawalRequestRepository.sumTotalApprovedUserWithdrawals();
+            if (totalRefunded == null) totalRefunded = BigDecimal.ZERO;
             
-            BigDecimal totalWithdrawn = withdrawalRequestRepository.sumTotalApprovedWithdrawals();
-            if (totalWithdrawn == null) totalWithdrawn = BigDecimal.ZERO;
+            BigDecimal actualRevenue = totalRevenue.subtract(totalRefunded);
+            BigDecimal commission = actualRevenue.multiply(new BigDecimal("0.10"));
             
-            BigDecimal systemBalance = totalRevenue.subtract(commission).subtract(totalWithdrawn);
+            BigDecimal totalShopWithdrawn = withdrawalRequestRepository.sumTotalApprovedShopWithdrawals();
+            if (totalShopWithdrawn == null) totalShopWithdrawn = BigDecimal.ZERO;
+            
+            BigDecimal systemBalance = actualRevenue.subtract(commission).subtract(totalShopWithdrawn);
             
             if (systemBalance.compareTo(request.getAmount()) < 0) {
                 throw new RuntimeException("Số dư hệ thống không đủ để duyệt yêu cầu này!");
@@ -604,6 +648,29 @@ public class AdminServiceImpl implements AdminService {
             throw new RuntimeException("Yêu cầu này đã được xử lý rồi!");
         }
 
+        if ("APPROVED".equals(status)) {
+            // Kiểm tra số dư hệ thống có đủ để hoàn tiền không
+            // Khi hoàn tiền user: tiền lấy từ cả phần hệ thống giữ (shopShare) + hoa hồng admin
+            // => Tổng có thể hoàn = actualRevenue - totalShopWithdrawn  (KHÔNG trừ commission)
+            BigDecimal totalRevenue = transactionRepository.sumTotalRevenue();
+            if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+            BigDecimal totalRefunded = withdrawalRequestRepository.sumTotalApprovedUserWithdrawals();
+            if (totalRefunded == null) totalRefunded = BigDecimal.ZERO;
+
+            BigDecimal actualRevenue = totalRevenue.subtract(totalRefunded);
+
+            BigDecimal totalShopWithdrawn = withdrawalRequestRepository.sumTotalApprovedShopWithdrawals();
+            if (totalShopWithdrawn == null) totalShopWithdrawn = BigDecimal.ZERO;
+
+            // Tổng tiền admin có thể dùng để hoàn = actualRevenue - phần đã trả cho Shop
+            // Bao gồm cả commission (27k) + phần hệ thống giữ (123k) = 150k
+            BigDecimal availableForRefund = actualRevenue.subtract(totalShopWithdrawn);
+
+            if (availableForRefund.compareTo(request.getAmount()) < 0) {
+                throw new RuntimeException("Số dư hệ thống không đủ để duyệt yêu cầu hoàn tiền này!");
+            }
+        }
+
         request.setStatus(status);
         if (adminNote != null) {
             request.setAdminNote(adminNote);
@@ -615,23 +682,47 @@ public class AdminServiceImpl implements AdminService {
             Booking booking = request.getBooking();
             int bookingId = booking.getId();
 
-            // Tính toán tiền phạt (penalty) dựa trên giờ hủy
+            // Tính toán tiền phạt (penalty) dựa trên số tiền hoàn thực tế
             java.math.BigDecimal totalPrice = (booking.getServices() != null && !booking.getServices().isEmpty())
                     ? booking.getServices().stream()
                         .map(s -> s.getPrice() != null ? s.getPrice() : java.math.BigDecimal.ZERO)
                         .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
                     : java.math.BigDecimal.ZERO;
 
-            long hoursToAppointment = 0;
-            if (booking.getAppointmentDatetime() != null && booking.getCancellationRequestedAt() != null) {
-                hoursToAppointment = java.time.Duration.between(
-                        booking.getCancellationRequestedAt(), booking.getAppointmentDatetime()).toHours();
+            java.math.BigDecimal paidAmount = java.math.BigDecimal.ZERO;
+            Payment existingPayment = paymentRepository.findByBookingId(bookingId).orElse(null);
+            if (existingPayment != null && "SUCCESS".equals(existingPayment.getStatus())) {
+                paidAmount = existingPayment.getAmount();
             }
 
-            if (hoursToAppointment < 5 && totalPrice.compareTo(java.math.BigDecimal.ZERO) > 0) {
-                // Hủy muộn: cộng 50% tiền bồi thường vào ví Shop
-                java.math.BigDecimal penalty = totalPrice.multiply(new java.math.BigDecimal("0.5"));
+            java.math.BigDecimal adminCommission = walletService.calculateAdminCommission(
+                    booking.getServices() != null
+                            ? booking.getServices().stream().map(s -> s.getId()).collect(java.util.stream.Collectors.toList())
+                            : java.util.Collections.emptyList());
+
+            java.math.BigDecimal penalty = paidAmount.subtract(adminCommission).subtract(request.getAmount());
+            if (penalty.compareTo(java.math.BigDecimal.ZERO) > 0) {
+                // Hủy muộn: cộng tiền bồi thường vào ví Shop (số tiền đã khấu trừ từ khách)
                 walletService.creditShopPenalty(bookingId, penalty, "hủy muộn");
+            }
+
+            // Nếu đây là đơn thanh toán 100% online, Shop đã được cộng tiền ngay lúc thanh toán.
+            // Khi hoàn tiền → cần trừ lại phần shopShare khỏi ví Shop.
+            // Lưu ý: KHÔNG check payment.status == SUCCESS ở đây vì booking có thể đã bị CANCELLED trước đó.
+            // Chỉ cần check method là online để biết shop đã được cộng tiền vào ví hay chưa.
+            String paymentMethod = existingPayment != null ? existingPayment.getMethod() : null;
+            boolean isOnlinePayment = paymentMethod != null
+                    && !"CASH_DEPOSIT".equals(paymentMethod)
+                    && !"CASH".equals(paymentMethod);
+
+            if (isOnlinePayment) {
+                // Thanh toán 100% online → shop đã được cộng shopShare vào ví lúc onPaymentSuccess
+                // → trừ lại để cân bằng
+                java.math.BigDecimal shopShare = totalPrice.subtract(adminCommission)
+                        .setScale(0, java.math.RoundingMode.DOWN);
+                if (shopShare.compareTo(java.math.BigDecimal.ZERO) > 0) {
+                    walletService.deductRefundedAmount(bookingId, shopShare);
+                }
             }
 
             // Chuyển Booking sang CANCELLED
@@ -658,6 +749,21 @@ public class AdminServiceImpl implements AdminService {
                     .completedAt(LocalDateTime.now())
                     .build();
             transactionRepository.save(refundTxn);
+
+            // Ghi Transaction trừ số dư hệ thống (system balance bị giảm khi hoàn tiền user)
+            Transaction systemDebitTxn = Transaction.builder()
+                    .type("SYSTEM_DEBIT")
+                    .status("SUCCESS")
+                    .amount(request.getAmount())
+                    .user(request.getUser())
+                    .withdrawal(request)
+                    .paymentMethod("TRANSFER")
+                    .description(String.format("Trừ số dư hệ thống - hoàn tiền đơn hủy #%d cho %s",
+                            bookingId,
+                            request.getUser() != null ? request.getUser().getFullName() : "khách hàng"))
+                    .completedAt(LocalDateTime.now())
+                    .build();
+            transactionRepository.save(systemDebitTxn);
         }
 
         // Thông báo User

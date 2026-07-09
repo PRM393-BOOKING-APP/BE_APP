@@ -189,10 +189,10 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public BigDecimal getAdminBalance() {
-        // Tổng phí admin từ tất cả booking COMPLETED (tính riêng biệt theo dịch vụ)
-        List<Booking> completedBookings = bookingRepository.findCompletedBookingsWithServices();
+        // Tổng phí admin từ tất cả booking đã thanh toán thành công (real-time, không chờ COMPLETED)
+        List<Booking> paidBookings = bookingRepository.findPaidBookingsWithServices();
         BigDecimal totalCommission = BigDecimal.ZERO;
-        for (Booking booking : completedBookings) {
+        for (Booking booking : paidBookings) {
             totalCommission = totalCommission.add(calculateAdminCommissionForBooking(booking));
         }
         return totalCommission.setScale(0, RoundingMode.DOWN);
@@ -204,6 +204,61 @@ public class WalletServiceImpl implements WalletService {
     }
 
     // ─── Booking lifecycle hooks ───────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public void onPaymentSuccess(int bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
+        Payment payment = paymentRepository.findByBookingId(bookingId).orElse(null);
+        if (payment == null || !"SUCCESS".equals(payment.getStatus())) {
+            return;
+        }
+
+        String paymentMethod = payment.getMethod();
+        boolean isCashDeposit = "CASH_DEPOSIT".equals(paymentMethod);
+        boolean isPureCash = "CASH".equals(paymentMethod);
+        boolean isOnlinePayment = !isCashDeposit && !isPureCash; // PAYOS, MOCK
+
+        if (!isOnlinePayment) {
+            // Với CASH_DEPOSIT, Shop nhận tiền mặt tại quán, nên không cộng ví ảo.
+            log.info("Payment success for booking {} but method is {}. Not crediting shop virtual wallet.", bookingId, paymentMethod);
+            return;
+        }
+
+        BigDecimal fullPrice = (booking.getServices() != null && !booking.getServices().isEmpty())
+                ? booking.getServices().stream().map(s -> s.getPrice() != null ? s.getPrice() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add)
+                : BigDecimal.ZERO;
+
+        BigDecimal adminCommission = calculateAdminCommissionForBooking(booking);
+        BigDecimal shopShare = fullPrice.subtract(adminCommission).setScale(0, RoundingMode.DOWN);
+
+        ShopWallet wallet = getOrCreateWallet(booking.getShop());
+        
+        // Khách trả 100% qua hệ thống, Admin giữ tiền. Admin cộng lại shopShare cho ví Shop ngay lập tức.
+        wallet.setAvailableBalance(safe(wallet.getAvailableBalance()).add(shopShare));
+        wallet.setTotalEarned(safe(wallet.getTotalEarned()).add(shopShare));
+        wallet.setUpdatedAt(LocalDateTime.now());
+        walletRepository.save(wallet);
+
+        if (!transactionRepository.existsByBookingIdAndType(bookingId, "WALLET_CREDIT")) {
+            transactionRepository.save(Transaction.builder()
+                    .booking(booking)
+                    .shop(booking.getShop())
+                    .type("WALLET_CREDIT")
+                    .amount(shopShare)
+                    .paymentMethod(paymentMethod)
+                    .status("SUCCESS")
+                    .description(String.format(
+                            "Cộng tiền vào ví (ngay lập tức) cho đơn đặt lịch #%d (phần shop nhận được: %s VNĐ)",
+                            bookingId, fullPrice.toPlainString()))
+                    .completedAt(LocalDateTime.now())
+                    .build());
+        }
+        
+        log.info("Credited {} immediately to Shop {} wallet for online payment booking {}", shopShare, booking.getShop().getShopName(), bookingId);
+    }
 
     @Override
     @Transactional
@@ -275,37 +330,24 @@ public class WalletServiceImpl implements WalletService {
             // Shop nhận 100% tiền mặt từ khách nên Shop nợ Admin phần hoa hồng.
             // Trừ phần adminCommission vào số dư ví của Shop.
             wallet.setAvailableBalance(safe(wallet.getAvailableBalance()).subtract(adminCommission));
-        } else if (isOnlinePayment) {
-            // Khách trả 100% qua hệ thống (PayOS/MOCK), Admin giữ tiền. Admin trả lại shopShare cho Shop.
-            wallet.setAvailableBalance(safe(wallet.getAvailableBalance()).add(shopShare));
         }
+        
         // Với CASH_DEPOSIT: Khách đã trả cọc qua PayOS (đủ phần adminCommission), Admin đã nhận.
         // Shop nhận phần còn lại bằng tiền mặt từ khách. Nên availableBalance không đổi.
         
-        wallet.setTotalEarned(safe(wallet.getTotalEarned()).add(shopShare));
-        wallet.setUpdatedAt(LocalDateTime.now());
-        walletRepository.save(wallet);
+        if (isPureCash || isCashDeposit) {
+            wallet.setTotalEarned(safe(wallet.getTotalEarned()).add(shopShare));
+            wallet.setUpdatedAt(LocalDateTime.now());
+            walletRepository.save(wallet);
+        } else {
+            // Đối với isOnlinePayment, đã cộng totalEarned lúc onPaymentSuccess
+            wallet.setUpdatedAt(LocalDateTime.now());
+            walletRepository.save(wallet);
+        }
 
         if (isOnlinePayment) {
-            if (transactionRepository.existsByBookingIdAndType(bookingId, "WALLET_CREDIT")) {
-                log.warn("Wallet credit transaction already exists for booking {}, skipping creation.", bookingId);
-            } else {
-                // Ghi Transaction WALLET_CREDIT
-                transactionRepository.save(Transaction.builder()
-                        .booking(booking)
-                        .shop(booking.getShop())
-                        .type("WALLET_CREDIT")
-                        .amount(shopShare)
-                        .paymentMethod(paymentMethod)
-                        .status("SUCCESS")
-                        .description(String.format("Wallet credit for booking #%d (shop share of %s VND)",
-                                bookingId, fullPrice.toPlainString()))
-                        .completedAt(LocalDateTime.now())
-                        .build());
-
-                log.info("Wallet credited for COMPLETED booking {} — shopShare={} (full price {})",
-                        bookingId, shopShare, fullPrice);
-            }
+            // Transaction WALLET_CREDIT is now created in onPaymentSuccess
+            log.info("Booking completed {} — wallet already credited at payment step.", bookingId);
         } else if (isPureCash && isShopCreated) {
             if (transactionRepository.existsByBookingIdAndType(bookingId, "COMMISSION_FEE")) {
                 log.warn("Commission fee transaction already exists for booking {}, skipping.", bookingId);
@@ -646,10 +688,22 @@ public class WalletServiceImpl implements WalletService {
 
         ShopWallet wallet = getOrCreateWallet(booking.getShop());
 
-        // LỖI CŨ CỦA HỆ THỐNG: Luôn trừ tiền ví Shop khi hoàn tiền.
-        // Thực tế, nếu đơn ở trạng thái WAITING_REFUND, tức là chưa COMPLETED, Shop chưa nhận được đồng nào.
-        // Do đó KHÔNG ĐƯỢC trừ tiền trong ví Shop. Việc trả tiền là Admin tự chuyển khoản từ tiền Admin đang giữ.
-        // Đã gỡ bỏ: wallet.setAvailableBalance(...); wallet.setTotalEarned(...);
+        // Từ bản cập nhật: Shop được cộng tiền ngay lập tức khi thanh toán 100% thành công.
+        // Do đó khi hoàn tiền, cần phải trừ lại số tiền đã cộng cho Shop.
+        Payment payment = paymentRepository.findByBookingId(bookingId).orElse(null);
+        if (payment != null && "SUCCESS".equals(payment.getStatus())) {
+            String method = payment.getMethod();
+            if (!"CASH_DEPOSIT".equals(method) && !"CASH".equals(method)) {
+                // Đây là thanh toán 100% online
+                BigDecimal fullPrice = (booking.getServices() != null && !booking.getServices().isEmpty())
+                        ? booking.getServices().stream().map(s -> s.getPrice() != null ? s.getPrice() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add)
+                        : BigDecimal.ZERO;
+                BigDecimal adminCommission = calculateAdminCommissionForBooking(booking);
+                BigDecimal shopShare = fullPrice.subtract(adminCommission).setScale(0, RoundingMode.DOWN);
+
+                deductRefundedAmount(bookingId, shopShare);
+            }
+        }
 
         // Ghi Transaction REFUND
         transactionRepository.save(Transaction.builder()
@@ -699,6 +753,45 @@ public class WalletServiceImpl implements WalletService {
 
         log.info("Credited NO_SHOW penalty to Shop {} for booking {} - Amount: {}", 
                 booking.getShop().getShopName(), bookingId, penaltyAmount);
+    }
+
+    @Override
+    @Transactional
+    public void deductRefundedAmount(int bookingId, BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
+        ShopWallet wallet = getOrCreateWallet(booking.getShop());
+        
+        wallet.setAvailableBalance(safe(wallet.getAvailableBalance()).subtract(amount));
+        wallet.setTotalEarned(safe(wallet.getTotalEarned()).subtract(amount));
+        wallet.setUpdatedAt(LocalDateTime.now());
+        walletRepository.save(wallet);
+
+        // Cập nhật WALLET_CREDIT cũ của booking này sang REFUNDED
+        transactionRepository.findByBookingIdOrderByCreatedAtDesc(bookingId).stream()
+                .filter(t -> "WALLET_CREDIT".equals(t.getType()) && "WAITING_REFUND".equals(t.getStatus()))
+                .forEach(t -> {
+                    t.setStatus("REFUNDED");
+                    transactionRepository.save(t);
+                });
+
+        transactionRepository.save(Transaction.builder()
+                .shop(booking.getShop())
+                .booking(booking)
+                .type("REFUND_DEDUCTION")
+                .amount(amount)
+                .status("SUCCESS")
+                .description(String.format("Khấu trừ số dư do đơn hàng bị hủy/hoàn tiền #%d", bookingId))
+                .completedAt(LocalDateTime.now())
+                .build());
+
+        log.info("Deducted REFUNDED AMOUNT from Shop {} for booking {} - Amount: {}", 
+                booking.getShop().getShopName(), bookingId, amount);
     }
 
     @Override

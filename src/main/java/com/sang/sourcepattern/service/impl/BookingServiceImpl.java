@@ -361,6 +361,7 @@ public class BookingServiceImpl implements BookingService {
                 .cageSize(booking.getCageSize())
                 .roomType(booking.getRoomType())
                 .category(isLodging ? "BOARDING" : (primaryService != null ? primaryService.getCategory() : null))
+                .isReviewed(booking.getReview() != null)
                 .build();
     }
 
@@ -961,6 +962,13 @@ public class BookingServiceImpl implements BookingService {
 
         log.info("Booking {} CONFIRMED (PayOS) — orderCode={}", booking.getId(), orderCode);
 
+        // ── Cộng tiền ngay lập tức vào ví Shop và ghi nhận hoa hồng Admin ─────
+        try {
+            walletService.onPaymentSuccess(booking.getId());
+        } catch (Exception e) {
+            log.error("Failed to credit wallet immediately for booking {}: {}", booking.getId(), e.getMessage(), e);
+        }
+
         // ── Gửi hóa đơn email cho khách hàng ─────────────────────────────────
         try {
             emailService.sendBookingInvoiceEmail(
@@ -1155,6 +1163,13 @@ public class BookingServiceImpl implements BookingService {
         }
 
         log.info("Booking {} CONFIRMED (MOCK) — orderCode={}", booking.getId(), orderCode);
+
+        // ── Cộng tiền ngay lập tức vào ví Shop và ghi nhận hoa hồng Admin ─────
+        try {
+            walletService.onPaymentSuccess(booking.getId());
+        } catch (Exception e) {
+            log.error("Failed to credit wallet immediately for booking {}: {}", booking.getId(), e.getMessage(), e);
+        }
 
         // ── Gửi hóa đơn email cho khách hàng ─────────────────────────────────
         try {
@@ -1614,21 +1629,24 @@ public class BookingServiceImpl implements BookingService {
         if (!isUser && !isOwner)
             throw new AppException(ErrorCode.UNAUTHENTICATED);
 
+        String oldStatus = booking.getStatus();
+
         // Không cho phép hủy booking ở trạng thái COMPLETED hoặc IN_PROGRESS
-        if ("COMPLETED".equals(booking.getStatus()) || "IN_PROGRESS".equals(booking.getStatus()))
+        if ("COMPLETED".equals(oldStatus) || "IN_PROGRESS".equals(oldStatus))
             throw new AppException(ErrorCode.BOOKING_ALREADY_PAID);
 
         // Refund voucher if eligible before changing status
         refundVoucherIfEligible(booking, userEmail);
 
-        boolean wasCancelRequested = "CANCEL_REQUESTED".equals(booking.getStatus());
+        boolean wasCancelRequested = "CANCEL_REQUESTED".equals(oldStatus);
 
-        // Kiểm tra booking đã thanh toán qua PayOS chưa
+        // Kiểm tra booking đã thanh toán thành công chưa
         Payment existingPayment = paymentRepository.findByBookingId(bookingId).orElse(null);
-        boolean isPaidViaPayOS = existingPayment != null && "PAYOS".equals(existingPayment.getMethod()) && "SUCCESS".equals(existingPayment.getStatus());
+        boolean isPaid = existingPayment != null && "SUCCESS".equals(existingPayment.getStatus());
+        BigDecimal paidAmount = isPaid ? existingPayment.getAmount() : BigDecimal.ZERO;
 
-        // Nếu đã thanh toán qua PayOS → luôn phải chờ Admin duyệt hoàn tiền
-        if (isPaidViaPayOS) {
+        // Nếu đã thanh toán → luôn phải chờ Admin duyệt hoàn tiền
+        if (isPaid) {
             booking.setStatus("WAITING_REFUND");
         } else {
             booking.setStatus("CANCELLED");
@@ -1655,8 +1673,8 @@ public class BookingServiceImpl implements BookingService {
             }
         }
 
-        if (isPaidViaPayOS) {
-            // Tính toán số tiền hoàn (để Admin biết trước, thực tế chưa chuyển tiền)
+        if (isPaid) {
+            // Tính toán số tiền hoàn
             BigDecimal totalPrice = (booking.getServices() != null && !booking.getServices().isEmpty())
                     ? booking.getServices().stream().map(s -> s.getPrice() != null ? s.getPrice() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add)
                     : BigDecimal.ZERO;
@@ -1673,11 +1691,15 @@ public class BookingServiceImpl implements BookingService {
             }
 
             BigDecimal refundAmount;
-            if (hoursToAppointment >= 5) {
-                refundAmount = totalPrice.subtract(deposit);
+            if ("WAITING_SHOP_APPROVAL".equals(oldStatus)) {
+                refundAmount = paidAmount;
             } else {
-                BigDecimal penalty = totalPrice.multiply(new BigDecimal("0.5"));
-                refundAmount = totalPrice.subtract(deposit).subtract(penalty);
+                if (hoursToAppointment >= 5) {
+                    refundAmount = paidAmount.subtract(deposit);
+                } else {
+                    BigDecimal penalty = totalPrice.multiply(new BigDecimal("0.5"));
+                    refundAmount = paidAmount.subtract(deposit).subtract(penalty);
+                }
             }
 
             if (refundAmount.compareTo(BigDecimal.ZERO) < 0) {
@@ -1860,6 +1882,8 @@ public class BookingServiceImpl implements BookingService {
         if (payment != null && "SUCCESS".equals(payment.getStatus())) {
             refundAmount = payment.getAmount();
             penalty = payment.getAmount(); // Shop chịu 100% — bằng đúng số tiền khách đã trả
+            payment.setStatus("WAITING_REFUND");
+            paymentRepository.save(payment);
         }
 
         // Shop cancels booking:
@@ -1869,6 +1893,26 @@ public class BookingServiceImpl implements BookingService {
         booking.setRefundAmount(refundAmount);
         bookingRepository.save(booking);
         sendBookingUpdateEvent(booking.getShop().getId(), bookingId);
+
+        if (refundAmount.compareTo(BigDecimal.ZERO) > 0) {
+            String bankInfo = (booking.getBankName() != null && !booking.getBankName().isBlank())
+                    ? String.format("%s | %s | %s", booking.getBankName(), booking.getAccountHolder(), booking.getBankAccount())
+                    : "Chưa có thông tin ngân hàng";
+
+            WithdrawalRequest refundRequest = WithdrawalRequest.builder()
+                    .user(booking.getUser())
+                    .booking(booking)
+                    .type("USER")
+                    .amount(refundAmount)
+                    .bankName(booking.getBankName())
+                    .bankAccount(booking.getBankAccount())
+                    .accountHolder(booking.getAccountHolder())
+                    .note(String.format("Hoàn tiền đơn hủy #%d - %s. Lý do: %s. TK nhận: %s",
+                            bookingId, booking.getUser().getFullName(), reason, bankInfo))
+                    .status("PENDING")
+                    .build();
+            withdrawalRequestRepository.save(refundRequest);
+        }
 
         cameraService.stopStream(bookingId);
 
