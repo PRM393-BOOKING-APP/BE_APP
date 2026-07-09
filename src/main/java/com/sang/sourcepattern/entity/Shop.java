@@ -34,11 +34,17 @@ public class Shop {
     /** Tọa độ địa lý — lấy từ Goong Geocoding API */
     Double latitude;
     Double longitude;
+    @Column(columnDefinition = "TEXT")
     String description;
     String licenseNumber;
+    @Column(columnDefinition = "TEXT")
     String licenseImageUrl;
+    @Column(columnDefinition = "TEXT")
     String logoUrl;
+    @Column(columnDefinition = "TEXT")
     String bannerUrl;
+    /** Comma-separated URLs — có thể nhiều ảnh, dễ vượt quá VARCHAR(255) mặc định. */
+    @Column(columnDefinition = "TEXT")
     String galleryUrls;
 
     String openTime;

@@ -119,7 +119,8 @@ public enum     ErrorCode {
     // No-Show cancellation errors
     NO_SHOW_TOO_EARLY(10009, "Chưa thể hủy vì vắng mặt. Thời gian ân hạn chưa kết thúc.", HttpStatus.BAD_REQUEST),
     INVALID_GRACE_PERIOD(10010, "Thời gian ân hạn đến trễ phải từ 5 đến 30 phút", HttpStatus.BAD_REQUEST),
-    VOUCHER_NOT_FOUND(10011, "Không tìm thấy mã giảm giá", HttpStatus.NOT_FOUND)
+    VOUCHER_NOT_FOUND(10011, "Không tìm thấy mã giảm giá", HttpStatus.NOT_FOUND),
+    VOUCHER_CODE_EXISTED(10012, "Mã voucher đã tồn tại, vui lòng chọn mã khác", HttpStatus.BAD_REQUEST)
     ;
 
 

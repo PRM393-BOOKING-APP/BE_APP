@@ -243,7 +243,12 @@ public class ShopServiceImpl implements ShopService {
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
                 .subtract(totalRefunds);
 
-        long totalBookings = allBookings.size();
+        // Đơn ở trạng thái PENDING_PAYMENT là đơn khách chưa thanh toán xong (có thể
+        // bị bỏ dở giữa chừng) — tab Lịch hẹn không hiển thị trạng thái này ở bất kỳ
+        // tab con nào, nên không tính vào "Tổng đơn đặt" để khớp với số đếm thủ công.
+        long totalBookings = allBookings.stream()
+                .filter(b -> !"PENDING_PAYMENT".equals(b.getStatus()))
+                .count();
         long pendingBookings = allBookings.stream()
                 .filter(b -> "WAITING_SHOP_APPROVAL".equals(b.getStatus()))
                 .count();
@@ -310,7 +315,10 @@ public class ShopServiceImpl implements ShopService {
                 final java.time.LocalDate loopMonth = currentMonthStart;
                 java.math.BigDecimal monthAmount = allBookings.stream()
                         .filter(b -> "COMPLETED".equals(b.getStatus()))
-                        .filter(b -> b.getAppointmentDatetime() != null && b.getAppointmentDatetime().toLocalDate().withDayOfMonth(1).equals(loopMonth))
+                        // Dùng createdAt để nhất quán với cách tính periodRevenue/periodCompleted ở trên —
+                        // trước đây dùng appointmentDatetime nên có đơn tính vào tổng doanh thu kỳ nhưng
+                        // lại không rơi vào ô ngày/tháng nào trên biểu đồ (lệch ngày hẹn vs ngày tạo đơn).
+                        .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().toLocalDate().withDayOfMonth(1).equals(loopMonth))
                         .map(this::calculateShopRevenueForBooking)
                         .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
                 
@@ -329,7 +337,8 @@ public class ShopServiceImpl implements ShopService {
                 final java.time.LocalDate loopDate = currentDate;
                 java.math.BigDecimal dayAmount = allBookings.stream()
                         .filter(b -> "COMPLETED".equals(b.getStatus()))
-                        .filter(b -> b.getAppointmentDatetime() != null && b.getAppointmentDatetime().toLocalDate().equals(loopDate))
+                        // Dùng createdAt để nhất quán với periodRevenue/periodCompleted (xem giải thích ở nhánh theo tháng phía trên)
+                        .filter(b -> b.getCreatedAt() != null && b.getCreatedAt().toLocalDate().equals(loopDate))
                         .map(this::calculateShopRevenueForBooking)
                         .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
                 
