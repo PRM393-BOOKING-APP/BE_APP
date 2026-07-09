@@ -49,6 +49,13 @@ public class VoucherController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Voucher> createVoucher(@RequestBody VoucherCreationRequest request) {
+        // Kiểm tra trùng mã TRƯỚC khi lưu — nếu để DB tự chặn bằng ràng buộc unique,
+        // lỗi sẽ rơi vào handler generic (DataIntegrityViolationException) và chỉ hiện
+        // "Lỗi không xác định" cho admin, không rõ nguyên nhân thật là do trùng mã.
+        if (voucherRepository.findByCode(request.getCode()).isPresent()) {
+            throw new AppException(ErrorCode.VOUCHER_CODE_EXISTED);
+        }
+
         MembershipTier targetTier = membershipTierRepository.findByName(request.getTargetTierName())
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
 
@@ -74,6 +81,14 @@ public class VoucherController {
     public ApiResponse<Voucher> updateVoucher(@PathVariable Integer id, @RequestBody VoucherCreationRequest request) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+
+        // Chỉ chặn nếu mã mới trùng với voucher KHÁC — cho phép giữ nguyên mã cũ của
+        // chính voucher đang sửa.
+        voucherRepository.findByCode(request.getCode()).ifPresent(existing -> {
+            if (existing.getId() != voucher.getId()) {
+                throw new AppException(ErrorCode.VOUCHER_CODE_EXISTED);
+            }
+        });
 
         MembershipTier targetTier = membershipTierRepository.findByName(request.getTargetTierName())
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
