@@ -653,7 +653,16 @@ public class TaskServiceImpl implements TaskService {
         // Cập nhật ví khi booking hoàn thành
         if ("COMPLETED".equals(newStatus)) {
             walletService.onBookingCompleted(bookingId);
-            tierUpgradeService.processTierUpgrade(booking.getUser());
+            // Cộng đúng giá trị NGUYÊN GIÁ của booking vừa hoàn thành vào total_spending —
+            // không liên quan đến hoa hồng shop hay giảm giá voucher (những khoản đó không
+            // ảnh hưởng tới số tiền khách đã bỏ ra cho dịch vụ).
+            double bookingTotal = booking.getServices() == null
+                    ? 0
+                    : booking.getServices().stream()
+                            .map(s -> s.getPrice() != null ? s.getPrice() : java.math.BigDecimal.ZERO)
+                            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
+                            .doubleValue();
+            tierUpgradeService.processTierUpgrade(booking.getUser(), bookingTotal);
             
             // Gửi email hoàn thành cho khách hàng
             try {

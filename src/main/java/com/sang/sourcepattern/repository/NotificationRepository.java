@@ -12,7 +12,9 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
 
-    Page<Notification> findByUserIdOrderByCreatedAtDesc(int userId, Pageable pageable);
+    // Tiebreak theo id khi 2 thông báo có cùng createdAt (độ phân giải clock ~vài ms),
+    // để thứ tự hiển thị luôn khớp với thứ tự tạo ra trong code, không phụ thuộc DB.
+    Page<Notification> findByUserIdOrderByCreatedAtDescIdDesc(int userId, Pageable pageable);
     long countByUserIdAndIsReadFalse(int userId);
 
     /** Lấy 1 đại diện mỗi broadcastId, sắp xếp mới nhất trước — có phân trang */

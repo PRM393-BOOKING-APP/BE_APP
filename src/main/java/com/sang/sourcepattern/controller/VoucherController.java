@@ -143,10 +143,17 @@ public class VoucherController {
 
         // Báo cho từng user đang giữ voucher này (chưa dùng) biết lý do voucher không còn
         // dùng được nữa, thay vì để họ tự phát hiện khi mở "Ưu đãi của tôi" mà không rõ vì sao.
+        // Một user có thể giữ nhiều bản UserVoucher (issueQuantity > 1) nên phải group theo
+        // user để chỉ gửi đúng 1 thông báo/người, tránh spam trùng lặp.
         var affectedHolders = userVoucherRepository.findByVoucherIdAndIsUsedFalse(id);
-        for (var uv : affectedHolders) {
+        var affectedUserIds = affectedHolders.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        uv -> uv.getUser().getId(),
+                        uv -> uv.getUser(),
+                        (a, b) -> a));
+        for (var user : affectedUserIds.values()) {
             notificationRepository.save(Notification.builder()
-                    .user(uv.getUser())
+                    .user(user)
                     .title("Voucher đã ngừng áp dụng")
                     .content(String.format(
                             "Voucher %s bạn đang giữ đã bị quản trị viên thu hồi và không thể sử dụng nữa. " +
@@ -156,7 +163,7 @@ public class VoucherController {
                     .build());
         }
 
-        long affectedUsers = affectedHolders.size();
+        int affectedUsers = affectedUserIds.size();
         return ApiResponse.<Void>builder()
                 .message(affectedUsers > 0
                     ? String.format("Đã vô hiệu hóa. %d user đang có voucher này sẽ không dùng được nữa và đã được thông báo.", affectedUsers)
@@ -166,15 +173,35 @@ public class VoucherController {
 
     /**
      * Reactivate: kích hoạt lại voucher template đã bị vô hiệu hóa.
+     * Không phát sinh UserVoucher mới — chỉ khôi phục khả dụng cho các bản ghi cũ đang có.
      */
     @PatchMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ApiResponse<Void> activateVoucher(@PathVariable Integer id) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
 
         voucher.setActive(true);
         voucherRepository.save(voucher);
+
+        var affectedHolders = userVoucherRepository.findByVoucherIdAndIsUsedFalse(id);
+        var affectedUserIds = affectedHolders.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        uv -> uv.getUser().getId(),
+                        uv -> uv.getUser(),
+                        (a, b) -> a));
+        for (var user : affectedUserIds.values()) {
+            notificationRepository.save(Notification.builder()
+                    .user(user)
+                    .title("Voucher đã được kích hoạt lại")
+                    .content(String.format(
+                            "Voucher %s bạn đang giữ đã được quản trị viên kích hoạt lại và có thể sử dụng bình thường.",
+                            voucher.getCode()))
+                    .notificationType(Notification.NotificationType.PROMOTION)
+                    .build());
+        }
+
         return ApiResponse.<Void>builder()
                 .message("Đã kích hoạt lại voucher thành công")
                 .build();
