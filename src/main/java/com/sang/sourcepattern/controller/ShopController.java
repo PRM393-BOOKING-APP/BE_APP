@@ -104,25 +104,34 @@ public class ShopController {
     // ─── Public endpoints ────────────────────────────────────────────────────
 
     @GetMapping("/public")
-    @Operation(summary = "Search verified shops (public) — keyword, city, shopType are optional")
+    @Operation(summary = "Search verified shops (public) — keyword, city, shopType, minPrice, maxPrice, minRating, lat/lng/radius are optional")
     public ApiResponse<List<ShopResponse>> searchPublic(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String city,
-            @RequestParam(required = false) String shopType) {
+            @RequestParam(required = false) String shopType,
+            @RequestParam(required = false) java.math.BigDecimal minPrice,
+            @RequestParam(required = false) java.math.BigDecimal maxPrice,
+            @RequestParam(required = false) Float minRating,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lng,
+            @RequestParam(required = false) Double radius) {
         return ApiResponse.<List<ShopResponse>>builder()
-                .result(shopService.searchVerifiedShops(keyword, city, shopType))
+                .result(shopService.searchVerifiedShops(keyword, city, shopType, minPrice, maxPrice, minRating, lat, lng, radius))
                 .build();
     }
 
     @GetMapping("/public/paged")
-    @Operation(summary = "Search verified shops (public, paginated, 10 per page)")
+    @Operation(summary = "Search verified shops (public, paginated, 10 per page) — minPrice/maxPrice/minRating are optional")
     public ApiResponse<com.sang.sourcepattern.dto.response.PageResponse<ShopResponse>> searchPublicPaged(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String shopType,
+            @RequestParam(required = false) java.math.BigDecimal minPrice,
+            @RequestParam(required = false) java.math.BigDecimal maxPrice,
+            @RequestParam(required = false) Float minRating,
             @RequestParam(defaultValue = "0") int page) {
         return ApiResponse.<com.sang.sourcepattern.dto.response.PageResponse<ShopResponse>>builder()
-                .result(shopService.searchVerifiedShopsPaged(keyword, city, shopType, page))
+                .result(shopService.searchVerifiedShopsPaged(keyword, city, shopType, minPrice, maxPrice, minRating, page))
                 .build();
     }
 

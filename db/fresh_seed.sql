@@ -759,3 +759,116 @@ WHERE id = 11;
 -- LƯU Ý: cần khởi động lại backend một lần (Hibernate ddl-auto=update) để tạo cột
 -- booking.applied_user_voucher_id TRƯỚC KHI chạy script này, nếu không UPDATE cuối sẽ lỗi.
 -- ============================================================================
+
+-- ============================================================================
+-- BỘ LỌC KHÁM PHÁ: khoảng cách GPS / mức giá / số sao tối thiểu
+-- 3 shop gốc (1-3) đều rating 4.6-4.8 và ở cùng khu vực gần nhau (TP.HCM, cách
+-- nhau vài km) nên không đủ để kiểm thử rõ ràng việc LOẠI TRỪ theo rating/giá/
+-- khoảng cách. Thêm 3 shop mới (owner 14-16) để mỗi bộ lọc đều có ít nhất 1 shop
+-- "trượt" rõ ràng khi áp dụng, dùng cho checklist test bên dưới.
+-- ============================================================================
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
+(14, 'owner4@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Đỗ Thanh Hà',        '0901111004', '15 Nguyễn Văn Đậu, Quận Bình Thạnh, TP. Hồ Chí Minh', 1, 1, 1, 0, 0),
+(15, 'owner5@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Ngô Quốc Bảo',       '0901111005', '200 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh',           1, 1, 1, 0, 0),
+(16, 'owner6@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Bùi Thị Thanh Trúc', '0901111006', '10 Hàng Bài, Hoàn Kiếm, Hà Nội',                       1, 1, 1, 0, 0);
+
+INSERT INTO user_roles (user_id, roles_id) VALUES
+(14, 2), (15, 2), (16, 2);
+
+-- Owner 17 + Shop 7: gần "24 Ỷ Lan, Tân An, La Gi, Lâm Đồng" — thêm riêng để bạn test
+-- bằng vị trí GPS THẬT của mình (không cần giả lập tọa độ TP.HCM) khi không ở HCM.
+-- Tọa độ dưới đây là ước lượng trung tâm phường Tân An/La Gi (không phải geocode chính
+-- xác tới số nhà), đủ để test bán kính vài km quanh khu vực đó.
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
+(17, 'owner7@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Văn Lộc', '0901111007', '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 1, 1, 1, 0, 0);
+
+INSERT INTO user_roles (user_id, roles_id) VALUES (17, 2);
+
+-- Shop 4: rating THẤP (3.5) + giá RẺ toàn bộ + cách Shop 1 khoảng 1.3km
+--   → dùng để test minRating loại shop này, và test radius hẹp vẫn thấy (gần).
+-- Shop 5: rating CAO (4.9) + giá ĐẮT toàn bộ (900k-1.5M) + cách Shop 1 khoảng 4.7km
+--   → dùng để test maxPrice loại shop này dù rating/khoảng cách đạt.
+-- Shop 6: ở Hà Nội (cách TP.HCM ~1150km), rating/giá đều đạt điều kiện thông thường
+--   → dùng để test bộ lọc khoảng cách loại shop này dù các filter khác đều pass.
+INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, city, latitude, longitude,
+                  description, license_number, logo_url, open_time, close_time, working_days,
+                  rating_avg, is_verified, status, assignment_mode, late_grace_period) VALUES
+(4, 14, 'Pet Care Bình Dân', 'GROOMING',
+   'contact@petcarebinhdan.vn', '02812345004',
+   '15 Nguyễn Văn Đậu, Phường 5, Quận Bình Thạnh, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
+   10.7860, 106.7010,
+   'Tiệm chăm sóc thú cưng giá bình dân, phù hợp túi tiền sinh viên.',
+   'GPKD-004-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   3.5, 1, 'APPROVED', 'MANUAL', 15),
+
+(5, 15, 'Luxury Paws Spa', 'SPA',
+   'contact@luxurypaws.vn', '02812345005',
+   '200 Hai Bà Trưng, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
+   10.7480, 106.7250,
+   'Spa cao cấp 5 sao cho thú cưng, dịch vụ trọn gói sang trọng.',
+   'GPKD-005-2024', NULL, '09:00', '21:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.9, 1, 'APPROVED', 'MANUAL', 15),
+
+(6, 16, 'Phòng Khám Thú Y Hà Nội', 'CLINIC',
+   'contact@thuyhanoi.vn', '02412345006',
+   '10 Hàng Bài, Hoàn Kiếm, Hà Nội', 'Hà Nội',
+   21.0285, 105.8542,
+   'Phòng khám thú y uy tín tại Hà Nội, hơn 10 năm kinh nghiệm.',
+   'GPKD-006-2024', NULL, '07:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT',
+   4.7, 1, 'APPROVED', 'AUTO', 10),
+
+(7, 17, 'Thú Cưng La Gi', 'GROOMING',
+   'contact@thucunglagi.vn', '02523456007',
+   '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 'Lâm Đồng',
+   10.6907, 107.7802,
+   'Tiệm chăm sóc thú cưng địa phương tại La Gi, phục vụ tận tâm, giá hợp lý.',
+   'GPKD-007-2024', NULL, '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.6, 1, 'APPROVED', 'MANUAL', 15);
+
+INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_earned, total_withdrawn) VALUES
+(4, 4, 0.00, 0.00, 0.00, 0.00),
+(5, 5, 0.00, 0.00, 0.00, 0.00),
+(6, 6, 0.00, 0.00, 0.00, 0.00),
+(7, 7, 0.00, 0.00, 0.00, 0.00);
+
+INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
+                          active, camera_enabled, cage_size, room_type,
+                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description) VALUES
+-- Shop 4: toàn bộ dịch vụ giá rẻ (30k - 100k)
+(20, 4, 'Cắt Móng', 'GROOMING', 30000, 15,
+   'Cắt móng nhanh gọn cho thú cưng.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(21, 4, 'Tắm Cơ Bản', 'GROOMING', 70000, 45,
+   'Tắm nhanh giá rẻ, phù hợp túi tiền sinh viên.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(22, 4, 'Tắm & Vệ Sinh Tai', 'GROOMING', 100000, 50,
+   'Gói tắm kèm vệ sinh tai giá rẻ.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+-- Shop 5: toàn bộ dịch vụ giá cao (900k - 1.5tr)
+(23, 5, 'Gói Spa Luxury Toàn Thân', 'SPA', 900000, 150,
+   'Spa cao cấp trọn gói, sản phẩm nhập khẩu.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(24, 5, 'Gói Trị Liệu Massage 5 Sao', 'SPA', 1200000, 120,
+   'Massage trị liệu chuyên sâu 5 sao.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(25, 5, 'Gói Chăm Sóc VIP Trọn Gói', 'SPA', 1500000, 180,
+   'Chăm sóc toàn diện cao cấp nhất.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+-- Shop 6: giá vừa phải, ở Hà Nội
+(26, 6, 'Khám Tổng Quát', 'CLINIC', 180000, 30,
+   'Khám sức khỏe tổng quát cho thú cưng.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(27, 6, 'Tiêm Phòng', 'CLINIC', 150000, 20,
+   'Tiêm vaccine phòng bệnh dại và các bệnh thường gặp.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+-- Shop 7 (La Gi): giá vừa phải, dùng để test bằng vị trí GPS thật
+(28, 7, 'Tắm & Sấy', 'GROOMING', 100000, 60,
+   'Tắm sạch, sấy khô và chải lông cho thú cưng.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(29, 7, 'Cắt Tỉa Lông', 'GROOMING', 150000, 75,
+   'Cắt tỉa lông theo yêu cầu.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+(30, 7, 'Spa Toàn Thân', 'SPA', 280000, 100,
+   'Tắm thảo dược, massage, cắt móng và vệ sinh tai.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+-- ============================================================================

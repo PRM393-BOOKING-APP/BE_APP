@@ -25,9 +25,16 @@ public interface ShopService {
     ShopResponse updateMyShop(String email, ShopUpdateRequest request);
     void sendBroadcastNotification(String ownerEmail, int shopId, ShopBroadcastNotificationRequest request);
 
-    /** Public: only verified shops, optional keyword/city/shopType filter */
-    List<ShopResponse> searchVerifiedShops(String keyword, String city, String shopType);
-    PageResponse<ShopResponse> searchVerifiedShopsPaged(String keyword, String city, String shopType, int page);
+    /**
+     * Public: only verified shops, optional keyword/city/shopType/price/rating/location filter.
+     * Khi lat/lng được truyền, kết quả sẽ có distanceKm và được sắp xếp theo khoảng cách tăng dần.
+     */
+    List<ShopResponse> searchVerifiedShops(String keyword, String city, String shopType,
+            java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Float minRating,
+            Double lat, Double lng, Double radiusKm);
+
+    PageResponse<ShopResponse> searchVerifiedShopsPaged(String keyword, String city, String shopType,
+            java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Float minRating, int page);
 
     /** Public: get a single verified shop by id */
     ShopResponse getVerifiedShopById(int id);

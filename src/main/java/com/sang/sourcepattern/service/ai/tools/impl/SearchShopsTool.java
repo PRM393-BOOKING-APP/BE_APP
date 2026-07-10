@@ -52,7 +52,7 @@ public class SearchShopsTool implements AITool {
         String shopType = (String) args.get("shopType");
         boolean sortByRating = Boolean.TRUE.equals(args.get("sortByRating"));
 
-        List<ShopResponse> shops = shopService.searchVerifiedShops(keyword, city, shopType);
+        List<ShopResponse> shops = shopService.searchVerifiedShops(keyword, city, shopType, null, null, null, null, null, null);
 
         if (sortByRating) {
             shops = shops.stream()

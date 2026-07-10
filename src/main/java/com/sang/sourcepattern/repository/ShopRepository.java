@@ -40,12 +40,22 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
           AND (:shopType IS NULL OR :shopType = ''
                OR LOWER(s.shopType) = LOWER(:shopType)
                OR LOWER(s.shopType) = 'mixed')
+          AND (:minRating IS NULL OR s.ratingAvg >= :minRating)
+          AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR EXISTS (
+                SELECT 1 FROM Service ps
+                WHERE ps.shop = s AND ps.active = true
+                  AND (:minPrice IS NULL OR ps.price >= :minPrice)
+                  AND (:maxPrice IS NULL OR ps.price <= :maxPrice)
+          ))
         ORDER BY s.ratingAvg DESC
     """)
     List<Shop> searchVerified(
             @Param("keyword") String keyword,
             @Param("city") String city,
-            @Param("shopType") String shopType
+            @Param("shopType") String shopType,
+            @Param("minPrice") java.math.BigDecimal minPrice,
+            @Param("maxPrice") java.math.BigDecimal maxPrice,
+            @Param("minRating") Float minRating
     );
 
     // ── Pageable variants ──────────────────────────────────────────────────────
@@ -63,6 +73,13 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
           AND (:shopType IS NULL OR :shopType = ''
                OR LOWER(s.shopType) = LOWER(:shopType)
                OR LOWER(s.shopType) = 'mixed')
+          AND (:minRating IS NULL OR s.ratingAvg >= :minRating)
+          AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR EXISTS (
+                SELECT 1 FROM Service ps
+                WHERE ps.shop = s AND ps.active = true
+                  AND (:minPrice IS NULL OR ps.price >= :minPrice)
+                  AND (:maxPrice IS NULL OR ps.price <= :maxPrice)
+          ))
         ORDER BY s.ratingAvg DESC
         """,
         countQuery = """
@@ -77,11 +94,21 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
           AND (:shopType IS NULL OR :shopType = ''
                OR LOWER(s.shopType) = LOWER(:shopType)
                OR LOWER(s.shopType) = 'mixed')
+          AND (:minRating IS NULL OR s.ratingAvg >= :minRating)
+          AND ((:minPrice IS NULL AND :maxPrice IS NULL) OR EXISTS (
+                SELECT 1 FROM Service ps
+                WHERE ps.shop = s AND ps.active = true
+                  AND (:minPrice IS NULL OR ps.price >= :minPrice)
+                  AND (:maxPrice IS NULL OR ps.price <= :maxPrice)
+          ))
         """)
     Page<Shop> searchVerifiedPaged(
             @Param("keyword") String keyword,
             @Param("city") String city,
             @Param("shopType") String shopType,
+            @Param("minPrice") java.math.BigDecimal minPrice,
+            @Param("maxPrice") java.math.BigDecimal maxPrice,
+            @Param("minRating") Float minRating,
             Pageable pageable
     );
 

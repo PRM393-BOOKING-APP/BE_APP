@@ -68,7 +68,7 @@ public class PrepareBookingTool implements AITool {
 
         // 1. Find shop
         List<ShopResponse> shops = shopService.searchVerifiedShops(
-                shopNameQuery.isEmpty() ? null : shopNameQuery, null, null);
+                shopNameQuery.isEmpty() ? null : shopNameQuery, null, null, null, null, null, null, null, null);
 
         if (shops.isEmpty()) {
             return ToolResult.error("Không tìm thấy shop: " + args.get("shopName"));

@@ -39,4 +39,9 @@ public class ShopResponse {
     String status;
     /** Số phút châm chước No-Show */
     int lateGracePeriod;
+
+    /** Khoảng cách (km) tới vị trí người dùng — chỉ có giá trị khi search kèm lat/lng */
+    Double distanceKm;
+    /** Giá thấp nhất trong các dịch vụ đang hoạt động của shop */
+    java.math.BigDecimal startingPrice;
 }
