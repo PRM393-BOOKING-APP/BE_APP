@@ -1223,7 +1223,7 @@ public class BookingServiceImpl implements BookingService {
             checkShopHasAvailableStaff(request.getShopId(), request.getAppointmentDatetime(), totalDuration, isBoarding);
         }
 
-        // ── Tính tiền cọc = 10% tổng dịch vụ sau discount ──────────────────
+        // ── Tính tiền cọc theo tỷ lệ hoa hồng từng dịch vụ (10%-25%) sau discount ──
         BigDecimal totalServicePrice = resolveTotalPrice(effectiveServiceIds);
 
         // Áp dụng voucher discount nếu có.
@@ -1238,7 +1238,7 @@ public class BookingServiceImpl implements BookingService {
         BigDecimal discountedTotal = totalServicePrice.subtract(BigDecimal.valueOf(voucherDiscount));
         if (discountedTotal.compareTo(BigDecimal.ZERO) < 0) discountedTotal = BigDecimal.ZERO;
 
-        // Deposit = 10% of discounted total (same ratio as admin commission)
+        // Deposit = tỷ lệ hoa hồng từng dịch vụ (10%-25% tùy loại dịch vụ) trên tổng sau discount
         BigDecimal rawDeposit = walletService.calculateAdminCommission(effectiveServiceIds);
         // Recalculate deposit proportionally: deposit = rawDeposit * (discountedTotal / totalServicePrice)
         if (totalServicePrice.compareTo(BigDecimal.ZERO) > 0 && voucherDiscount > 0) {
@@ -1645,8 +1645,30 @@ public class BookingServiceImpl implements BookingService {
         boolean isPaid = existingPayment != null && "SUCCESS".equals(existingPayment.getStatus());
         BigDecimal paidAmount = isPaid ? existingPayment.getAmount() : BigDecimal.ZERO;
 
-        // Nếu đã thanh toán → luôn phải chờ Admin duyệt hoàn tiền
+        BigDecimal refundAmount = BigDecimal.ZERO;
+
         if (isPaid) {
+            boolean isCashDeposit = "CASH_DEPOSIT".equals(existingPayment.getMethod());
+            if (isCashDeposit) {
+                // CASH_DEPOSIT: khách chỉ trả tiền cọc qua PayOS (10-25% giá dịch vụ).
+                // Khi hủy (dù WAITING_SHOP_APPROVAL hay CONFIRMED) → hoàn lại đúng số tiền cọc đã trả.
+                // Phần còn lại (90%) chưa thu tại quầy nên không cần xử lý.
+                refundAmount = paidAmount;
+            } else if ("WAITING_SHOP_APPROVAL".equals(oldStatus)) {
+                // Thanh toán online 100%, chưa được shop duyệt → hoàn 100%
+                refundAmount = paidAmount;
+            } else {
+                // Đã thanh toán 100% online, đã CONFIRMED → chỉ hoàn 50%
+                refundAmount = paidAmount.multiply(new BigDecimal("0.5"));
+            }
+
+            if (refundAmount.compareTo(BigDecimal.ZERO) < 0) {
+                refundAmount = BigDecimal.ZERO;
+            }
+        }
+
+        // Nếu đã thanh toán và có tiền cần hoàn → chờ Admin duyệt
+        if (isPaid && refundAmount.compareTo(BigDecimal.ZERO) > 0) {
             booking.setStatus("WAITING_REFUND");
         } else {
             booking.setStatus("CANCELLED");
@@ -1656,6 +1678,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setBankName(bankName);
         booking.setBankAccount(bankAccount);
         booking.setAccountHolder(accountHolder);
+        booking.setRefundAmount(refundAmount);
         bookingRepository.save(booking);
         sendBookingUpdateEvent(booking.getShop().getId(), bookingId);
 
@@ -1674,97 +1697,87 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (isPaid) {
-            // Tính toán số tiền hoàn
-            BigDecimal totalPrice = (booking.getServices() != null && !booking.getServices().isEmpty())
-                    ? booking.getServices().stream().map(s -> s.getPrice() != null ? s.getPrice() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add)
-                    : BigDecimal.ZERO;
+            if (refundAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                // Hủy thẳng, không cần Admin duyệt hoàn tiền
+                // (Trường hợp này không xảy ra với CASH_DEPOSIT vì luôn hoàn đúng tiền cọc)
+                existingPayment.setStatus("CANCELLED");
+                paymentRepository.save(existingPayment);
 
-            List<Integer> serviceIds = booking.getServices().stream()
-                    .map(com.sang.sourcepattern.entity.Service::getId)
-                    .collect(Collectors.toList());
-            BigDecimal deposit = walletService.calculateAdminCommission(serviceIds);
+                transactionRepository.findByBookingIdOrderByCreatedAtDesc(bookingId)
+                        .stream().findFirst().ifPresent(t -> {
+                            t.setStatus("CANCELLED");
+                            t.setNote("Cancelled by " + userEmail + " — no refund");
+                            transactionRepository.save(t);
+                        });
 
-            long hoursToAppointment = 0;
-            if (booking.getAppointmentDatetime() != null) {
-                LocalDateTime requestTime = booking.getCancellationRequestedAt() != null ? booking.getCancellationRequestedAt() : LocalDateTime.now();
-                hoursToAppointment = java.time.Duration.between(requestTime, booking.getAppointmentDatetime()).toHours();
-            }
+                // Thông báo khách hàng
+                notificationRepository.save(Notification.builder()
+                        .user(booking.getUser())
+                        .title("Đơn hủy đã được xử lý")
+                        .content(String.format(
+                                "Đơn hủy lịch #%d đã được xử lý thành công.",
+                                bookingId))
+                        .notificationType(Notification.NotificationType.SYSTEM)
+                        .build());
 
-            BigDecimal refundAmount;
-            if ("WAITING_SHOP_APPROVAL".equals(oldStatus)) {
-                refundAmount = paidAmount;
             } else {
-                if (hoursToAppointment >= 5) {
-                    refundAmount = paidAmount.subtract(deposit);
-                } else {
-                    BigDecimal penalty = totalPrice.multiply(new BigDecimal("0.5"));
-                    refundAmount = paidAmount.subtract(deposit).subtract(penalty);
-                }
+                // Có tiền cần hoàn → chờ Admin duyệt
+                // Tạo WithdrawalRequest loại USER (PENDING) để Admin xem xét và duyệt hoàn tiền
+                String bankInfo = (booking.getBankName() != null && !booking.getBankName().isBlank())
+                        ? String.format("%s | %s | %s", booking.getBankName(), booking.getAccountHolder(), booking.getBankAccount())
+                        : "Chưa có thông tin ngân hàng";
+
+                WithdrawalRequest refundRequest = WithdrawalRequest.builder()
+                        .user(booking.getUser())
+                        .booking(booking)
+                        .type("USER")
+                        .amount(refundAmount)
+                        .bankName(booking.getBankName())
+                        .bankAccount(booking.getBankAccount())
+                        .accountHolder(booking.getAccountHolder())
+                        .note(String.format("Hoàn tiền đơn hủy #%d - %s. Lý do: %s. TK nhận: %s",
+                                bookingId, booking.getUser().getFullName(), reason, bankInfo))
+                        .status("PENDING")
+                        .build();
+                withdrawalRequestRepository.save(refundRequest);
+
+                // Thông báo cho Admin
+                String amountText = NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(refundAmount);
+                String content = String.format("Khách hàng %s hủy đơn #%d. Vui lòng vào 'User hoàn tiền' để duyệt hoàn %s về: %s.",
+                        booking.getUser().getFullName(), bookingId, amountText, bankInfo);
+                String broadcastId = UUID.randomUUID().toString();
+                List<User> admins = userRepository.findByRoleName("ADMIN");
+                List<Notification> notifications = admins.stream()
+                        .map(admin -> Notification.builder()
+                                .user(admin)
+                                .title("Chờ duyệt hoàn tiền khách hàng")
+                                .content(content)
+                                .broadcastId(broadcastId)
+                                .notificationType(Notification.NotificationType.SYSTEM)
+                                .build())
+                        .collect(Collectors.toList());
+                notificationRepository.saveAll(notifications);
+
+                // Thông báo cho user
+                notificationRepository.save(Notification.builder()
+                        .user(booking.getUser())
+                        .title("Đơn hủy đang chờ Admin duyệt hoàn tiền")
+                        .content("Đơn hủy lịch #" + bookingId + " của bạn đang được xử lý. Admin sẽ xem xét và hoàn " + amountText + " trong vài ngày làm việc.")
+                        .notificationType(Notification.NotificationType.SYSTEM)
+                        .build());
+
+                // Payment → WAITING_REFUND
+                existingPayment.setStatus("WAITING_REFUND");
+                paymentRepository.save(existingPayment);
+
+                // Transaction → WAITING_REFUND
+                transactionRepository.findByBookingIdOrderByCreatedAtDesc(bookingId)
+                        .stream().findFirst().ifPresent(t -> {
+                            t.setStatus("WAITING_REFUND");
+                            t.setNote("Cancelled by " + userEmail + " — chờ Admin duyệt hoàn tiền");
+                            transactionRepository.save(t);
+                        });
             }
-
-            if (refundAmount.compareTo(BigDecimal.ZERO) < 0) {
-                refundAmount = BigDecimal.ZERO;
-            }
-
-            booking.setRefundAmount(refundAmount);
-            bookingRepository.save(booking);
-
-            // Tạo WithdrawalRequest loại USER (PENDING) để Admin xem xét và duyệt hoàn tiền
-            String bankInfo = (booking.getBankName() != null && !booking.getBankName().isBlank())
-                    ? String.format("%s | %s | %s", booking.getBankName(), booking.getAccountHolder(), booking.getBankAccount())
-                    : "Chưa có thông tin ngân hàng";
-
-            WithdrawalRequest refundRequest = WithdrawalRequest.builder()
-                    .user(booking.getUser())
-                    .booking(booking)
-                    .type("USER")
-                    .amount(refundAmount)
-                    .bankName(booking.getBankName())
-                    .bankAccount(booking.getBankAccount())
-                    .accountHolder(booking.getAccountHolder())
-                    .note(String.format("Hoàn tiền đơn hủy #%d - %s. Lý do: %s. TK nhận: %s",
-                            bookingId, booking.getUser().getFullName(), reason, bankInfo))
-                    .status("PENDING")
-                    .build();
-            withdrawalRequestRepository.save(refundRequest);
-
-            // Thông báo cho Admin
-            String amountText = NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(refundAmount);
-            String content = String.format("Khách hàng %s hủy đơn #%d. Vui lòng vào 'User hoàn tiền' để duyệt hoàn %s về: %s.",
-                    booking.getUser().getFullName(), bookingId, amountText, bankInfo);
-            String broadcastId = UUID.randomUUID().toString();
-            List<User> admins = userRepository.findByRoleName("ADMIN");
-            List<Notification> notifications = admins.stream()
-                    .map(admin -> Notification.builder()
-                            .user(admin)
-                            .title("Chờ duyệt hoàn tiền khách hàng")
-                            .content(content)
-                            .broadcastId(broadcastId)
-                            .notificationType(Notification.NotificationType.SYSTEM)
-                            .build())
-                    .collect(Collectors.toList());
-            notificationRepository.saveAll(notifications);
-
-            // Thông báo cho user
-            Notification notifToUser = Notification.builder()
-                    .user(booking.getUser())
-                    .title("Đơn hủy đang chờ Admin duyệt hoàn tiền")
-                    .content("Đơn hủy lịch #" + bookingId + " của bạn đang được xử lý. Admin sẽ xem xét và hoàn " + amountText + " trong vài ngày làm việc.")
-                    .notificationType(Notification.NotificationType.SYSTEM)
-                    .build();
-            notificationRepository.save(notifToUser);
-
-            // Payment → WAITING_REFUND
-            existingPayment.setStatus("WAITING_REFUND");
-            paymentRepository.save(existingPayment);
-
-            // Transaction → WAITING_REFUND
-            transactionRepository.findByBookingIdOrderByCreatedAtDesc(bookingId)
-                    .stream().findFirst().ifPresent(t -> {
-                        t.setStatus("WAITING_REFUND");
-                        t.setNote("Cancelled by " + userEmail + " — chờ Admin duyệt hoàn tiền");
-                        transactionRepository.save(t);
-                    });
         } else {
             // Không có thanh toán PayOS → hủy thẳng
             if (existingPayment != null) {

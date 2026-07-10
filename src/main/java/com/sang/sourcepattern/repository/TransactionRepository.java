@@ -35,14 +35,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
            "WHERE t.shop.id = :shopId AND t.type = 'WALLET_CREDIT' AND t.status = 'SUCCESS'")
     BigDecimal sumWalletCreditByShop(int shopId);
 
-    /** Tổng doanh thu toàn hệ thống */
+    /** Tổng doanh thu toàn hệ thống (bao gồm cả giao dịch đang chờ hoàn tiền — tiền đã thu thực tế) */
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
-           "WHERE t.type = 'BOOKING_PAYMENT' AND t.status = 'SUCCESS'")
+           "WHERE t.type = 'BOOKING_PAYMENT' AND t.status IN ('SUCCESS', 'WAITING_REFUND')")
     BigDecimal sumTotalRevenue();
 
-    /** Tổng doanh thu toàn hệ thống trong hôm nay */
+    /** Tổng doanh thu toàn hệ thống trong hôm nay (bao gồm cả đang chờ hoàn) */
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
-           "WHERE t.type = 'BOOKING_PAYMENT' AND t.status = 'SUCCESS' " +
+           "WHERE t.type = 'BOOKING_PAYMENT' AND t.status IN ('SUCCESS', 'WAITING_REFUND') " +
            "AND t.createdAt >= CURRENT_DATE")
     BigDecimal sumTotalRevenueToday();
 

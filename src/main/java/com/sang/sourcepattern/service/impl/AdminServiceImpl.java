@@ -691,8 +691,15 @@ public class AdminServiceImpl implements AdminService {
 
             java.math.BigDecimal paidAmount = java.math.BigDecimal.ZERO;
             Payment existingPayment = paymentRepository.findByBookingId(bookingId).orElse(null);
-            if (existingPayment != null && "SUCCESS".equals(existingPayment.getStatus())) {
+            // Lúc này payment status là WAITING_REFUND, nhưng số tiền paid vẫn hợp lệ.
+            if (existingPayment != null && existingPayment.getAmount() != null) {
                 paidAmount = existingPayment.getAmount();
+                // Đảm bảo số tiền hoàn không vượt quá số tiền khách đã thanh toán thực tế
+                // Không check payment.status == SUCCESS vì lúc admin duyệt, payment đã là WAITING_REFUND
+                if (request.getAmount().compareTo(paidAmount) > 0) {
+                    request.setAmount(paidAmount);
+                    withdrawalRequestRepository.save(request);
+                }
             }
 
             java.math.BigDecimal adminCommission = walletService.calculateAdminCommission(
@@ -700,16 +707,6 @@ public class AdminServiceImpl implements AdminService {
                             ? booking.getServices().stream().map(s -> s.getId()).collect(java.util.stream.Collectors.toList())
                             : java.util.Collections.emptyList());
 
-            java.math.BigDecimal penalty = paidAmount.subtract(adminCommission).subtract(request.getAmount());
-            if (penalty.compareTo(java.math.BigDecimal.ZERO) > 0) {
-                // Hủy muộn: cộng tiền bồi thường vào ví Shop (số tiền đã khấu trừ từ khách)
-                walletService.creditShopPenalty(bookingId, penalty, "hủy muộn");
-            }
-
-            // Nếu đây là đơn thanh toán 100% online, Shop đã được cộng tiền ngay lúc thanh toán.
-            // Khi hoàn tiền → cần trừ lại phần shopShare khỏi ví Shop.
-            // Lưu ý: KHÔNG check payment.status == SUCCESS ở đây vì booking có thể đã bị CANCELLED trước đó.
-            // Chỉ cần check method là online để biết shop đã được cộng tiền vào ví hay chưa.
             String paymentMethod = existingPayment != null ? existingPayment.getMethod() : null;
             boolean isOnlinePayment = paymentMethod != null
                     && !"CASH_DEPOSIT".equals(paymentMethod)
@@ -717,11 +714,18 @@ public class AdminServiceImpl implements AdminService {
 
             if (isOnlinePayment) {
                 // Thanh toán 100% online → shop đã được cộng shopShare vào ví lúc onPaymentSuccess
-                // → trừ lại để cân bằng
+                // → trừ lại theo tỷ lệ hoàn tiền
                 java.math.BigDecimal shopShare = totalPrice.subtract(adminCommission)
                         .setScale(0, java.math.RoundingMode.DOWN);
-                if (shopShare.compareTo(java.math.BigDecimal.ZERO) > 0) {
-                    walletService.deductRefundedAmount(bookingId, shopShare);
+                
+                java.math.BigDecimal deductionAmount = shopShare;
+                
+                if (paidAmount != null && paidAmount.compareTo(java.math.BigDecimal.ZERO) > 0) {
+                    deductionAmount = shopShare.multiply(request.getAmount()).divide(paidAmount, 0, java.math.RoundingMode.HALF_UP);
+                }
+                
+                if (deductionAmount.compareTo(java.math.BigDecimal.ZERO) > 0) {
+                    walletService.deductRefundedAmount(bookingId, deductionAmount);
                 }
             }
 
