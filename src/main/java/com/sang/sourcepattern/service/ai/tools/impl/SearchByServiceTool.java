@@ -51,7 +51,7 @@ public class SearchByServiceTool implements AITool {
         int topN = args.get("topN") instanceof Number ? ((Number) args.get("topN")).intValue() : 5;
 
         // Get all verified shops (optionally filtered by city)
-        List<ShopResponse> allShops = shopService.searchVerifiedShops(null, cityFilter, null);
+        List<ShopResponse> allShops = shopService.searchVerifiedShops(null, cityFilter, null, null, null, null, null, null, null);
 
         // For each shop, find matching services
         List<Map<String, Object>> matched = new ArrayList<>();

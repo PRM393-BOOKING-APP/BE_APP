@@ -30,6 +30,8 @@ public interface ShopMapper {
     @Mapping(target = "isVerified", source = "verified")
     @Mapping(target = "status", expression = "java(shop.getStatus() != null ? shop.getStatus().name() : null)")
     @Mapping(target = "serviceNames", expression = "java(shop.getServices() != null ? shop.getServices().stream().map(s -> s.getServiceName()).collect(java.util.stream.Collectors.toList()) : null)")
+    @Mapping(target = "startingPrice", expression = "java(shop.getServices() != null ? shop.getServices().stream().filter(com.sang.sourcepattern.entity.Service::isActive).map(com.sang.sourcepattern.entity.Service::getPrice).filter(java.util.Objects::nonNull).min(java.util.Comparator.naturalOrder()).orElse(null) : null)")
+    @Mapping(target = "distanceKm", ignore = true)
     ShopResponse toShopResponse(Shop shop);
 
     @Mapping(target = "owner", ignore = true)

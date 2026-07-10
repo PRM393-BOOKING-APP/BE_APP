@@ -607,17 +607,39 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public List<ShopResponse> searchVerifiedShops(String keyword, String city, String shopType) {
-        return shopRepository.searchVerified(keyword, city, shopType)
-                .stream()
-                .map(shopMapper::toShopResponse)
-                .toList();
+    public List<ShopResponse> searchVerifiedShops(String keyword, String city, String shopType,
+            java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Float minRating,
+            Double lat, Double lng, Double radiusKm) {
+        List<Shop> shops = shopRepository.searchVerified(keyword, city, shopType, minPrice, maxPrice, minRating);
+
+        if (lat == null || lng == null) {
+            return shops.stream().map(shopMapper::toShopResponse).toList();
+        }
+
+        double effectiveRadius = radiusKm != null ? radiusKm : 10.0;
+        List<ShopResponse> withDistance = new java.util.ArrayList<>();
+        for (Shop shop : shops) {
+            if (shop.getLatitude() == null || shop.getLongitude() == null) {
+                continue;
+            }
+            double distance = com.sang.sourcepattern.util.DistanceUtil.calculate(
+                    lat, lng, shop.getLatitude(), shop.getLongitude());
+            if (distance > effectiveRadius) {
+                continue;
+            }
+            ShopResponse response = shopMapper.toShopResponse(shop);
+            response.setDistanceKm(Math.round(distance * 10.0) / 10.0);
+            withDistance.add(response);
+        }
+        withDistance.sort(java.util.Comparator.comparing(ShopResponse::getDistanceKm));
+        return withDistance;
     }
 
     @Override
-    public com.sang.sourcepattern.dto.response.PageResponse<ShopResponse> searchVerifiedShopsPaged(String keyword, String city, String shopType, int page) {
+    public com.sang.sourcepattern.dto.response.PageResponse<ShopResponse> searchVerifiedShopsPaged(String keyword, String city, String shopType,
+            java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Float minRating, int page) {
         org.springframework.data.domain.Page<Shop> pageResult =
-                shopRepository.searchVerifiedPaged(keyword, city, shopType,
+                shopRepository.searchVerifiedPaged(keyword, city, shopType, minPrice, maxPrice, minRating,
                         org.springframework.data.domain.PageRequest.of(page, 10));
         return com.sang.sourcepattern.dto.response.PageResponse.<ShopResponse>builder()
                 .content(pageResult.getContent().stream().map(shopMapper::toShopResponse).toList())
