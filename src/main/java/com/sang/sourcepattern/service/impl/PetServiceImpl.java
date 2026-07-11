@@ -10,6 +10,7 @@ import com.sang.sourcepattern.repository.PetDocumentRepository;
 import com.sang.sourcepattern.repository.PetRepository;
 import com.sang.sourcepattern.repository.UserRepository;
 import com.sang.sourcepattern.repository.CareLogRepository;
+import com.sang.sourcepattern.repository.BookingRepository;
 import com.sang.sourcepattern.service.PetService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -30,6 +31,7 @@ public class PetServiceImpl implements PetService {
     UserRepository userRepository;
     PetDocumentRepository petDocumentRepository;
     CareLogRepository careLogRepository;
+    BookingRepository bookingRepository;
     PetMapper petMapper;
 
     @Override
@@ -107,7 +109,7 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public List<PetResponse> getPetsByOwner(int ownerId) {
-        return petRepository.findByOwnerId(ownerId).stream()
+        return petRepository.findByOwnerIdAndActiveTrue(ownerId).stream()
                 .map(petMapper::toPetResponse)
                 .toList();
     }
@@ -181,9 +183,14 @@ public class PetServiceImpl implements PetService {
         Pet pet = petRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PET_NOT_EXISTED));
         
+        long activeBookings = bookingRepository.countActiveBookingsByPetId(id);
+        if (activeBookings > 0) {
+            throw new AppException(ErrorCode.CANNOT_DELETE_PET_WITH_ACTIVE_BOOKING);
+        }
+        
         pet.setActive(false);
         pet.setUnactiveReason(reason);
-        petRepository.delete(pet);
+        petRepository.save(pet);
     }
 
     @Override

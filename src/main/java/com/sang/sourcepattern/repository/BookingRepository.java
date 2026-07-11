@@ -43,6 +43,9 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     @Query("SELECT DISTINCT b FROM Booking b LEFT JOIN FETCH b.services WHERE b.shop.id = :shopId AND b.appointmentDatetime BETWEEN :start AND :end")
     List<Booking> findByShopIdAndDatetimeBetweenWithServices(@Param("shopId") int shopId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.pet.id = :petId AND b.status IN ('PENDING_PAYMENT', 'WAITING_SHOP_APPROVAL', 'CONFIRMED', 'IN_PROGRESS')")
+    long countActiveBookingsByPetId(@Param("petId") int petId);
+
     // Keep old methods for backward compatibility
     List<Booking> findByUserId(int userId);
     List<Booking> findByShopId(int shopId);
