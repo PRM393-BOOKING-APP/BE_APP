@@ -89,6 +89,8 @@ public interface BookingService {
      */
     List<StaffResponse> getShopStaffWithAvailability(int shopId, LocalDateTime appointmentDatetime, int durationMinutes);
 
+    void cancelOverdueBookings();
+
     /** Get all bookings for a shop owner within a range */
     List<BookingResponse> getShopBookings(String ownerEmail, LocalDateTime start, LocalDateTime end);
     com.sang.sourcepattern.dto.response.PageResponse<BookingResponse> getShopBookingsPaged(
