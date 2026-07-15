@@ -89,19 +89,20 @@ INSERT INTO user_roles (user_id, roles_id) VALUES
 
 -- ============================================================================
 -- SHOPS
--- Shop 3 (Pet Hotel 5 Sao) cung cấp cả LƯU TRÚ (BOARDING) lẫn SPA/GROOMING
+-- Shop 3 (Pet Hotel 5 Sao) cung cấp cả LƯU TRÚ (BOARDING) lẫn SPA_GROOMING
 -- để test luồng đặt lịch/thanh toán gộp nhiều loại dịch vụ trong 1 booking.
 -- ============================================================================
 INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, city, latitude, longitude,
                   description, license_number, logo_url, open_time, close_time, working_days,
-                  rating_avg, is_verified, status, assignment_mode, late_grace_period) VALUES
-(1, 2, 'Mèo Kute Spa', 'SPA',
+                  rating_avg, is_verified, status, assignment_mode, late_grace_period,
+                  off_days, created_at) VALUES
+(1, 2, 'Mèo Kute Spa', 'SPA_GROOMING',
    'contact@meokutespa.vn', '02812345001',
    '123 Lê Văn Sỹ, Phường 13, Quận 3, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.7769, 106.6938,
    'Spa & chăm sóc lông cao cấp cho mèo và chó. Đội ngũ chuyên nghiệp, tận tâm.',
    'GPKD-001-2024', NULL, '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.6, 1, 'APPROVED', 'MANUAL', 15),
+   4.6, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
 
 (2, 3, 'Thú Y An Tâm', 'CLINIC',
    'contact@thuyantam.vn', '02812345002',
@@ -109,7 +110,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    10.8038, 106.7162,
    'Phòng khám thú y uy tín với đội ngũ bác sĩ giàu kinh nghiệm.',
    'GPKD-002-2024', NULL, '07:30', '18:00', 'MON,TUE,WED,THU,FRI,SAT',
-   4.8, 1, 'APPROVED', 'AUTO', 10),
+   4.8, 1, 'APPROVED', 'AUTO', 10, NULL, NOW()),
 
 (3, 4, 'Pet Hotel 5 Sao', 'BOARDING',
    'contact@pethotel5sao.vn', '02812345003',
@@ -117,7 +118,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    10.8451, 106.6657,
    'Khách sạn thú cưng 5 sao với camera giám sát 24/7. Phòng riêng và phòng chung, kèm dịch vụ spa tại chỗ cho thú cưng lưu trú.',
    'GPKD-003-2024', NULL, '06:00', '22:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.7, 1, 'APPROVED', 'OPEN_POOL', 30);
+   4.7, 1, 'APPROVED', 'OPEN_POOL', 30, NULL, NOW());
 
 -- ============================================================================
 -- SHOP WALLETS
@@ -144,17 +145,17 @@ INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob,
 INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
                           active, camera_enabled, cage_size, room_type,
                           camera_tiers, camera_tier_prices, camera_tier_labels, camera_description) VALUES
--- Shop 1: SPA/GROOMING
-(1, 1, 'Tắm & Sấy Cơ Bản', 'GROOMING', 150000, 60,
+-- Shop 1: SPA_GROOMING
+(1, 1, 'Tắm & Sấy Cơ Bản', 'SPA_GROOMING', 150000, 60,
    'Tắm sạch với dầu gội chuyên dụng, sấy khô và chải lông.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(2, 1, 'Cắt Tỉa Lông', 'GROOMING', 200000, 90,
+(2, 1, 'Cắt Tỉa Lông', 'SPA_GROOMING', 200000, 90,
    'Cắt tỉa theo yêu cầu, tạo kiểu lông đẹp cho thú cưng.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(3, 1, 'Spa Toàn Thân', 'SPA', 350000, 120,
+(3, 1, 'Spa Toàn Thân', 'SPA_GROOMING', 350000, 120,
    'Tắm thảo dược, massage, cắt móng, vệ sinh tai và tạo kiểu.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(4, 1, 'Nhuộm Lông Nghệ Thuật', 'GROOMING', 500000, 180,
+(4, 1, 'Nhuộm Lông Nghệ Thuật', 'SPA_GROOMING', 500000, 180,
    'Nhuộm lông bằng màu an toàn, tạo kiểu độc đáo theo yêu cầu.',
    0, 0, NULL, NULL, NULL, NULL, NULL, NULL),
 -- Shop 2: CLINIC
@@ -170,7 +171,7 @@ INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_mi
 (8, 2, 'Siêu Âm Ổ Bụng', 'CLINIC', 400000, 60,
    'Siêu âm chẩn đoán các bệnh lý nội tạng, thai sản.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
--- Shop 3: BOARDING (co camera) + SPA/GROOMING tai cho
+-- Shop 3: BOARDING (có camera) + SPA_GROOMING tại chỗ
 (9, 3, 'Lưu Trú Phòng Chung', 'BOARDING', 200000, 1440,
    'Phòng chung thoải mái, ăn uống đầy đủ, vui chơi cùng các bé khác.',
    1, 1, '["SMALL","MEDIUM"]', '["SHARED"]',
@@ -192,15 +193,15 @@ INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_mi
     '{"BASIC":0,"HD":60000,"AI":200000}',
     '{"BASIC":"Xem cơ bản (miễn phí)","HD":"Camera HD (60.000đ/ngày)","AI":"AI theo dõi hành vi (200.000đ/ngày)"}',
     'Camera AI cao cấp theo dõi sức khỏe và hành vi 24/7'),
-(12, 3, 'Tắm & Vệ Sinh', 'GROOMING', 120000, 90,
+(12, 3, 'Tắm & Vệ Sinh', 'SPA_GROOMING', 120000, 90,
     'Tắm sạch, vệ sinh tai, cắt móng cho thú cưng lưu trú.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(13, 3, 'Spa Toàn Thân', 'SPA', 350000, 120,
+(13, 3, 'Spa Toàn Thân', 'SPA_GROOMING', 350000, 120,
     'Tắm thảo dược, massage, cắt móng, vệ sinh tai và tạo kiểu cho thú cưng đang lưu trú.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
 -- Shop 1: dịch vụ giá cao, dùng để test nhanh việc lên hạng (vượt ngưỡng Bạc/Vàng/Bạch Kim
 -- chỉ với 1 booking, không cần cộng dồn nhiều đơn nhỏ)
-(14, 1, 'Gói Chăm Sóc Cao Cấp Trọn Gói', 'SPA', 4000000, 180,
+(14, 1, 'Gói Chăm Sóc Cao Cấp Trọn Gói', 'SPA_GROOMING', 4000000, 180,
     'Gói cao cấp: tắm dưỡng chuyên sâu, trị liệu spa toàn thân, khám tổng quát và tư vấn dinh dưỡng riêng theo thể trạng thú cưng.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -508,10 +509,10 @@ UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=45' WHERE id = 7;  -- 
 UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=12' WHERE id = 8;  -- Hoang Duc Manh
 
 -- 2. Thêm khách hàng PLATINUM (tier_id=4, 15M spent) để demo filter
-INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending) VALUES
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
 (13, 'vip.customer@gmail.com',
  '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO',
- 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000);
+ 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000, 0);
 
 UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=25' WHERE id = 13;
 
@@ -592,19 +593,19 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
                           active, camera_enabled, cage_size, room_type,
                           camera_tiers, camera_tier_prices, camera_tier_labels, camera_description) VALUES
-(15, 1, 'Gói Trị Liệu Chuyên Sâu Cao Cấp', 'SPA', 3000000, 200,
+(15, 1, 'Gói Trị Liệu Chuyên Sâu Cao Cấp', 'SPA_GROOMING', 3000000, 200,
     'Liệu trình chăm sóc cao cấp dài ngày, phục hồi da lông và thể trạng toàn diện.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(16, 1, 'Gói Chăm Sóc Định Kỳ Nâng Cao', 'SPA', 1300000, 150,
+(16, 1, 'Gói Chăm Sóc Định Kỳ Nâng Cao', 'SPA_GROOMING', 1300000, 150,
     'Gói chăm sóc định kỳ hàng tháng: tắm dưỡng, cắt tỉa, kiểm tra sức khỏe cơ bản.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(17, 1, 'Gói Vệ Sinh & Chăm Sóc Cơ Bản Nâng Cao', 'GROOMING', 300000, 100,
+(17, 1, 'Gói Vệ Sinh & Chăm Sóc Cơ Bản Nâng Cao', 'SPA_GROOMING', 300000, 100,
     'Vệ sinh tai, cắt móng, tắm sấy và chải lông kỹ hơn gói cơ bản.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(18, 1, 'Cắt Móng & Vệ Sinh Tai', 'GROOMING', 50000, 15,
+(18, 1, 'Cắt Móng & Vệ Sinh Tai', 'SPA_GROOMING', 50000, 15,
     'Dịch vụ nhanh: cắt móng và vệ sinh tai cho thú cưng.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(19, 1, 'Gói Chăm Sóc VIP Toàn Diện Dài Hạn', 'SPA', 14000000, 300,
+(19, 1, 'Gói Chăm Sóc VIP Toàn Diện Dài Hạn', 'SPA_GROOMING', 14000000, 300,
     'Gói chăm sóc VIP trọn gói dài hạn: trị liệu, spa, tư vấn dinh dưỡng và ưu tiên lịch hẹn riêng.',
     1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -664,7 +665,7 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 (37, 'CONFIRMED',             'IN_PROGRESS',            '2026-04-25 09:10:00', 'staff2.spa@peteye.vn'),
 (37, 'IN_PROGRESS',           'COMPLETED',              '2026-04-25 14:05:00', 'staff2.spa@peteye.vn');
 
-SET FOREIGN_KEY_CHECKS = 1;
+-- SET FOREIGN_KEY_CHECKS = 1;  -- disabled: seed data is consistent by design
 
 -- ============================================================================
 -- VOUCHER & MEMBERSHIP TIER DEMO DATA
@@ -732,11 +733,12 @@ WHERE id = 11;
 
 -- ============================================================================
 -- SUMMARY
--- Users    : 13 (1 admin, 3 owners, 5 customers, 4 staff)
--- Shops    : 3  (SPA/MANUAL, CLINIC/AUTO, BOARDING+SPA/OPEN_POOL)
---   Shop 3 (Pet Hotel 5 Sao) có cả dịch vụ BOARDING (9,10,11) và SPA/GROOMING
+-- Users    : 17 (1 admin, 7 owners, 6 customers, 4 staff)
+-- Shops    : 7  (SPA_GROOMING/MANUAL, CLINIC/AUTO, BOARDING+SPA_GROOMING/OPEN_POOL, SPA_GROOMING/MANUAL x2, CLINIC/AUTO, SPA_GROOMING/MANUAL)
+--   Shop 3 (Pet Hotel 5 Sao) có cả dịch vụ BOARDING (9,10,11) và SPA_GROOMING
 --   (12,13) để test đặt lịch/thanh toán gộp 2 loại dịch vụ khác nhau (xem booking 32).
--- Services : 13 (4 shop1, 4 shop2, 5 shop3)
+--   Shop 4 (rating thấp 3.5), Shop 5 (giá cao), Shop 6 (Hà Nội), Shop 7 (La Gi) để test filter.
+-- Services : 30
 -- Pets     : 7  (5 gốc + 2 của VIP customer)
 -- Bookings : 32
 --   COMPLETED            : 9  (IDs  1-5, 27-30)
@@ -792,22 +794,23 @@ INSERT INTO user_roles (user_id, roles_id) VALUES (17, 2);
 --   → dùng để test bộ lọc khoảng cách loại shop này dù các filter khác đều pass.
 INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, city, latitude, longitude,
                   description, license_number, logo_url, open_time, close_time, working_days,
-                  rating_avg, is_verified, status, assignment_mode, late_grace_period) VALUES
-(4, 14, 'Pet Care Bình Dân', 'GROOMING',
+                  rating_avg, is_verified, status, assignment_mode, late_grace_period,
+                  off_days, created_at) VALUES
+(4, 14, 'Pet Care Bình Dân', 'SPA_GROOMING',
    'contact@petcarebinhdan.vn', '02812345004',
    '15 Nguyễn Văn Đậu, Phường 5, Quận Bình Thạnh, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.7860, 106.7010,
    'Tiệm chăm sóc thú cưng giá bình dân, phù hợp túi tiền sinh viên.',
    'GPKD-004-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   3.5, 1, 'APPROVED', 'MANUAL', 15),
+   3.5, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
 
-(5, 15, 'Luxury Paws Spa', 'SPA',
+(5, 15, 'Luxury Paws Spa', 'SPA_GROOMING',
    'contact@luxurypaws.vn', '02812345005',
    '200 Hai Bà Trưng, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.7480, 106.7250,
    'Spa cao cấp 5 sao cho thú cưng, dịch vụ trọn gói sang trọng.',
    'GPKD-005-2024', NULL, '09:00', '21:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.9, 1, 'APPROVED', 'MANUAL', 15),
+   4.9, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
 
 (6, 16, 'Phòng Khám Thú Y Hà Nội', 'CLINIC',
    'contact@thuyhanoi.vn', '02412345006',
@@ -815,15 +818,15 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    21.0285, 105.8542,
    'Phòng khám thú y uy tín tại Hà Nội, hơn 10 năm kinh nghiệm.',
    'GPKD-006-2024', NULL, '07:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT',
-   4.7, 1, 'APPROVED', 'AUTO', 10),
+   4.7, 1, 'APPROVED', 'AUTO', 10, NULL, NOW()),
 
-(7, 17, 'Thú Cưng La Gi', 'GROOMING',
+(7, 17, 'Thú Cưng La Gi', 'SPA_GROOMING',
    'contact@thucunglagi.vn', '02523456007',
    '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 'Lâm Đồng',
    10.6907, 107.7802,
    'Tiệm chăm sóc thú cưng địa phương tại La Gi, phục vụ tận tâm, giá hợp lý.',
    'GPKD-007-2024', NULL, '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.6, 1, 'APPROVED', 'MANUAL', 15);
+   4.6, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW());
 
 INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_earned, total_withdrawn) VALUES
 (4, 4, 0.00, 0.00, 0.00, 0.00),
@@ -835,23 +838,23 @@ INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_mi
                           active, camera_enabled, cage_size, room_type,
                           camera_tiers, camera_tier_prices, camera_tier_labels, camera_description) VALUES
 -- Shop 4: toàn bộ dịch vụ giá rẻ (30k - 100k)
-(20, 4, 'Cắt Móng', 'GROOMING', 30000, 15,
+(20, 4, 'Cắt Móng', 'SPA_GROOMING', 30000, 15,
    'Cắt móng nhanh gọn cho thú cưng.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(21, 4, 'Tắm Cơ Bản', 'GROOMING', 70000, 45,
+(21, 4, 'Tắm Cơ Bản', 'SPA_GROOMING', 70000, 45,
    'Tắm nhanh giá rẻ, phù hợp túi tiền sinh viên.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(22, 4, 'Tắm & Vệ Sinh Tai', 'GROOMING', 100000, 50,
+(22, 4, 'Tắm & Vệ Sinh Tai', 'SPA_GROOMING', 100000, 50,
    'Gói tắm kèm vệ sinh tai giá rẻ.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
 -- Shop 5: toàn bộ dịch vụ giá cao (900k - 1.5tr)
-(23, 5, 'Gói Spa Luxury Toàn Thân', 'SPA', 900000, 150,
+(23, 5, 'Gói Spa Luxury Toàn Thân', 'SPA_GROOMING', 900000, 150,
    'Spa cao cấp trọn gói, sản phẩm nhập khẩu.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(24, 5, 'Gói Trị Liệu Massage 5 Sao', 'SPA', 1200000, 120,
+(24, 5, 'Gói Trị Liệu Massage 5 Sao', 'SPA_GROOMING', 1200000, 120,
    'Massage trị liệu chuyên sâu 5 sao.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(25, 5, 'Gói Chăm Sóc VIP Trọn Gói', 'SPA', 1500000, 180,
+(25, 5, 'Gói Chăm Sóc VIP Trọn Gói', 'SPA_GROOMING', 1500000, 180,
    'Chăm sóc toàn diện cao cấp nhất.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
 -- Shop 6: giá vừa phải, ở Hà Nội
@@ -862,13 +865,15 @@ INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_mi
    'Tiêm vaccine phòng bệnh dại và các bệnh thường gặp.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
 -- Shop 7 (La Gi): giá vừa phải, dùng để test bằng vị trí GPS thật
-(28, 7, 'Tắm & Sấy', 'GROOMING', 100000, 60,
+(28, 7, 'Tắm & Sấy', 'SPA_GROOMING', 100000, 60,
    'Tắm sạch, sấy khô và chải lông cho thú cưng.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(29, 7, 'Cắt Tỉa Lông', 'GROOMING', 150000, 75,
+(29, 7, 'Cắt Tỉa Lông', 'SPA_GROOMING', 150000, 75,
    'Cắt tỉa lông theo yêu cầu.',
    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(30, 7, 'Spa Toàn Thân', 'SPA', 280000, 100,
+(30, 7, 'Spa Toàn Thân', 'SPA_GROOMING', 280000, 100,
    'Tắm thảo dược, massage, cắt móng và vệ sinh tai.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 -- ============================================================================
+
+SET FOREIGN_KEY_CHECKS = 1;
