@@ -27,6 +27,7 @@ public enum     ErrorCode {
     CARE_LOG_NOT_FOUND(2002, "Không tìm thấy nhật ký chăm sóc", HttpStatus.NOT_FOUND),
     NO_IMAGE_IN_CARE_LOG(2003, "Nhật ký chăm sóc này không chứa hình ảnh", HttpStatus.BAD_REQUEST),
     CARE_LOG_NOT_BELONG_TO_PET(2004, "Nhật ký chăm sóc không thuộc về thú cưng này", HttpStatus.BAD_REQUEST),
+    CANNOT_DELETE_PET_WITH_ACTIVE_BOOKING(2005, "Không thể xóa thú cưng đang có lịch đặt chưa hoàn thành", HttpStatus.BAD_REQUEST),
     OLD_PASSWORD_INVALID(1011, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
     WRONG_PASSWORD(1012, "Mật khẩu không chính xác", HttpStatus.UNAUTHORIZED),
     SHOP_EXISTED(3001, "Cửa hàng đã tồn tại", HttpStatus.BAD_REQUEST),
