@@ -508,10 +508,10 @@ UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=45' WHERE id = 7;  -- 
 UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=12' WHERE id = 8;  -- Hoang Duc Manh
 
 -- 2. Thêm khách hàng PLATINUM (tier_id=4, 15M spent) để demo filter
-INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending) VALUES
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
 (13, 'vip.customer@gmail.com',
  '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO',
- 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000);
+ 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000, 0);
 
 UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=25' WHERE id = 13;
 
@@ -780,9 +780,13 @@ INSERT INTO user_roles (user_id, roles_id) VALUES
 -- Tọa độ dưới đây là ước lượng trung tâm phường Tân An/La Gi (không phải geocode chính
 -- xác tới số nhà), đủ để test bán kính vài km quanh khu vực đó.
 INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
-(17, 'owner7@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Văn Lộc', '0901111007', '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 1, 1, 1, 0, 0);
+(17, 'owner7@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Văn Lộc', '0901111007', '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 1, 1, 1, 0, 0),
+(18, 'owner8@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Thị Tám', '0901111008', '123 Cầu Giấy, Hà Nội', 1, 1, 1, 0, 0),
+(19, 'owner9@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Lê Văn Chín', '0901111009', '456 Đống Đa, Hà Nội', 1, 1, 1, 0, 0),
+(20, 'owner10@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Phạm Mười', '0901111010', '789 Ba Đình, Hà Nội', 1, 1, 1, 0, 0);
 
-INSERT INTO user_roles (user_id, roles_id) VALUES (17, 2);
+INSERT INTO user_roles (user_id, roles_id) VALUES 
+(17, 2), (18, 2), (19, 2), (20, 2);
 
 -- Shop 4: rating THẤP (3.5) + giá RẺ toàn bộ + cách Shop 1 khoảng 1.3km
 --   → dùng để test minRating loại shop này, và test radius hẹp vẫn thấy (gần).
@@ -815,7 +819,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    21.0285, 105.8542,
    'Phòng khám thú y uy tín tại Hà Nội, hơn 10 năm kinh nghiệm.',
    'GPKD-006-2024', NULL, '07:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT',
-   4.7, 1, 'APPROVED', 'AUTO', 10),
+   4.7, 1, 'PENDING', 'AUTO', 10),
 
 (7, 17, 'Thú Cưng La Gi', 'GROOMING',
    'contact@thucunglagi.vn', '02523456007',
@@ -823,13 +827,40 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    10.6907, 107.7802,
    'Tiệm chăm sóc thú cưng địa phương tại La Gi, phục vụ tận tâm, giá hợp lý.',
    'GPKD-007-2024', NULL, '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.6, 1, 'APPROVED', 'MANUAL', 15);
+   4.6, 1, 'PENDING', 'MANUAL', 15),
+
+(8, 18, 'Cầu Giấy Pet Spa', 'SPA',
+   'contact@caugiaypetspa.vn', '02412345008',
+   '123 Cầu Giấy, Hà Nội', 'Hà Nội',
+   21.0333, 105.7958,
+   'Dịch vụ spa làm đẹp toàn diện cho thú cưng tại khu vực Cầu Giấy.',
+   'GPKD-008-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'PENDING', 'MANUAL', 15),
+
+(9, 19, 'Phòng Khám Thú Y Đống Đa', 'CLINIC',
+   'contact@thuyidongda.vn', '02412345009',
+   '456 Đống Đa, Hà Nội', 'Hà Nội',
+   21.0125, 105.8239,
+   'Chuyên khám chữa bệnh, tiêm phòng cho chó mèo uy tín.',
+   'GPKD-009-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'REJECTED', 'MANUAL', 15),
+
+(10, 20, 'Khách Sạn Thú Cưng Ba Đình', 'BOARDING',
+   'contact@badinhpethotel.vn', '02412345010',
+   '789 Ba Đình, Hà Nội', 'Hà Nội',
+   21.0357, 105.8361,
+   'Dịch vụ lưu chuồng an toàn, sạch sẽ, có sân chơi rộng rãi cho các bé.',
+   'GPKD-010-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'REJECTED', 'MANUAL', 15);
 
 INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_earned, total_withdrawn) VALUES
 (4, 4, 0.00, 0.00, 0.00, 0.00),
 (5, 5, 0.00, 0.00, 0.00, 0.00),
 (6, 6, 0.00, 0.00, 0.00, 0.00),
-(7, 7, 0.00, 0.00, 0.00, 0.00);
+(7, 7, 0.00, 0.00, 0.00, 0.00),
+(8, 8, 0.00, 0.00, 0.00, 0.00),
+(9, 9, 0.00, 0.00, 0.00, 0.00),
+(10, 10, 0.00, 0.00, 0.00, 0.00);
 
 INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
                           active, camera_enabled, cage_size, room_type,
