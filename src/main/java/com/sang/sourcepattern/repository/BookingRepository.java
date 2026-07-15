@@ -231,4 +231,10 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     @Query("SELECT DISTINCT b.shop.id FROM Booking b WHERE b.user.email = :email")
     List<Integer> findShopIdsByUserEmail(@Param("email") String email);
+
+    @Query("SELECT DISTINCT b FROM Booking b LEFT JOIN FETCH b.services WHERE b.status = 'CONFIRMED' AND b.appointmentDatetime <= :threshold")
+    List<Booking> findOverdueConfirmedBookings(@Param("threshold") LocalDateTime threshold);
+
+    @Query("SELECT DISTINCT b FROM Booking b LEFT JOIN FETCH b.services WHERE b.status = 'WAITING_SHOP_APPROVAL' AND b.appointmentDatetime <= :threshold")
+    List<Booking> findOverdueWaitingBookings(@Param("threshold") LocalDateTime threshold);
 }

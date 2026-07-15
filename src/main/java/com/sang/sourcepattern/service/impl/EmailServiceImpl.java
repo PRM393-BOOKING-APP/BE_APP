@@ -456,4 +456,41 @@ public class EmailServiceImpl implements EmailService {
                 
         doSend(toEmail, subject, html);
     }
+
+    @Async
+    @Override
+    public void sendOverdueCancellationEmail(String toEmail, Booking booking) {
+        var shop = booking.getShop();
+        String shopName = shop != null && shop.getShopName() != null ? shop.getShopName() : "PET EYE Shop";
+        String subject = "[PET EYE] Thông báo hủy lịch hẹn do quá hạn - " + shopName;
+        
+        var user = booking.getUser();
+        String customerName = user != null && user.getFullName() != null ? user.getFullName() : "Quý khách";
+        DateTimeFormatter dtFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String appointmentStr = booking.getAppointmentDatetime() != null
+                ? booking.getAppointmentDatetime().format(dtFmt) : "—";
+                
+        String reasonText = "Hệ thống tự động hủy do lịch hẹn (đã được shop duyệt) đã quá hạn 1 tiếng mà chưa được bắt đầu.";
+
+        String html = """
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                    <h2 style="color: #d32f2f;">❌ Thông báo hủy lịch hẹn</h2>
+                    <p>Chào <strong>%s</strong>,</p>
+                    <p>Lịch hẹn của bạn tại <strong>%s</strong> đã bị hệ thống tự động hủy.</p>
+                    
+                    <div style="background-color: #f9f9f9; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #d32f2f;">
+                        <p style="margin: 4px 0;"><strong>Mã đơn/Lịch hẹn:</strong> #%d</p>
+                        <p style="margin: 4px 0;"><strong>Thời gian hẹn ban đầu:</strong> %s</p>
+                        <p style="margin: 4px 0;"><strong>Lý do:</strong> %s</p>
+                    </div>
+
+                    <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">
+                    <p style="color: #aaa; font-size: 12px; text-align: center;">PET EYE — Nền tảng chăm sóc thú cưng</p>
+                </div>
+                """.formatted(customerName, shopName, booking.getId(), appointmentStr, reasonText);
+                
+        doSend(toEmail, subject, html);
+    }
 }

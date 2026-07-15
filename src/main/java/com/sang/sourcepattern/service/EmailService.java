@@ -39,4 +39,10 @@ public interface EmailService {
      * Gửi email thông báo cho khách hàng khi shop xin đổi nhân viên.
      */
     void sendStaffChangeRequestEmail(String toEmail, Booking booking, com.sang.sourcepattern.entity.Staff proposedStaff, String reason);
+
+    /**
+     * Gửi email thông báo hủy lịch do quá hạn (không đề cập đến tiền bạc).
+     * Áp dụng cho đơn đã duyệt (CONFIRMED).
+     */
+    void sendOverdueCancellationEmail(String toEmail, Booking booking);
 }

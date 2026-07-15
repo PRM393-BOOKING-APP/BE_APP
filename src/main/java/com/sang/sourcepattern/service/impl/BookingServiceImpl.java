@@ -1979,6 +1979,144 @@ public class BookingServiceImpl implements BookingService {
     // ─── Staff list ───────────────────────────────────────────────────────────
 
     @Override
+    @Transactional
+    public void cancelOverdueBookings() {
+        LocalDateTime now = LocalDateTime.now();
+        // 1. CONFIRMED -> trễ 1h
+        LocalDateTime confirmedThreshold = now.minusHours(1);
+        List<Booking> confirmedList = bookingRepository.findOverdueConfirmedBookings(confirmedThreshold);
+        
+        // 2. WAITING_SHOP_APPROVAL -> đến giờ hẹn
+        LocalDateTime waitingThreshold = now;
+        List<Booking> waitingList = bookingRepository.findOverdueWaitingBookings(waitingThreshold);
+
+        List<Booking> allOverdue = new java.util.ArrayList<>();
+        allOverdue.addAll(confirmedList);
+        allOverdue.addAll(waitingList);
+
+        if (allOverdue.isEmpty()) {
+            return;
+        }
+
+        for (Booking b : allOverdue) {
+            boolean isConfirmed = "CONFIRMED".equals(b.getStatus());
+            b.setStatus(isConfirmed ? "CANCELLED" : "WAITING_REFUND");
+            b.setCancellationReason("Hệ thống tự động hủy do quá hạn lịch hẹn");
+            
+            cameraService.stopStream(b.getId());
+            sendBookingUpdateEvent(b.getShop().getId(), b.getId());
+
+            if (!isConfirmed) {
+                // Xử lý hoàn tiền cho đơn WAITING_SHOP_APPROVAL
+                BigDecimal refundAmount = BigDecimal.ZERO;
+                BigDecimal penalty = BigDecimal.ZERO;
+                Payment payment = paymentRepository.findByBookingId(b.getId()).orElse(null);
+                
+                if (payment != null && "SUCCESS".equals(payment.getStatus())) {
+                    refundAmount = payment.getAmount();
+                    penalty = payment.getAmount(); // Shop bị phạt 100% giống như shop tự hủy
+                    payment.setStatus("WAITING_REFUND");
+                    paymentRepository.save(payment);
+                }
+                
+                b.setRefundAmount(refundAmount);
+                
+                if (refundAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    String bankInfo = (b.getBankName() != null && !b.getBankName().isBlank())
+                            ? String.format("%s | %s | %s", b.getBankName(), b.getAccountHolder(), b.getBankAccount())
+                            : "Chưa có thông tin ngân hàng";
+
+                    WithdrawalRequest refundRequest = WithdrawalRequest.builder()
+                            .user(b.getUser())
+                            .booking(b)
+                            .type("USER")
+                            .amount(refundAmount)
+                            .bankName(b.getBankName())
+                            .bankAccount(b.getBankAccount())
+                            .accountHolder(b.getAccountHolder())
+                            .note(String.format("Hoàn tiền đơn tự hủy quá hạn #%d - %s. Lý do: Shop không duyệt. TK nhận: %s",
+                                    b.getId(), b.getUser().getFullName(), bankInfo))
+                            .status("PENDING")
+                            .build();
+                    withdrawalRequestRepository.save(refundRequest);
+                    
+                    // Thông báo cho Admin
+                    String amountText = NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(refundAmount);
+                    String content = String.format("Hệ thống tự hủy đơn #%d do shop %s không duyệt. Vui lòng hoàn lại %s cho khách hàng %s.",
+                            b.getId(),
+                            b.getShop().getShopName(),
+                            amountText,
+                            b.getUser() != null ? b.getUser().getFullName() : "khách lẻ");
+                    String broadcastId = UUID.randomUUID().toString();
+                    List<User> admins = userRepository.findByRoleName("ADMIN");
+                    List<Notification> notifications = admins.stream()
+                            .map(admin -> Notification.builder()
+                                    .user(admin)
+                                    .title("Hệ thống tự hủy đơn - Yêu cầu hoàn tiền")
+                                    .content(content)
+                                    .broadcastId(broadcastId)
+                                    .notificationType(Notification.NotificationType.SYSTEM)
+                                    .build())
+                            .collect(Collectors.toList());
+                    notificationRepository.saveAll(notifications);
+                    
+                    // Cập nhật Transaction
+                    transactionRepository.findByBookingIdOrderByCreatedAtDesc(b.getId())
+                            .stream().findFirst().ifPresent(t -> {
+                                t.setStatus("WAITING_REFUND");
+                                t.setNote("Auto-cancelled by SYSTEM — chờ Admin duyệt hoàn tiền");
+                                transactionRepository.save(t);
+                            });
+                }
+
+                // Trừ tiền phạt shop
+                if (penalty.compareTo(BigDecimal.ZERO) > 0) {
+                    walletService.deductShopPenalty(b.getShop().getId(), penalty, b.getId());
+                }
+
+                // Hoàn voucher
+                refundVoucherIfEligible(b, "SYSTEM");
+            }
+
+            // Notify Shop
+            if (b.getShop().getOwner() != null) {
+                String shopMsg = isConfirmed 
+                    ? String.format("Hệ thống đã tự động hủy đơn #%d của khách hàng %s do quá hạn giờ hẹn.", b.getId(), b.getUser() != null ? b.getUser().getFullName() : "khách lẻ")
+                    : String.format("Hệ thống tự động hủy đơn #%d do quá hạn mà shop chưa duyệt. Shop đã bị trừ phí phạt.", b.getId());
+                Notification nShop = Notification.builder()
+                        .user(b.getShop().getOwner())
+                        .title("Hủy lịch quá hạn")
+                        .content(shopMsg)
+                        .notificationType(Notification.NotificationType.SYSTEM)
+                        .build();
+                notificationRepository.save(nShop);
+            }
+
+            // Notify User
+            if (b.getUser() != null) {
+                String userMsg = isConfirmed
+                    ? String.format("Lịch hẹn #%d tại shop %s của bạn đã bị hệ thống tự động hủy do quá hạn.", b.getId(), b.getShop().getShopName())
+                    : String.format("Lịch hẹn #%d tại shop %s đã bị hệ thống hủy do shop không duyệt. Hệ thống sẽ hoàn lại 100%% tiền cọc cho bạn sớm nhất.", b.getId(), b.getShop().getShopName());
+                
+                Notification nUser = Notification.builder()
+                        .user(b.getUser())
+                        .title(isConfirmed ? "Hủy lịch quá hạn" : "Hệ thống đã hủy lịch của bạn")
+                        .content(userMsg)
+                        .notificationType(Notification.NotificationType.SYSTEM)
+                        .build();
+                notificationRepository.save(nUser);
+                
+                // Gửi email cho khách hàng (chỉ áp dụng cho đơn đã duyệt)
+                if (isConfirmed && b.getUser().getEmail() != null && !b.getUser().getEmail().isEmpty()) {
+                    emailService.sendOverdueCancellationEmail(b.getUser().getEmail(), b);
+                }
+            }
+            log.info("Auto cancelled overdue booking #{} (Status before: {})", b.getId(), isConfirmed ? "CONFIRMED" : "WAITING_SHOP_APPROVAL");
+        }
+        bookingRepository.saveAll(allOverdue);
+    }
+
+    @Override
     public List<StaffResponse> getShopStaff(int shopId) {
         shopRepository.findById(shopId)
                 .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
