@@ -11,12 +11,15 @@ import com.sang.sourcepattern.dto.request.SocialLoginRequest;
 import com.sang.sourcepattern.dto.request.UpdateEmailRequest;
 import com.sang.sourcepattern.dto.response.ApiResponse;
 import com.sang.sourcepattern.dto.response.AuthenticationResponse;
+import com.sang.sourcepattern.dto.response.GoogleConfigResponse;
 import com.sang.sourcepattern.dto.response.IntrospectResponse;
 import com.sang.sourcepattern.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import com.sang.sourcepattern.service.AuthenticationService;
 
@@ -30,6 +33,18 @@ public class AuthenticationController {
 
     AuthenticationService authenticationService;
     UserService userService;
+
+    @Value("${social.google.client-id}")
+    @NonFinal
+    String googleClientId;
+
+    /** FE lấy Google OAuth Client ID từ BE, không cần khai báo trong .env của FE */
+    @GetMapping("/google/config")
+    public ApiResponse<GoogleConfigResponse> googleConfig() {
+        return ApiResponse.<GoogleConfigResponse>builder()
+                .result(GoogleConfigResponse.builder().clientId(googleClientId).build())
+                .build();
+    }
 
     @GetMapping("/test")
     public ApiResponse<String> test() {
