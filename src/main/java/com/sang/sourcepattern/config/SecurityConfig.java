@@ -38,6 +38,7 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui.html",
             "/auth/test", // Thêm test endpoint
+            "/auth/google/config",
             "/services/shop/**",
             "/services/{id}",
             "/shops/public",

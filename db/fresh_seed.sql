@@ -89,35 +89,36 @@ INSERT INTO user_roles (user_id, roles_id) VALUES
 
 -- ============================================================================
 -- SHOPS
--- Shop 3 (Pet Hotel 5 Sao) cung cấp cả LƯU TRÚ (BOARDING) lẫn SPA/GROOMING
+-- Shop 3 (Pet Hotel 5 Sao) cung cấp cả LƯU TRÚ (BOARDING) lẫn SPA_GROOMING
 -- để test luồng đặt lịch/thanh toán gộp nhiều loại dịch vụ trong 1 booking.
 -- ============================================================================
 INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, city, latitude, longitude,
                   description, license_number, logo_url, open_time, close_time, working_days,
-                  rating_avg, is_verified, status, assignment_mode, late_grace_period) VALUES
+                  rating_avg, is_verified, status, assignment_mode, late_grace_period,
+                  off_days, created_at) VALUES
 (1, 2, 'Mèo Kute Spa', 'SPA',
    'contact@meokutespa.vn', '02812345001',
    '123 Lê Văn Sỹ, Phường 13, Quận 3, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.7769, 106.6938,
    'Spa & chăm sóc lông cao cấp cho mèo và chó. Đội ngũ chuyên nghiệp, tận tâm.',
-   'GPKD-001-2024', NULL, '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.6, 1, 'APPROVED', 'MANUAL', 15),
+   'GPKD-001-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784128585/n3ukgjhrssosvduanlpm.png', '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.6, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
 
 (2, 3, 'Thú Y An Tâm', 'CLINIC',
    'contact@thuyantam.vn', '02812345002',
    '45 Đinh Tiên Hoàng, Phường 3, Quận Bình Thạnh, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.8038, 106.7162,
    'Phòng khám thú y uy tín với đội ngũ bác sĩ giàu kinh nghiệm.',
-   'GPKD-002-2024', NULL, '07:30', '18:00', 'MON,TUE,WED,THU,FRI,SAT',
-   4.8, 1, 'APPROVED', 'AUTO', 10),
+   'GPKD-002-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132490/kw6jkqvng8ulacskmfk7.jpg', '07:30', '18:00', 'MON,TUE,WED,THU,FRI,SAT',
+   4.8, 1, 'APPROVED', 'AUTO', 10, NULL, NOW()),
 
 (3, 4, 'Pet Hotel 5 Sao', 'BOARDING',
    'contact@pethotel5sao.vn', '02812345003',
    '88 Nguyễn Oanh, Phường 17, Quận Gò Vấp, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.8451, 106.6657,
    'Khách sạn thú cưng 5 sao với camera giám sát 24/7. Phòng riêng và phòng chung, kèm dịch vụ spa tại chỗ cho thú cưng lưu trú.',
-   'GPKD-003-2024', NULL, '06:00', '22:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.7, 1, 'APPROVED', 'OPEN_POOL', 30);
+   'GPKD-003-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132532/h9dlgkjyj9ugljs14e8f.jpg', '06:00', '22:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.7, 1, 'APPROVED', 'OPEN_POOL', 30, NULL, NOW());
 
 -- ============================================================================
 -- SHOP WALLETS
@@ -131,78 +132,78 @@ INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_e
 -- PETS
 -- ============================================================================
 INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob, sterilized,
-                 health_note, is_active) VALUES
-(1, 5, 'Mochi', 'CAT', 'Munchkin',    'FEMALE', 'Trắng vàng',  3.2, '2022-03-15', 1, 'Khỏe mạnh', 1),
-(2, 5, 'Buddy', 'DOG', 'Poodle',      'MALE',   'Nâu caramel', 4.5, '2021-07-20', 1, 'Dị ứng hải sản', 1),
-(3, 6, 'Luna',  'CAT', 'British SH',  'FEMALE', 'Xám xanh',    4.0, '2020-11-01', 1, 'Khỏe mạnh', 1),
-(4, 7, 'Max',   'DOG', 'Labrador',    'MALE',   'Vàng',        22.0,'2019-05-10', 0, 'Khớp cần theo dõi', 1),
-(5, 8, 'Coco',  'RABBIT','Holland Lop','FEMALE','Trắng đen',   2.1, '2023-01-25', 0, 'Khỏe mạnh', 1);
+                 health_note, is_active,avatar) VALUES
+(1, 5, 'Mochi', 'CAT', 'Munchkin',    'FEMALE', 'Trắng vàng',  3.2, '2022-03-15', 1, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132784/vkvn5tvkedzjwme2bj7c.jpg'),
+(2, 5, 'Buddy', 'DOG', 'Poodle',      'MALE',   'Nâu caramel', 4.5, '2021-07-20', 1, 'Dị ứng hải sản', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132715/fv2qtsjbv2rqgljfewpv.jpg'),
+(3, 6, 'Luna',  'CAT', 'British SH',  'FEMALE', 'Xám xanh',    4.0, '2020-11-01', 1, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132947/rqlzht7wskxn1nelfxip.jpg'),
+(4, 7, 'Max',   'DOG', 'Labrador',    'MALE',   'Vàng',        22.0,'2019-05-10', 0, 'Khớp cần theo dõi', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132903/nf6b7pxxgicqvqkzsgrl.jpg'),
+(5, 8, 'Coco',  'RABBIT','Holland Lop','FEMALE','Trắng đen',   2.1, '2023-01-25', 0, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132826/hjev3kplttode736xb07.jpg');
 
 -- ============================================================================
 -- PET SERVICES
 -- ============================================================================
 INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
                           active, camera_enabled, cage_size, room_type,
-                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description) VALUES
--- Shop 1: SPA/GROOMING
-(1, 1, 'Tắm & Sấy Cơ Bản', 'GROOMING', 150000, 60,
+                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description,image_url) VALUES
+-- Shop 1: SPA_GROOMING
+(1, 1, 'Tắm & Sấy Cơ Bản', 'SPA', 150000, 60,
    'Tắm sạch với dầu gội chuyên dụng, sấy khô và chải lông.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(2, 1, 'Cắt Tỉa Lông', 'GROOMING', 200000, 90,
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784128944/gavn7efenvniguwmox6y.webp'),
+(2, 1, 'Cắt Tỉa Lông', 'SPA', 200000, 90,
    'Cắt tỉa theo yêu cầu, tạo kiểu lông đẹp cho thú cưng.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129478/ynxahjzw8tefgno9u2j8.jpg'),
 (3, 1, 'Spa Toàn Thân', 'SPA', 350000, 120,
    'Tắm thảo dược, massage, cắt móng, vệ sinh tai và tạo kiểu.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(4, 1, 'Nhuộm Lông Nghệ Thuật', 'GROOMING', 500000, 180,
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129645/jp6o2qts0tnf7ybphlaw.jpg'),
+(4, 1, 'Nhuộm Lông Nghệ Thuật', 'SPA', 500000, 180,
    'Nhuộm lông bằng màu an toàn, tạo kiểu độc đáo theo yêu cầu.',
-   0, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   0, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129720/culj1peh9mtvguedtfaw.jpg'),
 -- Shop 2: CLINIC
 (5, 2, 'Khám Tổng Quát', 'CLINIC', 200000, 30,
    'Khám sức khỏe toàn diện, tư vấn dinh dưỡng và chăm sóc.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129785/jnu8ywecadecyumvyycv.jpg'),
 (6, 2, 'Tiêm Phòng', 'CLINIC', 150000, 20,
    'Tiêm vaccine phòng bệnh dại, carre, parvo và các bệnh thường gặp.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129875/nizrwc9z7dilqkrinj9u.jpg'),
 (7, 2, 'Xét Nghiệm Máu', 'CLINIC', 300000, 45,
    'Xét nghiệm công thức máu toàn phần, đánh giá chức năng gan thận.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130521/sq1gxoy2brlo3qvhkn0q.jpg'),
 (8, 2, 'Siêu Âm Ổ Bụng', 'CLINIC', 400000, 60,
    'Siêu âm chẩn đoán các bệnh lý nội tạng, thai sản.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
--- Shop 3: BOARDING (co camera) + SPA/GROOMING tai cho
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130564/abylbyqlnkaxeysv1qo5.jpg'),
+-- Shop 3: BOARDING (có camera) + SPA_GROOMING tại chỗ
 (9, 3, 'Lưu Trú Phòng Chung', 'BOARDING', 200000, 1440,
    'Phòng chung thoải mái, ăn uống đầy đủ, vui chơi cùng các bé khác.',
    1, 1, '["SMALL","MEDIUM"]', '["SHARED"]',
    '["BASIC","HD"]',
    '{"BASIC":0,"HD":60000}',
    '{"BASIC":"Xem cơ bản (miễn phí)","HD":"Camera HD (60.000đ/ngày)"}',
-   'Camera giám sát 24/7, xem qua ứng dụng'),
+   'Camera giám sát 24/7, xem qua ứng dụng','http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130464/r9v9nhmxymqn7b8d9zku.jpg'),
 (10, 3, 'Lưu Trú Phòng Riêng', 'BOARDING', 350000, 1440,
     'Phòng riêng yên tĩnh, chăm sóc cá nhân, 2 bữa/ngày.',
     1, 1, '["MEDIUM","LARGE"]', '["PRIVATE"]',
     '["BASIC","HD","AI"]',
     '{"BASIC":0,"HD":60000,"AI":200000}',
     '{"BASIC":"Xem cơ bản (miễn phí)","HD":"Camera HD (60.000đ/ngày)","AI":"AI theo dõi hành vi (200.000đ/ngày)"}',
-    'Camera HD & AI nhận diện hành vi bất thường'),
+    'Camera HD & AI nhận diện hành vi bất thường','http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130411/rkckkbvgurpiis2i1xzw.jpg'),
 (11, 3, 'Lưu Trú VIP Suite', 'BOARDING', 550000, 1440,
     'Phòng VIP rộng rãi, giường êm ái, đồ chơi riêng, chăm sóc cá nhân tối đa.',
     1, 1, '["LARGE"]', '["PRIVATE"]',
     '["BASIC","HD","AI"]',
     '{"BASIC":0,"HD":60000,"AI":200000}',
     '{"BASIC":"Xem cơ bản (miễn phí)","HD":"Camera HD (60.000đ/ngày)","AI":"AI theo dõi hành vi (200.000đ/ngày)"}',
-    'Camera AI cao cấp theo dõi sức khỏe và hành vi 24/7'),
-(12, 3, 'Tắm & Vệ Sinh', 'GROOMING', 120000, 90,
+    'Camera AI cao cấp theo dõi sức khỏe và hành vi 24/7','http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130302/dmsgtzl0x6igy8afiliz.jpg'),
+(12, 3, 'Tắm & Vệ Sinh', 'SPA', 120000, 90,
     'Tắm sạch, vệ sinh tai, cắt móng cho thú cưng lưu trú.',
-    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130133/yhvzdfzw1veyyxozicov.jpg'),
 (13, 3, 'Spa Toàn Thân', 'SPA', 350000, 120,
     'Tắm thảo dược, massage, cắt móng, vệ sinh tai và tạo kiểu cho thú cưng đang lưu trú.',
-    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130224/weftffuyicymizto6hpl.jpg'),
 -- Shop 1: dịch vụ giá cao, dùng để test nhanh việc lên hạng (vượt ngưỡng Bạc/Vàng/Bạch Kim
 -- chỉ với 1 booking, không cần cộng dồn nhiều đơn nhỏ)
 (14, 1, 'Gói Chăm Sóc Cao Cấp Trọn Gói', 'SPA', 4000000, 180,
     'Gói cao cấp: tắm dưỡng chuyên sâu, trị liệu spa toàn thân, khám tổng quát và tư vấn dinh dưỡng riêng theo thể trạng thú cưng.',
-    1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130069/kp0rxrdlq8olmdkxzt7m.jpg');
 
 -- ============================================================================
 -- BOOKINGS
@@ -502,25 +503,25 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 -- ============================================================================
 
 -- 1. Cập nhật avatar cho 4 khách hàng hiện có (dùng placeholder ảnh thật)
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=47' WHERE id = 5;  -- Pham Anh Thu
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=33' WHERE id = 6;  -- Nguyen Binh Minh
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=45' WHERE id = 7;  -- Vu Cam Ly
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=12' WHERE id = 8;  -- Hoang Duc Manh
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133307/ym7altp3jejdikztgrrl.jpg' WHERE id = 5;  -- Pham Anh Thu
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133363/ujsaxtio8ga3n9zwzke2.jpg' WHERE id = 6;  -- Nguyen Binh Minh
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133421/i3qkab8jj6meqjmomifc.jpg' WHERE id = 7;  -- Vu Cam Ly
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133392/yknvoflhibainefzwk9p.jpg' WHERE id = 8;  -- Hoang Duc Manh
 
 -- 2. Thêm khách hàng PLATINUM (tier_id=4, 15M spent) để demo filter
-INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending) VALUES
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts,avatar) VALUES
 (13, 'vip.customer@gmail.com',
  '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO',
- 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000);
+ 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000, 0,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133497/njn5iovepjn3omaiv8f6.jpg');
 
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=25' WHERE id = 13;
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133543/hbtpbln3lsv1van7wjj4.jpg' WHERE id = 13;
 
 INSERT INTO user_roles (user_id, roles_id) VALUES (13, 3);
 
 -- 3. Pets của khách hàng PLATINUM (2 con)
-INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob, sterilized, health_note, is_active) VALUES
-(6, 13, 'Diamond', 'DOG', 'Husky Siberia', 'MALE',   'Trắng xám', 18.5, '2020-08-15', 1, 'Khỏe mạnh, cần tập thể dục đều đặn', 1),
-(7, 13, 'Ruby',    'CAT', 'Ragdoll',       'FEMALE', 'Trắng kem',  4.2, '2021-12-01', 1, 'Khỏe mạnh, không dị ứng',            1);
+INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob, sterilized, health_note, is_active, avatar) VALUES
+(6, 13, 'Diamond', 'DOG', 'Husky Siberia', 'MALE',   'Trắng xám', 18.5, '2020-08-15', 1, 'Khỏe mạnh, cần tập thể dục đều đặn', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133028/wmfouirk7zjtsmy49gzw.jpg'),
+(7, 13, 'Ruby',    'CAT', 'Ragdoll',       'FEMALE', 'Trắng kem',  4.2, '2021-12-01', 1, 'Khỏe mạnh, không dị ứng',            1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133070/yoremoqhfckmzpw3mos3.webp');
 
 -- 4. Bookings COMPLETED của khách hàng PLATINUM tại shop 1 (IDs 27-30)
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
@@ -591,22 +592,22 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 -- ============================================================================
 INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
                           active, camera_enabled, cage_size, room_type,
-                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description) VALUES
+                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description,image_url) VALUES
 (15, 1, 'Gói Trị Liệu Chuyên Sâu Cao Cấp', 'SPA', 3000000, 200,
     'Liệu trình chăm sóc cao cấp dài ngày, phục hồi da lông và thể trạng toàn diện.',
-    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131449/w2w8vt5uqi0jcw7nlaco.jpg'),
 (16, 1, 'Gói Chăm Sóc Định Kỳ Nâng Cao', 'SPA', 1300000, 150,
     'Gói chăm sóc định kỳ hàng tháng: tắm dưỡng, cắt tỉa, kiểm tra sức khỏe cơ bản.',
-    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(17, 1, 'Gói Vệ Sinh & Chăm Sóc Cơ Bản Nâng Cao', 'GROOMING', 300000, 100,
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131494/eyaseuiveu7ofamxav6k.jpg'),
+(17, 1, 'Gói Vệ Sinh & Chăm Sóc Cơ Bản Nâng Cao', 'SPA', 300000, 100,
     'Vệ sinh tai, cắt móng, tắm sấy và chải lông kỹ hơn gói cơ bản.',
-    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(18, 1, 'Cắt Móng & Vệ Sinh Tai', 'GROOMING', 50000, 15,
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131530/xfutyogfebyli4qb67kp.jpg'),
+(18, 1, 'Cắt Móng & Vệ Sinh Tai', 'SPA', 50000, 15,
     'Dịch vụ nhanh: cắt móng và vệ sinh tai cho thú cưng.',
-    1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131574/opoozh79tzdd2t1cesku.jpg'),
 (19, 1, 'Gói Chăm Sóc VIP Toàn Diện Dài Hạn', 'SPA', 14000000, 300,
     'Gói chăm sóc VIP trọn gói dài hạn: trị liệu, spa, tư vấn dinh dưỡng và ưu tiên lịch hẹn riêng.',
-    1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131604/hfpi6oywaftbxtjaew5d.jpg');
 
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
                      appointment_datetime, check_in, check_out,
@@ -664,7 +665,7 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 (37, 'CONFIRMED',             'IN_PROGRESS',            '2026-04-25 09:10:00', 'staff2.spa@peteye.vn'),
 (37, 'IN_PROGRESS',           'COMPLETED',              '2026-04-25 14:05:00', 'staff2.spa@peteye.vn');
 
-SET FOREIGN_KEY_CHECKS = 1;
+-- SET FOREIGN_KEY_CHECKS = 1;  -- disabled: seed data is consistent by design
 
 -- ============================================================================
 -- VOUCHER & MEMBERSHIP TIER DEMO DATA
@@ -732,11 +733,12 @@ WHERE id = 11;
 
 -- ============================================================================
 -- SUMMARY
--- Users    : 13 (1 admin, 3 owners, 5 customers, 4 staff)
--- Shops    : 3  (SPA/MANUAL, CLINIC/AUTO, BOARDING+SPA/OPEN_POOL)
---   Shop 3 (Pet Hotel 5 Sao) có cả dịch vụ BOARDING (9,10,11) và SPA/GROOMING
+-- Users    : 17 (1 admin, 7 owners, 6 customers, 4 staff)
+-- Shops    : 7  (SPA_GROOMING/MANUAL, CLINIC/AUTO, BOARDING+SPA_GROOMING/OPEN_POOL, SPA_GROOMING/MANUAL x2, CLINIC/AUTO, SPA_GROOMING/MANUAL)
+--   Shop 3 (Pet Hotel 5 Sao) có cả dịch vụ BOARDING (9,10,11) và SPA_GROOMING
 --   (12,13) để test đặt lịch/thanh toán gộp 2 loại dịch vụ khác nhau (xem booking 32).
--- Services : 13 (4 shop1, 4 shop2, 5 shop3)
+--   Shop 4 (rating thấp 3.5), Shop 5 (giá cao), Shop 6 (Hà Nội), Shop 7 (La Gi) để test filter.
+-- Services : 30
 -- Pets     : 7  (5 gốc + 2 của VIP customer)
 -- Bookings : 32
 --   COMPLETED            : 9  (IDs  1-5, 27-30)
@@ -780,9 +782,13 @@ INSERT INTO user_roles (user_id, roles_id) VALUES
 -- Tọa độ dưới đây là ước lượng trung tâm phường Tân An/La Gi (không phải geocode chính
 -- xác tới số nhà), đủ để test bán kính vài km quanh khu vực đó.
 INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
-(17, 'owner7@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Văn Lộc', '0901111007', '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 1, 1, 1, 0, 0);
+(17, 'owner7@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Văn Lộc', '0901111007', '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 1, 1, 1, 0, 0),
+(18, 'owner8@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Thị Tám', '0901111008', '123 Cầu Giấy, Hà Nội', 1, 1, 1, 0, 0),
+(19, 'owner9@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Lê Văn Chín', '0901111009', '456 Đống Đa, Hà Nội', 1, 1, 1, 0, 0),
+(20, 'owner10@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Phạm Mười', '0901111010', '789 Ba Đình, Hà Nội', 1, 1, 1, 0, 0);
 
-INSERT INTO user_roles (user_id, roles_id) VALUES (17, 2);
+INSERT INTO user_roles (user_id, roles_id) VALUES 
+(17, 2), (18, 2), (19, 2), (20, 2);
 
 -- Shop 4: rating THẤP (3.5) + giá RẺ toàn bộ + cách Shop 1 khoảng 1.3km
 --   → dùng để test minRating loại shop này, và test radius hẹp vẫn thấy (gần).
@@ -792,83 +798,113 @@ INSERT INTO user_roles (user_id, roles_id) VALUES (17, 2);
 --   → dùng để test bộ lọc khoảng cách loại shop này dù các filter khác đều pass.
 INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, city, latitude, longitude,
                   description, license_number, logo_url, open_time, close_time, working_days,
-                  rating_avg, is_verified, status, assignment_mode, late_grace_period) VALUES
-(4, 14, 'Pet Care Bình Dân', 'GROOMING',
+                  rating_avg, is_verified, status, assignment_mode, late_grace_period,
+                  off_days, created_at) VALUES
+(4, 14, 'Pet Care Bình Dân', 'SPA',
    'contact@petcarebinhdan.vn', '02812345004',
    '15 Nguyễn Văn Đậu, Phường 5, Quận Bình Thạnh, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.7860, 106.7010,
    'Tiệm chăm sóc thú cưng giá bình dân, phù hợp túi tiền sinh viên.',
-   'GPKD-004-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   3.5, 1, 'APPROVED', 'MANUAL', 15),
+   'GPKD-004-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131888/v8oatrctazrhj3htgnzg.png', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   3.5, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
 
 (5, 15, 'Luxury Paws Spa', 'SPA',
    'contact@luxurypaws.vn', '02812345005',
    '200 Hai Bà Trưng, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.7480, 106.7250,
    'Spa cao cấp 5 sao cho thú cưng, dịch vụ trọn gói sang trọng.',
-   'GPKD-005-2024', NULL, '09:00', '21:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.9, 1, 'APPROVED', 'MANUAL', 15),
+   'GPKD-005-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131943/ogscuecijacpuvrkj3hh.png', '09:00', '21:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.9, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
 
 (6, 16, 'Phòng Khám Thú Y Hà Nội', 'CLINIC',
    'contact@thuyhanoi.vn', '02412345006',
    '10 Hàng Bài, Hoàn Kiếm, Hà Nội', 'Hà Nội',
    21.0285, 105.8542,
    'Phòng khám thú y uy tín tại Hà Nội, hơn 10 năm kinh nghiệm.',
-   'GPKD-006-2024', NULL, '07:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT',
-   4.7, 1, 'APPROVED', 'AUTO', 10),
+   'GPKD-006-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132001/bmpiqd2wklwq1wlfkvkq.jpg', '07:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT',
+   4.7, 1, 'PENDING', 'AUTO', 10, NULL, NOW()),
 
-(7, 17, 'Thú Cưng La Gi', 'GROOMING',
+(7, 17, 'Thú Cưng La Gi', 'SPA',
    'contact@thucunglagi.vn', '02523456007',
    '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 'Lâm Đồng',
    10.6907, 107.7802,
    'Tiệm chăm sóc thú cưng địa phương tại La Gi, phục vụ tận tâm, giá hợp lý.',
-   'GPKD-007-2024', NULL, '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
-   4.6, 1, 'APPROVED', 'MANUAL', 15);
+   'GPKD-007-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132047/kl4r68j3klp7jur12hcc.webp', '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.6, 1, 'PENDING', 'MANUAL', 15, NULL, NOW()),
+
+(8, 18, 'Cầu Giấy Pet Spa', 'SPA',
+   'contact@caugiaypetspa.vn', '02412345008',
+   '123 Cầu Giấy, Hà Nội', 'Hà Nội',
+   21.0333, 105.7958,
+   'Dịch vụ spa làm đẹp toàn diện cho thú cưng tại khu vực Cầu Giấy.',
+   'GPKD-008-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132235/hhgc6m3zybjbmu3jt2jk.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'PENDING', 'MANUAL', 15, NULL, NOW()),
+
+(9, 19, 'Phòng Khám Thú Y Đống Đa', 'CLINIC',
+   'contact@thuyidongda.vn', '02412345009',
+   '456 Đống Đa, Hà Nội', 'Hà Nội',
+   21.0125, 105.8239,
+   'Chuyên khám chữa bệnh, tiêm phòng cho chó mèo uy tín.',
+   'GPKD-009-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132173/mvxzfszyaueskttgmpsj.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'REJECTED', 'MANUAL', 15, NULL, NOW()),
+
+(10, 20, 'Khách Sạn Thú Cưng Ba Đình', 'BOARDING',
+   'contact@badinhpethotel.vn', '02412345010',
+   '789 Ba Đình, Hà Nội', 'Hà Nội',
+   21.0357, 105.8361,
+   'Dịch vụ lưu chuồng an toàn, sạch sẽ, có sân chơi rộng rãi cho các bé.',
+   'GPKD-010-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132292/njbnvqcxpvxdcdnyvf3c.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'REJECTED', 'MANUAL', 15, NULL, NOW());
 
 INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_earned, total_withdrawn) VALUES
 (4, 4, 0.00, 0.00, 0.00, 0.00),
 (5, 5, 0.00, 0.00, 0.00, 0.00),
 (6, 6, 0.00, 0.00, 0.00, 0.00),
-(7, 7, 0.00, 0.00, 0.00, 0.00);
+(7, 7, 0.00, 0.00, 0.00, 0.00),
+(8, 8, 0.00, 0.00, 0.00, 0.00),
+(9, 9, 0.00, 0.00, 0.00, 0.00),
+(10, 10, 0.00, 0.00, 0.00, 0.00);
 
 INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
                           active, camera_enabled, cage_size, room_type,
-                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description) VALUES
+                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description,image_url) VALUES
 -- Shop 4: toàn bộ dịch vụ giá rẻ (30k - 100k)
-(20, 4, 'Cắt Móng', 'GROOMING', 30000, 15,
+(20, 4, 'Cắt Móng', 'SPA', 30000, 15,
    'Cắt móng nhanh gọn cho thú cưng.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(21, 4, 'Tắm Cơ Bản', 'GROOMING', 70000, 45,
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130859/fzggqa87cbmnfvqf5fsx.jpg'),
+(21, 4, 'Tắm Cơ Bản', 'SPA', 70000, 45,
    'Tắm nhanh giá rẻ, phù hợp túi tiền sinh viên.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(22, 4, 'Tắm & Vệ Sinh Tai', 'GROOMING', 100000, 50,
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130933/e75lk7kxqgbuanzuak7f.jpg'),
+(22, 4, 'Tắm & Vệ Sinh Tai', 'SPA', 100000, 50,
    'Gói tắm kèm vệ sinh tai giá rẻ.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130995/bs61iewzfmtlxkevjdgs.jpg'),
 -- Shop 5: toàn bộ dịch vụ giá cao (900k - 1.5tr)
 (23, 5, 'Gói Spa Luxury Toàn Thân', 'SPA', 900000, 150,
    'Spa cao cấp trọn gói, sản phẩm nhập khẩu.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131038/cjaexv3nrmpryqmoifou.jpg'),
 (24, 5, 'Gói Trị Liệu Massage 5 Sao', 'SPA', 1200000, 120,
    'Massage trị liệu chuyên sâu 5 sao.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131089/d46r8ebvnyud7mn1caac.png'),
 (25, 5, 'Gói Chăm Sóc VIP Trọn Gói', 'SPA', 1500000, 180,
    'Chăm sóc toàn diện cao cấp nhất.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131131/hzoqtzs1lykdrssmgo8c.jpg'),
 -- Shop 6: giá vừa phải, ở Hà Nội
 (26, 6, 'Khám Tổng Quát', 'CLINIC', 180000, 30,
    'Khám sức khỏe tổng quát cho thú cưng.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131186/beg2xjgwkegei3nytkce.jpg'),
 (27, 6, 'Tiêm Phòng', 'CLINIC', 150000, 20,
    'Tiêm vaccine phòng bệnh dại và các bệnh thường gặp.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131224/c5gagcfwppfdip2usbud.jpg'),
 -- Shop 7 (La Gi): giá vừa phải, dùng để test bằng vị trí GPS thật
-(28, 7, 'Tắm & Sấy', 'GROOMING', 100000, 60,
+(28, 7, 'Tắm & Sấy', 'SPA', 100000, 60,
    'Tắm sạch, sấy khô và chải lông cho thú cưng.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
-(29, 7, 'Cắt Tỉa Lông', 'GROOMING', 150000, 75,
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131282/hkdilvmgnhityea13b5f.jpg'),
+(29, 7, 'Cắt Tỉa Lông', 'SPA', 150000, 75,
    'Cắt tỉa lông theo yêu cầu.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL),
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131323/hnglgrfvwr0fptt81sg2.jpg'),
 (30, 7, 'Spa Toàn Thân', 'SPA', 280000, 100,
    'Tắm thảo dược, massage, cắt móng và vệ sinh tai.',
-   1, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131354/vzddirqdwabzgc4zyvch.jpg');
 -- ============================================================================
+
+SET FOREIGN_KEY_CHECKS = 1;

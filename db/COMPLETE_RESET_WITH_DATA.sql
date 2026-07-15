@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     `just_upgraded` TINYINT(1) DEFAULT 0,
     `tier_id` INT,
     `total_spending` DOUBLE DEFAULT 0,
+    `failed_login_attempts` INT DEFAULT 0,
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB;
 
@@ -74,6 +75,8 @@ CREATE TABLE IF NOT EXISTS `shop` (
     `status` VARCHAR(50),
     `assignment_mode` VARCHAR(50),
     `late_grace_period` INT,
+    `off_days` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`owner_id`) REFERENCES `user`(`id`) ON DELETE SET NULL
     ) ENGINE=InnoDB;
@@ -165,6 +168,7 @@ CREATE TABLE IF NOT EXISTS `booking` (
     `status` VARCHAR(50),
     `note` TEXT,
     `voucher_id` INT,
+    `applied_user_voucher_id` INT,
     `discount_amount` DOUBLE DEFAULT 0,
     `cancellation_reason` VARCHAR(255),
     `bank_name` VARCHAR(100),
