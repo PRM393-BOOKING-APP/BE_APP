@@ -27,7 +27,7 @@ spring:
   # DATABASE (MYSQL)
   # ===============================
   datasource:
-    url: jdbc:mysql://localhost:3306/APP?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=utf8
+    url: jdbc:mysql://localhost:3306/PET_EYE?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=utf8
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
