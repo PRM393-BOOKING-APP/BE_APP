@@ -132,12 +132,12 @@ INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_e
 -- PETS
 -- ============================================================================
 INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob, sterilized,
-                 health_note, is_active) VALUES
-(1, 5, 'Mochi', 'CAT', 'Munchkin',    'FEMALE', 'Trắng vàng',  3.2, '2022-03-15', 1, 'Khỏe mạnh', 1),
-(2, 5, 'Buddy', 'DOG', 'Poodle',      'MALE',   'Nâu caramel', 4.5, '2021-07-20', 1, 'Dị ứng hải sản', 1),
-(3, 6, 'Luna',  'CAT', 'British SH',  'FEMALE', 'Xám xanh',    4.0, '2020-11-01', 1, 'Khỏe mạnh', 1),
-(4, 7, 'Max',   'DOG', 'Labrador',    'MALE',   'Vàng',        22.0,'2019-05-10', 0, 'Khớp cần theo dõi', 1),
-(5, 8, 'Coco',  'RABBIT','Holland Lop','FEMALE','Trắng đen',   2.1, '2023-01-25', 0, 'Khỏe mạnh', 1);
+                 health_note, is_active,avatar) VALUES
+(1, 5, 'Mochi', 'CAT', 'Munchkin',    'FEMALE', 'Trắng vàng',  3.2, '2022-03-15', 1, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132784/vkvn5tvkedzjwme2bj7c.jpg'),
+(2, 5, 'Buddy', 'DOG', 'Poodle',      'MALE',   'Nâu caramel', 4.5, '2021-07-20', 1, 'Dị ứng hải sản', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132715/fv2qtsjbv2rqgljfewpv.jpg'),
+(3, 6, 'Luna',  'CAT', 'British SH',  'FEMALE', 'Xám xanh',    4.0, '2020-11-01', 1, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132947/rqlzht7wskxn1nelfxip.jpg'),
+(4, 7, 'Max',   'DOG', 'Labrador',    'MALE',   'Vàng',        22.0,'2019-05-10', 0, 'Khớp cần theo dõi', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132903/nf6b7pxxgicqvqkzsgrl.jpg'),
+(5, 8, 'Coco',  'RABBIT','Holland Lop','FEMALE','Trắng đen',   2.1, '2023-01-25', 0, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132826/hjev3kplttode736xb07.jpg');
 
 -- ============================================================================
 -- PET SERVICES
@@ -503,25 +503,25 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 -- ============================================================================
 
 -- 1. Cập nhật avatar cho 4 khách hàng hiện có (dùng placeholder ảnh thật)
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=47' WHERE id = 5;  -- Pham Anh Thu
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=33' WHERE id = 6;  -- Nguyen Binh Minh
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=45' WHERE id = 7;  -- Vu Cam Ly
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=12' WHERE id = 8;  -- Hoang Duc Manh
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133307/ym7altp3jejdikztgrrl.jpg' WHERE id = 5;  -- Pham Anh Thu
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133363/ujsaxtio8ga3n9zwzke2.jpg' WHERE id = 6;  -- Nguyen Binh Minh
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133421/i3qkab8jj6meqjmomifc.jpg' WHERE id = 7;  -- Vu Cam Ly
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133392/yknvoflhibainefzwk9p.jpg' WHERE id = 8;  -- Hoang Duc Manh
 
 -- 2. Thêm khách hàng PLATINUM (tier_id=4, 15M spent) để demo filter
-INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts,avatar) VALUES
 (13, 'vip.customer@gmail.com',
  '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO',
- 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000, 0);
+ 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000, 0,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133497/njn5iovepjn3omaiv8f6.jpg');
 
-UPDATE `user` SET avatar = 'https://i.pravatar.cc/150?img=25' WHERE id = 13;
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133543/hbtpbln3lsv1van7wjj4.jpg' WHERE id = 13;
 
 INSERT INTO user_roles (user_id, roles_id) VALUES (13, 3);
 
 -- 3. Pets của khách hàng PLATINUM (2 con)
-INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob, sterilized, health_note, is_active) VALUES
-(6, 13, 'Diamond', 'DOG', 'Husky Siberia', 'MALE',   'Trắng xám', 18.5, '2020-08-15', 1, 'Khỏe mạnh, cần tập thể dục đều đặn', 1),
-(7, 13, 'Ruby',    'CAT', 'Ragdoll',       'FEMALE', 'Trắng kem',  4.2, '2021-12-01', 1, 'Khỏe mạnh, không dị ứng',            1);
+INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob, sterilized, health_note, is_active, avatar) VALUES
+(6, 13, 'Diamond', 'DOG', 'Husky Siberia', 'MALE',   'Trắng xám', 18.5, '2020-08-15', 1, 'Khỏe mạnh, cần tập thể dục đều đặn', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133028/wmfouirk7zjtsmy49gzw.jpg'),
+(7, 13, 'Ruby',    'CAT', 'Ragdoll',       'FEMALE', 'Trắng kem',  4.2, '2021-12-01', 1, 'Khỏe mạnh, không dị ứng',            1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133070/yoremoqhfckmzpw3mos3.webp');
 
 -- 4. Bookings COMPLETED của khách hàng PLATINUM tại shop 1 (IDs 27-30)
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
