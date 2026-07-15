@@ -109,7 +109,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '45 Đinh Tiên Hoàng, Phường 3, Quận Bình Thạnh, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.8038, 106.7162,
    'Phòng khám thú y uy tín với đội ngũ bác sĩ giàu kinh nghiệm.',
-   'GPKD-002-2024', NULL, '07:30', '18:00', 'MON,TUE,WED,THU,FRI,SAT',
+   'GPKD-002-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132490/kw6jkqvng8ulacskmfk7.jpg', '07:30', '18:00', 'MON,TUE,WED,THU,FRI,SAT',
    4.8, 1, 'APPROVED', 'AUTO', 10, NULL, NOW()),
 
 (3, 4, 'Pet Hotel 5 Sao', 'BOARDING',
@@ -117,7 +117,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '88 Nguyễn Oanh, Phường 17, Quận Gò Vấp, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.8451, 106.6657,
    'Khách sạn thú cưng 5 sao với camera giám sát 24/7. Phòng riêng và phòng chung, kèm dịch vụ spa tại chỗ cho thú cưng lưu trú.',
-   'GPKD-003-2024', NULL, '06:00', '22:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   'GPKD-003-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132532/h9dlgkjyj9ugljs14e8f.jpg', '06:00', '22:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
    4.7, 1, 'APPROVED', 'OPEN_POOL', 30, NULL, NOW());
 
 -- ============================================================================
@@ -805,7 +805,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '15 Nguyễn Văn Đậu, Phường 5, Quận Bình Thạnh, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.7860, 106.7010,
    'Tiệm chăm sóc thú cưng giá bình dân, phù hợp túi tiền sinh viên.',
-   'GPKD-004-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   'GPKD-004-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131888/v8oatrctazrhj3htgnzg.png', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
    3.5, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
 
 (5, 15, 'Luxury Paws Spa', 'SPA',
@@ -813,7 +813,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '200 Hai Bà Trưng, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
    10.7480, 106.7250,
    'Spa cao cấp 5 sao cho thú cưng, dịch vụ trọn gói sang trọng.',
-   'GPKD-005-2024', NULL, '09:00', '21:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   'GPKD-005-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131943/ogscuecijacpuvrkj3hh.png', '09:00', '21:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
    4.9, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
 
 (6, 16, 'Phòng Khám Thú Y Hà Nội', 'CLINIC',
@@ -821,7 +821,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '10 Hàng Bài, Hoàn Kiếm, Hà Nội', 'Hà Nội',
    21.0285, 105.8542,
    'Phòng khám thú y uy tín tại Hà Nội, hơn 10 năm kinh nghiệm.',
-   'GPKD-006-2024', NULL, '07:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT',
+   'GPKD-006-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132001/bmpiqd2wklwq1wlfkvkq.jpg', '07:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT',
    4.7, 1, 'PENDING', 'AUTO', 10, NULL, NOW()),
 
 (7, 17, 'Thú Cưng La Gi', 'SPA',
@@ -829,7 +829,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 'Lâm Đồng',
    10.6907, 107.7802,
    'Tiệm chăm sóc thú cưng địa phương tại La Gi, phục vụ tận tâm, giá hợp lý.',
-   'GPKD-007-2024', NULL, '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   'GPKD-007-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132047/kl4r68j3klp7jur12hcc.webp', '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
    4.6, 1, 'PENDING', 'MANUAL', 15, NULL, NOW()),
 
 (8, 18, 'Cầu Giấy Pet Spa', 'SPA',
@@ -837,7 +837,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '123 Cầu Giấy, Hà Nội', 'Hà Nội',
    21.0333, 105.7958,
    'Dịch vụ spa làm đẹp toàn diện cho thú cưng tại khu vực Cầu Giấy.',
-   'GPKD-008-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   'GPKD-008-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132235/hhgc6m3zybjbmu3jt2jk.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
    0.0, 0, 'PENDING', 'MANUAL', 15, NULL, NOW()),
 
 (9, 19, 'Phòng Khám Thú Y Đống Đa', 'CLINIC',
@@ -845,7 +845,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '456 Đống Đa, Hà Nội', 'Hà Nội',
    21.0125, 105.8239,
    'Chuyên khám chữa bệnh, tiêm phòng cho chó mèo uy tín.',
-   'GPKD-009-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   'GPKD-009-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132173/mvxzfszyaueskttgmpsj.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
    0.0, 0, 'REJECTED', 'MANUAL', 15, NULL, NOW()),
 
 (10, 20, 'Khách Sạn Thú Cưng Ba Đình', 'BOARDING',
@@ -853,7 +853,7 @@ INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, cit
    '789 Ba Đình, Hà Nội', 'Hà Nội',
    21.0357, 105.8361,
    'Dịch vụ lưu chuồng an toàn, sạch sẽ, có sân chơi rộng rãi cho các bé.',
-   'GPKD-010-2024', NULL, '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   'GPKD-010-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132292/njbnvqcxpvxdcdnyvf3c.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
    0.0, 0, 'REJECTED', 'MANUAL', 15, NULL, NOW());
 
 INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_earned, total_withdrawn) VALUES
