@@ -79,7 +79,7 @@ public class AdminServiceImpl implements AdminService {
         // Period stats
         BigDecimal periodRevenue = bookingRepository.sumRevenueBetween(periodStart, periodEnd);
         if (periodRevenue == null) periodRevenue = BigDecimal.ZERO;
-        long periodUsers = userRepository.countUsersBetween(periodStart, periodEnd);
+        long periodUsers = userRepository.countActiveUsersBetween(periodStart, periodEnd);
         long periodBookings = bookingRepository.countBookingsBetween(periodStart, periodEnd);
 
         // Calculate Revenue Trend (Current vs Prev period)
@@ -94,7 +94,7 @@ public class AdminServiceImpl implements AdminService {
         Boolean totalRevenueTrendUp = revTrendVal >= 0;
 
         // Calculate Users Trend
-        long usersPrev = userRepository.countUsersBetween(prevStart, prevEnd);
+        long usersPrev = userRepository.countActiveUsersBetween(prevStart, prevEnd);
         double usersTrendVal = 0.0;
         if (usersPrev > 0) {
             usersTrendVal = (double) (periodUsers - usersPrev) / usersPrev * 100;
@@ -115,14 +115,14 @@ public class AdminServiceImpl implements AdminService {
         String totalBookingsTrend = String.format("%s%.1f%%", bookingsTrendVal >= 0 ? "+" : "", bookingsTrendVal);
         Boolean totalBookingsTrendUp = bookingsTrendVal >= 0;
 
-        long periodShops = shopRepository.countShopsBetween(periodStart, periodEnd);
+        long periodShops = shopRepository.countActiveShopsBetween(periodStart, periodEnd);
         long periodPendingShops = shopRepository.countShopsByStatusBetween(ShopStatus.PENDING, periodStart, periodEnd);
         long periodMessages = messageRepository.countMessagesBetween(periodStart, periodEnd);
         
         long totalMessages = messageRepository.count();
 
         // Calculate Shops Trend
-        long shopsPrev = shopRepository.countShopsBetween(prevStart, prevEnd);
+        long shopsPrev = shopRepository.countActiveShopsBetween(prevStart, prevEnd);
         double shopsTrendVal = 0.0;
         if (shopsPrev > 0) { shopsTrendVal = (double) (periodShops - shopsPrev) / shopsPrev * 100; }
         else if (shopsPrev == 0 && periodShops > 0) { shopsTrendVal = 100.0; }
@@ -145,7 +145,7 @@ public class AdminServiceImpl implements AdminService {
         String totalMessagesTrend = String.format("%s%.1f%%", messagesTrendVal >= 0 ? "+" : "", messagesTrendVal);
         Boolean totalMessagesTrendUp = messagesTrendVal >= 0;
 
-        // Calculate Sparklines (Last 8 days)
+        // Calculate Sparklines — chia đều period thành 8 điểm
         List<Double> totalRevenueSparkData = new ArrayList<>();
         List<Long> totalUsersSparkData = new ArrayList<>();
         List<Long> totalBookingsSparkData = new ArrayList<>();
@@ -153,18 +153,22 @@ public class AdminServiceImpl implements AdminService {
         List<Long> pendingShopsSparkData = new ArrayList<>();
         List<Long> totalMessagesSparkData = new ArrayList<>();
 
-        for (int i = 7; i >= 0; i--) {
-            LocalDateTime dayStart = LocalDate.now().minusDays(i).atStartOfDay();
-            LocalDateTime dayEnd = LocalDate.now().minusDays(i).atTime(23, 59, 59);
-            
-            BigDecimal dayRev = bookingRepository.sumRevenueBetween(dayStart, dayEnd);
+        long totalSeconds = java.time.temporal.ChronoUnit.SECONDS.between(periodStart, periodEnd);
+        int points = 8;
+        long segmentSeconds = Math.max(totalSeconds / points, 86400); // ít nhất 1 ngày mỗi điểm
+
+        for (int i = 0; i < points; i++) {
+            LocalDateTime segStart = periodStart.plusSeconds(segmentSeconds * i);
+            LocalDateTime segEnd   = (i == points - 1) ? periodEnd : periodStart.plusSeconds(segmentSeconds * (i + 1)).minusSeconds(1);
+
+            BigDecimal dayRev = bookingRepository.sumRevenueBetween(segStart, segEnd);
             totalRevenueSparkData.add(dayRev != null ? dayRev.doubleValue() : 0.0);
-            
-            totalUsersSparkData.add(userRepository.countUsersBetween(dayStart, dayEnd));
-            totalBookingsSparkData.add(bookingRepository.countBookingsBetween(dayStart, dayEnd));
-            totalShopsSparkData.add(shopRepository.countShopsBetween(dayStart, dayEnd));
-            pendingShopsSparkData.add(shopRepository.countShopsByStatusBetween(ShopStatus.PENDING, dayStart, dayEnd));
-            totalMessagesSparkData.add(messageRepository.countMessagesBetween(dayStart, dayEnd));
+
+            totalUsersSparkData.add(userRepository.countActiveUsersBetween(segStart, segEnd));
+            totalBookingsSparkData.add(bookingRepository.countBookingsBetween(segStart, segEnd));
+            totalShopsSparkData.add(shopRepository.countActiveShopsBetween(segStart, segEnd));
+            pendingShopsSparkData.add(shopRepository.countShopsByStatusBetween(ShopStatus.PENDING, segStart, segEnd));
+            totalMessagesSparkData.add(messageRepository.countMessagesBetween(segStart, segEnd));
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -181,6 +185,7 @@ public class AdminServiceImpl implements AdminService {
         result.put("totalUsersSparkData", totalUsersSparkData);
 
         result.put("totalShops", totalShops);
+        result.put("periodShops", periodShops);
         result.put("totalShopsTrend", totalShopsTrend);
         result.put("totalShopsTrendUp", totalShopsTrendUp);
         result.put("totalShopsSparkData", totalShopsSparkData);
@@ -192,12 +197,14 @@ public class AdminServiceImpl implements AdminService {
         result.put("totalBookingsSparkData", totalBookingsSparkData);
 
         result.put("pendingShops", pendingShops);
+        result.put("periodPendingShops", periodPendingShops);
         result.put("pendingShopsTrend", pendingShopsTrend);
         result.put("pendingShopsTrendUp", pendingShopsTrendUp);
         result.put("pendingShopsSparkData", pendingShopsSparkData);
 
         result.put("unreadMessages", unreadMessages);
         result.put("totalMessages", totalMessages);
+        result.put("periodMessages", periodMessages);
         result.put("totalMessagesTrend", totalMessagesTrend);
         result.put("totalMessagesTrendUp", totalMessagesTrendUp);
         result.put("totalMessagesSparkData", totalMessagesSparkData);

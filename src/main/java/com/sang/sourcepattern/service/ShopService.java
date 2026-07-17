@@ -34,7 +34,7 @@ public interface ShopService {
             Double lat, Double lng, Double radiusKm);
 
     PageResponse<ShopResponse> searchVerifiedShopsPaged(String keyword, String city, String shopType,
-            java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Float minRating, int page);
+            java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Float minRating, int page, int size);
 
     /** Public: get a single verified shop by id */
     ShopResponse getVerifiedShopById(int id);

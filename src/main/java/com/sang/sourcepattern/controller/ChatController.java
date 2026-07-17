@@ -408,6 +408,44 @@ public class ChatController {
         return ApiResponse.<List<UserResponse>>builder().result(response).build();
     }
 
+    /** REST — Thu hồi tin nhắn (chỉ người gửi mới được thu hồi) */
+    @DeleteMapping("/chat/messages/{id}/recall")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SHOP_OWNER') or hasRole('STAFF') or hasRole('USER')")
+    public ApiResponse<Void> recallMessage(
+            @PathVariable int id,
+            @AuthenticationPrincipal Jwt jwt) {
+        final String myEmail = jwt.getClaimAsString("email") != null
+                ? jwt.getClaimAsString("email")
+                : jwt.getSubject();
+
+        Message message = messageRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MESSAGE_NOT_FOUND));
+
+        if (!message.getSenderEmail().equalsIgnoreCase(myEmail)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        message.setRecalled(true);
+        message.setContent("Tin nhắn đã được thu hồi");
+        messageRepository.save(message);
+
+        // Broadcast recall event to all subscribers of the channel
+        ChatMessageResponse response = toResponse(message);
+        String destination;
+        if ("CUSTOMER_CHAT".equals(message.getChannelType())) {
+            destination = "/topic/chat/" + message.getShopId() + "/customer/" + message.getRecipientEmail();
+        } else if ("ADMIN_SUPPORT".equals(message.getChannelType())) {
+            destination = "/topic/chat/" + message.getShopId() + "/ADMIN_SUPPORT/" + message.getRecipientEmail();
+        } else if ("DIRECT".equals(message.getChannelType())) {
+            destination = "/topic/chat/" + message.getShopId() + "/direct/" + message.getRecipientEmail();
+        } else {
+            destination = "/topic/chat/" + message.getShopId() + "/" + message.getChannelType();
+        }
+        messagingTemplate.convertAndSend(destination, response);
+
+        return ApiResponse.<Void>builder().message("Recalled").build();
+    }
+
     private ChatMessageResponse toResponse(Message m) {
         return ChatMessageResponse.builder()
                 .id(m.getId())
@@ -418,9 +456,9 @@ public class ChatController {
                 .targetId(m.getTargetId())
                 .senderRole(m.getSenderRole())
                 .content(m.getContent())
-
                 .createdAt(m.getCreatedAt())
                 .isRead(m.isRead())
+                .isRecalled(m.isRecalled())
                 .build();
     }
 }

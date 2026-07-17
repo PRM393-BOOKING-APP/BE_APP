@@ -17,6 +17,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
     List<User> findByRoleName(@Param("roleName") String roleName);
 
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
+    org.springframework.data.domain.Page<User> findByRoleName(@Param("roleName") String roleName, org.springframework.data.domain.Pageable pageable);
+
     Optional<User> findByFacebookId(String facebookId);
     Optional<User> findByZaloId(String zaloId);
     Optional<User> findByGoogleId(String googleId);
@@ -44,5 +47,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt BETWEEN :start AND :end")
     long countUsersBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
+
+    /** Đếm số user DISTINCT có booking trong khoảng thời gian (dùng cho dashboard filter) */
+    @Query("SELECT COUNT(DISTINCT b.user) FROM Booking b WHERE b.createdAt BETWEEN :start AND :end AND b.status != 'PENDING_PAYMENT'")
+    long countActiveUsersBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
 }
 

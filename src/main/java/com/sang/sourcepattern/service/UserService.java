@@ -20,7 +20,7 @@ public interface UserService {
 
     List<UserResponse> getAllUsers();
 
-    PageResponse<UserResponse> getAllUsersPaged(int page);
+    PageResponse<UserResponse> getAllUsersPaged(int page, String role);
 
     void deleteUser(Integer userId);
 

@@ -53,4 +53,7 @@ public class Message {
 
     @Builder.Default
     boolean isRead = false;
+
+    @Builder.Default
+    boolean isRecalled = false;
 }

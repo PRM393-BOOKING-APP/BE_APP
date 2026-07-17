@@ -125,4 +125,8 @@ public interface ShopRepository extends JpaRepository<Shop, Integer> {
 
     @Query("SELECT COUNT(s) FROM Shop s WHERE s.status = :status AND s.createdAt BETWEEN :start AND :end")
     long countShopsByStatusBetween(@Param("status") com.sang.sourcepattern.enums.ShopStatus status, @Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
+
+    /** Đếm số shop DISTINCT có booking trong khoảng thời gian (dùng cho dashboard filter) */
+    @Query("SELECT COUNT(DISTINCT b.shop) FROM Booking b WHERE b.createdAt BETWEEN :start AND :end AND b.status != 'PENDING_PAYMENT'")
+    long countActiveShopsBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
 }
