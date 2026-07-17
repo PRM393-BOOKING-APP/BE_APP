@@ -22,8 +22,8 @@ TRUNCATE TABLE `shop`;
 TRUNCATE TABLE `user_roles`;
 TRUNCATE TABLE `user`;
 
-INSERT INTO `user` (`id`, `email`, `password`, `full_name`, `phone`, `address`, `active`, `email_verified`, `failed_login_attempts`, `created_at`) VALUES
-(1, 'admin@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Admin System', '0999999999', 'Quận 1, TP.HCM', 1, 1, 0, NOW()),
+INSERT INTO `user` (`id`, `email`, `password`, `full_name`, `phone`, `address`, `active`, `email_verified`, `failed_login_attempts`, `avatar`, `created_at`) VALUES
+(1, 'admin@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Admin System', '0999999999', 'Quận 1, TP.HCM', 1, 1, 0, 'https://randomuser.me/api/portraits/men/32.jpg', NOW()),
 (104, 'huyhoang15032k4@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Huy Hoàng', '0900000104', 'Hà Nội', 1, 1, 0, NOW()),
 (105, 'hoangdhse180422@fpt.edu.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Hoàng FPT', '0900000105', 'Hà Nội', 1, 1, 0, NOW()),
 (106, 'khachhang1@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Khách 1', '0900000106', 'Hà Nội', 1, 1, 0, NOW()),
@@ -58,12 +58,12 @@ INSERT INTO `user_roles` (`user_id`, `roles_id`) VALUES
 (114, 3),
 (124, 4);
 
-INSERT INTO `shop` (`id`, `owner_id`, `shop_name`, `email`, `phone`, `address`, `city`, `shop_type`, `is_verified`, `late_grace_period`, `description`, `open_time`, `close_time`, `working_days`, `rating_avg`) VALUES
+INSERT INTO `shop` (`id`, `owner_id`, `shop_name`, `email`, `phone`, `address`, `city`, `shop_type`, `is_verified`, `late_grace_period`, `description`, `open_time`, `close_time`, `working_days`, `rating_avg`, `logo_url`, `banner_url`, `gallery_urls`) VALUES
 (10, 110, 'PetCare Hospital Q2', 'huyacsp1@gmail.com', '098000010', 'Địa chỉ shop PetCare Hospital Q2', 'Hồ Chí Minh', 'CLINIC', 1, 15, 'Phòng khám thú y uy tín tại Quận 2. Bác sĩ 10 năm kinh nghiệm, trang thiết bị hiện đại.', '07:00', '21:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.5),
 (11, 111, 'PetPro Luxury Boarding', 'huyacsp3@gmail.com', '098000011', 'Địa chỉ shop PetPro Luxury Boarding', 'Hồ Chí Minh', 'BOARDING', 1, 15, 'Dịch vụ lưu trú & khách sạn thú cưng. Camera 24/7, phòng riêng thoáng mát.', '06:00', '22:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.6),
 (12, 112, 'Sasaki Grooming & Spa', 'huyacsp4@gmail.com', '098000012', 'Địa chỉ shop Sasaki Grooming & Spa', 'Hồ Chí Minh', 'SPA_GROOMING', 1, 15, 'Chuyên dịch vụ Spa & Grooming cho thú cưng. Đội ngũ nhân viên tận tình, sản phẩm cao cấp.', '08:00', '20:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.6),
 (13, 113, 'Pawsome Clinic Q3', 'shop4@peteye.com', '098000013', 'Địa chỉ shop Pawsome Clinic Q3', 'Hồ Chí Minh', 'CLINIC', 1, 15, 'Phòng khám thú y hiện đại tại Quận 3. Chuyên điều trị chuyên sâu và phẫu thuật nội soi.', '08:00', '20:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.6),
-(14, 114, 'Meowtel District 1', 'shop5@peteye.com', '098000014', 'Địa chỉ shop Meowtel District 1', 'Hồ Chí Minh', 'BOARDING', 1, 15, 'Khách sạn cao cấp chuyên dành riêng cho mèo tại Quận 1. Yên tĩnh, an toàn, có khu vui chơi riêng.', '07:00', '22:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.3);
+(14, 114, 'Meowtel District 1', 'shop5@peteye.com', '098000014', 'Địa chỉ shop Meowtel District 1', 'Hồ Chí Minh', 'BOARDING', 1, 15, 'Khách sạn cao cấp chuyên dành riêng cho mèo tại Quận 1. Yên tĩnh, an toàn, có khu vui chơi riêng.', '07:00', '22:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.3, 'https://img.freepik.com/free-vector/detailed-pet-logo-template_23-2149023812.jpg?w=740', 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1000&auto=format&fit=crop', 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=500&auto=format&fit=crop,https://images.unsplash.com/photo-1596253457199-04473b64f331?q=80&w=500&auto=format&fit=crop');
 
 INSERT INTO `shop_wallet` (`id`, `shop_id`, `frozen_balance`, `available_balance`, `total_earned`, `total_withdrawn`, `updated_at`) VALUES
 (1, 10, 2565000, 3960000, 3960000, 0, NOW()),
@@ -112,7 +112,7 @@ INSERT INTO `pet_service` (`id`, `shop_id`, `service_name`, `description`, `pric
 (1406, 14, 'Huấn luyện cơ bản (1 buổi)', 'Huấn luyện các lệnh cơ bản: ngồi, nằm, đứng, đi theo. Phù hợp cho chó từ 3 tháng tuổi trở lên.', 300000, 60, 'BOARDING', 1, NOW());
 
 INSERT INTO `pet` (`id`, `owner_id`, `name`, `species`, `breed`, `gender`, `color`, `avatar`, `sterilized`, `weight`, `dob`, `health_note`, `favorite_food`, `allergies`, `hobbies`, `walk_time`, `is_active`) VALUES
-(1, 104, 'Max', 'CAT', 'Munchkin', 'FEMALE', 'Trắng', NULL, 1, 3.9, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
+(1, 104, 'Max', 'CAT', 'Munchkin', 'FEMALE', 'Trắng', 'https://cdn2.thecatapi.com/images/3m.jpg', 1, 3.9, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
 (2, 104, 'Charlie 1', 'CAT', 'Munchkin', 'MALE', 'Trắng', NULL, 1, 20.9, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
 (3, 104, 'Max 2', 'DOG', 'Golden Retriever', 'FEMALE', 'Trắng', NULL, 1, 8.7, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
 (4, 105, 'Charlie', 'CAT', 'Persian', 'MALE', 'Trắng', NULL, 1, 2.8, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
