@@ -1,1413 +1,910 @@
+-- ============================================================================
+-- FRESH SEED DATA - PET EYE
+-- 6 booking statuses x 4-5 records each, full demo data
+-- Run AFTER COMPLETE_RESET_WITH_DATA.sql (schema already created)
+-- Or run standalone after dropping and recreating PET_EYE db.
+-- ============================================================================
+USE PET_EYE;
 SET FOREIGN_KEY_CHECKS = 0;
+SET NAMES utf8mb4;
 
-TRUNCATE TABLE `review`;
-TRUNCATE TABLE `notification`;
-TRUNCATE TABLE `message`;
-TRUNCATE TABLE `care_log`;
-TRUNCATE TABLE `booking_services`;
-TRUNCATE TABLE `transaction`;
-TRUNCATE TABLE `payment`;
-TRUNCATE TABLE `booking`;
-TRUNCATE TABLE `pet_image`;
-TRUNCATE TABLE `pet_vaccination`;
-TRUNCATE TABLE `pet_medical_record`;
-TRUNCATE TABLE `pet_document`;
-TRUNCATE TABLE `pet_meal`;
-TRUNCATE TABLE `pet_reminder`;
-TRUNCATE TABLE `pet`;
-TRUNCATE TABLE `pet_service`;
-TRUNCATE TABLE `staff`;
-TRUNCATE TABLE `shop_wallet`;
-TRUNCATE TABLE `shop`;
-TRUNCATE TABLE `user_roles`;
+-- ============================================================================
+-- TRUNCATE ALL DATA TABLES
+-- ============================================================================
+TRUNCATE TABLE withdrawal_request;
+TRUNCATE TABLE shop_wallet;
+TRUNCATE TABLE staff_change_request;
+TRUNCATE TABLE staff_certificate;
+TRUNCATE TABLE pet_vaccination;
+TRUNCATE TABLE pet_reminder;
+TRUNCATE TABLE pet_meal;
+TRUNCATE TABLE pet_image;
+TRUNCATE TABLE pet_document;
+TRUNCATE TABLE boarding_detail;
+TRUNCATE TABLE booking_history;
+TRUNCATE TABLE care_log;
+TRUNCATE TABLE pet_medical_record;
+TRUNCATE TABLE review;
+TRUNCATE TABLE notification;
+TRUNCATE TABLE payment;
+TRUNCATE TABLE booking_services;
+TRUNCATE TABLE booking;
+TRUNCATE TABLE cage;
+TRUNCATE TABLE pet;
+TRUNCATE TABLE staff;
+TRUNCATE TABLE pet_service;
+TRUNCATE TABLE shop;
+TRUNCATE TABLE user_voucher;
+TRUNCATE TABLE voucher;
+TRUNCATE TABLE invalidated_token;
+TRUNCATE TABLE user_token;
+TRUNCATE TABLE user_roles;
 TRUNCATE TABLE `user`;
+TRUNCATE TABLE `role`;
+TRUNCATE TABLE membership_tier;
 
-INSERT INTO `user` (`id`, `email`, `password`, `full_name`, `phone`, `address`, `active`, `email_verified`, `failed_login_attempts`, `created_at`) VALUES
-(1, 'admin@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Admin System', '0999999999', 'Quận 1, TP.HCM', 1, 1, 0, NOW()),
-(104, 'huyhoang15032k4@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Huy Hoàng', '0900000104', 'Hà Nội', 1, 1, 0, NOW()),
-(105, 'hoangdhse180422@fpt.edu.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Hoàng FPT', '0900000105', 'Hà Nội', 1, 1, 0, NOW()),
-(106, 'khachhang1@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Khách 1', '0900000106', 'Hà Nội', 1, 1, 0, NOW()),
-(107, 'khachhang2@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Khách 2', '0900000107', 'Hà Nội', 1, 1, 0, NOW()),
-(108, 'khachhang3@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Khách 3', '0900000108', 'Hà Nội', 1, 1, 0, NOW()),
-(110, 'huyacsp1@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Owner PetCare Hospital Q2', '098000010', 'TP.HCM', 1, 1, 0, NOW()),
-(120, 'staff_10@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Staff PetCare Hospital Q2', '097000010', 'TP.HCM', 1, 1, 0, NOW()),
-(111, 'huyacsp3@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Owner PetPro Luxury Boarding', '098000011', 'TP.HCM', 1, 1, 0, NOW()),
-(121, 'staff_11@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Staff PetPro Luxury Boarding', '097000011', 'TP.HCM', 1, 1, 0, NOW()),
-(112, 'huyacsp4@gmail.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Owner Sasaki Grooming & Spa', '098000012', 'TP.HCM', 1, 1, 0, NOW()),
-(122, 'staff_12@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Staff Sasaki Grooming & Spa', '097000012', 'TP.HCM', 1, 1, 0, NOW()),
-(113, 'shop4@peteye.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Owner Pawsome Clinic Q3', '098000013', 'TP.HCM', 1, 1, 0, NOW()),
-(123, 'staff_13@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Staff Pawsome Clinic Q3', '097000013', 'TP.HCM', 1, 1, 0, NOW()),
-(114, 'shop5@peteye.com', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Owner Meowtel District 1', '098000014', 'TP.HCM', 1, 1, 0, NOW()),
-(124, 'staff_14@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Staff Meowtel District 1', '097000014', 'TP.HCM', 1, 1, 0, NOW());
+-- ============================================================================
+-- ROLES
+-- ============================================================================
+INSERT INTO `role` (id, name, description) VALUES
+(1, 'ADMIN',      'Quản trị viên hệ thống'),
+(2, 'SHOP_OWNER', 'Chủ cửa hàng thú cưng'),
+(3, 'USER',       'Khách hàng'),
+(4, 'STAFF',      'Nhân viên cửa hàng');
 
-INSERT INTO `user_roles` (`user_id`, `roles_id`) VALUES
+-- ============================================================================
+-- MEMBERSHIP TIERS
+-- ============================================================================
+INSERT INTO membership_tier (id, name, required_spending, benefits) VALUES
+(1, 'BRONZE',   0,        'Thành viên cơ bản'),
+(2, 'SILVER',   2000000,  'Giảm 5% tất cả dịch vụ'),
+(3, 'GOLD',     5000000,  'Giảm 10% + ưu tiên đặt lịch'),
+(4, 'PLATINUM', 10000000, 'Giảm 15% + tư vấn riêng');
+
+-- ============================================================================
+-- USERS  (password = "12345678" for all)
+-- IDs: 1=admin, 2-4=owners, 5-8=customers
+-- ============================================================================
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
+                                                                                                                                                (1,  'admin@peteye.vn',       '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Admin PetEye',         '0900000001', 'TP. Hồ Chí Minh', 1, 1, 1, 0, 0),
+                                                                                                                                                (2,  'owner1@peteye.vn',   '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Minh Tuấn',     '0901111001', '123 Lê Văn Sỹ, Quận 3, TP. Hồ Chí Minh',       1, 1, 1, 0, 0),
+                                                                                                                                                (3,  'owner2@peteye.vn','$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Thị Lan',         '0901111002', '45 Đinh Tiên Hoàng, Quận Bình Thạnh, TP. Hồ Chí Minh', 1, 1, 1, 0, 0),
+                                                                                                                                                (4,  'owner3@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Lê Hoàng Nam',         '0901111003', '88 Nguyễn Oanh, Quận Gò Vấp, TP. Hồ Chí Minh',     1, 1, 1, 0, 0),
+                                                                                                                                                (5,  'anhthu@gmail.com',      '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Phạm Anh Thư',         '0912345001', '10 Trần Huy Liệu, Quận Phú Nhuận, TP. Hồ Chí Minh',   1, 1, 3, 3500000, 0),
+                                                                                                                                                (6,  'binhminh@gmail.com',    '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Bình Minh',     '0912345002', '5 Võ Thị Sáu, Quận 1, TP. Hồ Chí Minh',        1, 1, 2, 1500000, 0),
+                                                                                                                                                (7,  'camly@gmail.com',       '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Vũ Cẩm Ly',            '0912345003', '22 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh',      1, 1, 2, 800000, 0),
+                                                                                                                                                (8,  'ducmanh@gmail.com',     '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Hoàng Đức Mạnh',       '0912345004', '7 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh', 1, 1, 1, 200000, 0);
+-- ============================================================================
+-- USER ROLES
+-- ============================================================================
+INSERT INTO user_roles (user_id, roles_id) VALUES
+(1,  1),
+(2,  2),
+(3,  2),
+(4,  2),
+(5,  3),
+(6,  3),
+(7,  3),
+(8,  3);
+
+-- ============================================================================
+-- SHOPS
+-- Shop 3 (Pet Hotel 5 Sao) cung cấp cả LƯU TRÚ (BOARDING) lẫn SPA_GROOMING
+-- để test luồng đặt lịch/thanh toán gộp nhiều loại dịch vụ trong 1 booking.
+-- ============================================================================
+INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, city, latitude, longitude,
+                  description, license_number, logo_url, open_time, close_time, working_days,
+                  rating_avg, is_verified, status, assignment_mode, late_grace_period,
+                  off_days, created_at) VALUES
+(1, 2, 'Mèo Kute Spa', 'SPA',
+   'contact@meokutespa.vn', '02812345001',
+   '123 Lê Văn Sỹ, Phường 13, Quận 3, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
+   10.7769, 106.6938,
+   'Spa & chăm sóc lông cao cấp cho mèo và chó. Đội ngũ chuyên nghiệp, tận tâm.',
+   'GPKD-001-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784128585/n3ukgjhrssosvduanlpm.png', '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.6, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
+
+(2, 3, 'Thú Y An Tâm', 'CLINIC',
+   'contact@thuyantam.vn', '02812345002',
+   '45 Đinh Tiên Hoàng, Phường 3, Quận Bình Thạnh, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
+   10.8038, 106.7162,
+   'Phòng khám thú y uy tín với đội ngũ bác sĩ giàu kinh nghiệm.',
+   'GPKD-002-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132490/kw6jkqvng8ulacskmfk7.jpg', '07:30', '18:00', 'MON,TUE,WED,THU,FRI,SAT',
+   4.8, 1, 'APPROVED', 'AUTO', 10, NULL, NOW()),
+
+(3, 4, 'Pet Hotel 5 Sao', 'BOARDING',
+   'contact@pethotel5sao.vn', '02812345003',
+   '88 Nguyễn Oanh, Phường 17, Quận Gò Vấp, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
+   10.8451, 106.6657,
+   'Khách sạn thú cưng 5 sao với camera giám sát 24/7. Phòng riêng và phòng chung, kèm dịch vụ spa tại chỗ cho thú cưng lưu trú.',
+   'GPKD-003-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132532/h9dlgkjyj9ugljs14e8f.jpg', '06:00', '22:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.7, 1, 'APPROVED', 'OPEN_POOL', 30, NULL, NOW());
+
+-- ============================================================================
+-- SHOP WALLETS
+-- ============================================================================
+INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_earned, total_withdrawn) VALUES
+(1, 1, 0.00,       3450000.00, 5450000.00, 2000000.00),
+(2, 2, 0.00,       2950000.00, 3950000.00, 1000000.00),
+(3, 3, 350000.00,  2550000.00, 2900000.00, 0.00);
+
+-- ============================================================================
+-- PETS
+-- ============================================================================
+INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob, sterilized,
+                 health_note, is_active,avatar) VALUES
+(1, 5, 'Mochi', 'CAT', 'Munchkin',    'FEMALE', 'Trắng vàng',  3.2, '2022-03-15', 1, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132784/vkvn5tvkedzjwme2bj7c.jpg'),
+(2, 5, 'Buddy', 'DOG', 'Poodle',      'MALE',   'Nâu caramel', 4.5, '2021-07-20', 1, 'Dị ứng hải sản', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132715/fv2qtsjbv2rqgljfewpv.jpg'),
+(3, 6, 'Luna',  'CAT', 'British SH',  'FEMALE', 'Xám xanh',    4.0, '2020-11-01', 1, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132947/rqlzht7wskxn1nelfxip.jpg'),
+(4, 7, 'Max',   'DOG', 'Labrador',    'MALE',   'Vàng',        22.0,'2019-05-10', 0, 'Khớp cần theo dõi', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132903/nf6b7pxxgicqvqkzsgrl.jpg'),
+(5, 8, 'Coco',  'RABBIT','Holland Lop','FEMALE','Trắng đen',   2.1, '2023-01-25', 0, 'Khỏe mạnh', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132826/hjev3kplttode736xb07.jpg');
+
+-- ============================================================================
+-- PET SERVICES
+-- ============================================================================
+INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
+                          active, camera_enabled, cage_size, room_type,
+                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description,image_url) VALUES
+-- Shop 1: SPA_GROOMING
+(1, 1, 'Tắm & Sấy Cơ Bản', 'SPA', 150000, 60,
+   'Tắm sạch với dầu gội chuyên dụng, sấy khô và chải lông.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784128944/gavn7efenvniguwmox6y.webp'),
+(2, 1, 'Cắt Tỉa Lông', 'SPA', 200000, 90,
+   'Cắt tỉa theo yêu cầu, tạo kiểu lông đẹp cho thú cưng.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129478/ynxahjzw8tefgno9u2j8.jpg'),
+(3, 1, 'Spa Toàn Thân', 'SPA', 350000, 120,
+   'Tắm thảo dược, massage, cắt móng, vệ sinh tai và tạo kiểu.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129645/jp6o2qts0tnf7ybphlaw.jpg'),
+(4, 1, 'Nhuộm Lông Nghệ Thuật', 'SPA', 500000, 180,
+   'Nhuộm lông bằng màu an toàn, tạo kiểu độc đáo theo yêu cầu.',
+   0, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129720/culj1peh9mtvguedtfaw.jpg'),
+-- Shop 2: CLINIC
+(5, 2, 'Khám Tổng Quát', 'CLINIC', 200000, 30,
+   'Khám sức khỏe toàn diện, tư vấn dinh dưỡng và chăm sóc.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129785/jnu8ywecadecyumvyycv.jpg'),
+(6, 2, 'Tiêm Phòng', 'CLINIC', 150000, 20,
+   'Tiêm vaccine phòng bệnh dại, carre, parvo và các bệnh thường gặp.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784129875/nizrwc9z7dilqkrinj9u.jpg'),
+(7, 2, 'Xét Nghiệm Máu', 'CLINIC', 300000, 45,
+   'Xét nghiệm công thức máu toàn phần, đánh giá chức năng gan thận.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130521/sq1gxoy2brlo3qvhkn0q.jpg'),
+(8, 2, 'Siêu Âm Ổ Bụng', 'CLINIC', 400000, 60,
+   'Siêu âm chẩn đoán các bệnh lý nội tạng, thai sản.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130564/abylbyqlnkaxeysv1qo5.jpg'),
+-- Shop 3: BOARDING (có camera) + SPA_GROOMING tại chỗ
+(9, 3, 'Lưu Trú Phòng Chung', 'BOARDING', 200000, 1440,
+   'Phòng chung thoải mái, ăn uống đầy đủ, vui chơi cùng các bé khác.',
+   1, 1, '["SMALL","MEDIUM"]', '["SHARED"]',
+   '["BASIC","HD"]',
+   '{"BASIC":0,"HD":60000}',
+   '{"BASIC":"Xem cơ bản (miễn phí)","HD":"Camera HD (60.000đ/ngày)"}',
+   'Camera giám sát 24/7, xem qua ứng dụng','http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130464/r9v9nhmxymqn7b8d9zku.jpg'),
+(10, 3, 'Lưu Trú Phòng Riêng', 'BOARDING', 350000, 1440,
+    'Phòng riêng yên tĩnh, chăm sóc cá nhân, 2 bữa/ngày.',
+    1, 1, '["MEDIUM","LARGE"]', '["PRIVATE"]',
+    '["BASIC","HD","AI"]',
+    '{"BASIC":0,"HD":60000,"AI":200000}',
+    '{"BASIC":"Xem cơ bản (miễn phí)","HD":"Camera HD (60.000đ/ngày)","AI":"AI theo dõi hành vi (200.000đ/ngày)"}',
+    'Camera HD & AI nhận diện hành vi bất thường','http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130411/rkckkbvgurpiis2i1xzw.jpg'),
+(11, 3, 'Lưu Trú VIP Suite', 'BOARDING', 550000, 1440,
+    'Phòng VIP rộng rãi, giường êm ái, đồ chơi riêng, chăm sóc cá nhân tối đa.',
+    1, 1, '["LARGE"]', '["PRIVATE"]',
+    '["BASIC","HD","AI"]',
+    '{"BASIC":0,"HD":60000,"AI":200000}',
+    '{"BASIC":"Xem cơ bản (miễn phí)","HD":"Camera HD (60.000đ/ngày)","AI":"AI theo dõi hành vi (200.000đ/ngày)"}',
+    'Camera AI cao cấp theo dõi sức khỏe và hành vi 24/7','http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130302/dmsgtzl0x6igy8afiliz.jpg'),
+(12, 3, 'Tắm & Vệ Sinh', 'SPA', 120000, 90,
+    'Tắm sạch, vệ sinh tai, cắt móng cho thú cưng lưu trú.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130133/yhvzdfzw1veyyxozicov.jpg'),
+(13, 3, 'Spa Toàn Thân', 'SPA', 350000, 120,
+    'Tắm thảo dược, massage, cắt móng, vệ sinh tai và tạo kiểu cho thú cưng đang lưu trú.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130224/weftffuyicymizto6hpl.jpg'),
+-- Shop 1: dịch vụ giá cao, dùng để test nhanh việc lên hạng (vượt ngưỡng Bạc/Vàng/Bạch Kim
+-- chỉ với 1 booking, không cần cộng dồn nhiều đơn nhỏ)
+(14, 1, 'Gói Chăm Sóc Cao Cấp Trọn Gói', 'SPA', 4000000, 180,
+    'Gói cao cấp: tắm dưỡng chuyên sâu, trị liệu spa toàn thân, khám tổng quát và tư vấn dinh dưỡng riêng theo thể trạng thú cưng.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130069/kp0rxrdlq8olmdkxzt7m.jpg');
+
+-- ============================================================================
+-- BOOKINGS
+-- ============================================================================
+
+-- ─── Staff records (linked to shop + user accounts) ───────────────────────
+INSERT INTO staff (id, shop_id, user_id, full_name, role, phone, is_active) VALUES
+(1, 1, 9,  'Trần Văn Hùng',  'GROOMER',      '0911001001', 1),
+(2, 1, 10, 'Lê Thị Mai',     'GROOMER',      '0911001002', 1),
+(3, 2, 11, 'Nguyễn Thị Hoa', 'VETERINARIAN', '0911001003', 1),
+(4, 3, 12, 'Phạm Văn Dũng',  'CARETAKER',    '0911001004', 1);
+
+-- 1. COMPLETED (5) -- booking IDs 1-5, thang 5/2026
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, check_in, check_out,
+                     status, note, payos_order_code, created_at) VALUES
+(1, 5, 1, 1, 1, '2026-07-05 09:00:00', '2026-07-05 09:05:00', '2026-07-05 10:10:00',
+   'COMPLETED', NULL, 202405001, '2026-07-04 20:00:00'),
+(2, 5, 1, 2, 2, '2026-07-10 14:00:00', '2026-07-10 14:02:00', '2026-07-10 15:35:00',
+   'COMPLETED', NULL, 202405002, '2026-07-09 18:30:00'),
+(3, 6, 2, 3, 3, '2026-07-12 08:30:00', '2026-07-12 08:35:00', '2026-07-12 09:10:00',
+   'COMPLETED', 'Luna cần kiểm tra răng', 202405003, '2026-07-11 21:00:00'),
+(4, 7, 2, 4, 3, '2026-07-20 10:00:00', '2026-07-20 10:00:00', '2026-07-20 11:05:00',
+   'COMPLETED', 'Max đau khớp trước trái', 202405004, '2026-07-19 15:00:00'),
+(5, 8, 1, 5, 1, '2026-07-28 11:00:00', '2026-07-28 11:10:00', '2026-07-28 12:05:00',
+   'COMPLETED', NULL, 202405005, '2026-07-27 10:00:00');
+
+INSERT INTO booking_services (booking_id, service_id) VALUES
 (1, 1),
-(104, 2),
-(105, 2),
-(106, 2),
-(107, 2),
-(108, 2),
-(110, 3),
-(120, 4),
-(111, 3),
-(121, 4),
-(112, 3),
-(122, 4),
-(113, 3),
-(123, 4),
-(114, 3),
-(124, 4);
+(2, 3),
+(3, 5),
+(4, 5), (4, 7),
+(5, 1);
 
-INSERT INTO `shop` (`id`, `owner_id`, `shop_name`, `email`, `phone`, `address`, `city`, `shop_type`, `is_verified`, `late_grace_period`, `description`, `open_time`, `close_time`, `working_days`, `rating_avg`) VALUES
-(10, 110, 'PetCare Hospital Q2', 'huyacsp1@gmail.com', '098000010', 'Địa chỉ shop PetCare Hospital Q2', 'Hồ Chí Minh', 'CLINIC', 1, 15, 'Phòng khám thú y uy tín tại Quận 2. Bác sĩ 10 năm kinh nghiệm, trang thiết bị hiện đại.', '07:00', '21:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.5),
-(11, 111, 'PetPro Luxury Boarding', 'huyacsp3@gmail.com', '098000011', 'Địa chỉ shop PetPro Luxury Boarding', 'Hồ Chí Minh', 'BOARDING', 1, 15, 'Dịch vụ lưu trú & khách sạn thú cưng. Camera 24/7, phòng riêng thoáng mát.', '06:00', '22:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.6),
-(12, 112, 'Sasaki Grooming & Spa', 'huyacsp4@gmail.com', '098000012', 'Địa chỉ shop Sasaki Grooming & Spa', 'Hồ Chí Minh', 'SPA_GROOMING', 1, 15, 'Chuyên dịch vụ Spa & Grooming cho thú cưng. Đội ngũ nhân viên tận tình, sản phẩm cao cấp.', '08:00', '20:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.6),
-(13, 113, 'Pawsome Clinic Q3', 'shop4@peteye.com', '098000013', 'Địa chỉ shop Pawsome Clinic Q3', 'Hồ Chí Minh', 'CLINIC', 1, 15, 'Phòng khám thú y hiện đại tại Quận 3. Chuyên điều trị chuyên sâu và phẫu thuật nội soi.', '08:00', '20:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.6),
-(14, 114, 'Meowtel District 1', 'shop5@peteye.com', '098000014', 'Địa chỉ shop Meowtel District 1', 'Hồ Chí Minh', 'BOARDING', 1, 15, 'Khách sạn cao cấp chuyên dành riêng cho mèo tại Quận 1. Yên tĩnh, an toàn, có khu vui chơi riêng.', '07:00', '22:00', 'Mon,Tue,Wed,Thu,Fri,Sat,Sun', 4.3);
+-- 2. CANCELLED (4) -- booking IDs 6-9
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, status, note, cancellation_reason,
+                     payos_order_code, created_at) VALUES
+(6, 5, 2, 1, 3, '2026-07-15 09:00:00',
+   'CANCELLED', NULL, 'Khách hủy: mèo bị ốm không thể đến khám', 202405006, '2026-07-14 10:00:00'),
+(7, 6, 1, 3, 1, '2026-07-22 15:00:00',
+   'CANCELLED', NULL, 'Khách hủy: bận đột xuất', 202405007, '2026-07-21 08:00:00'),
+(8, 7, 3, 4, 4, '2026-08-01 12:00:00',
+   'CANCELLED', 'Phòng riêng cho Max', 'Shop hủy: hết phòng loại LARGE', 202406001, '2026-07-30 19:00:00'),
+(9, 8, 2, 5, 3, '2026-08-05 09:30:00',
+   'CANCELLED', NULL, 'Khách hủy: thay đổi kế hoạch', 202406002, '2026-08-04 09:00:00');
 
-INSERT INTO `shop_wallet` (`id`, `shop_id`, `frozen_balance`, `available_balance`, `total_earned`, `total_withdrawn`, `updated_at`) VALUES
-(1, 10, 2565000, 3960000, 3960000, 0, NOW()),
-(2, 11, 5304000, 4938500, 4938500, 0, NOW()),
-(3, 12, 3435000, 2662500, 2662500, 0, NOW()),
-(4, 13, 2700000, 9090000, 9090000, 0, NOW()),
-(5, 14, 884000, 4641000, 4641000, 0, NOW());
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(6, 5),
+(7, 2),
+(8, 10),
+(9, 6);
 
-INSERT INTO `staff` (`id`, `user_id`, `shop_id`, `full_name`, `role`, `phone`, `specialization`, `is_active`) VALUES
-(1, 120, 10, 'Staff PetCare Hospital Q2', 'VETERINARIAN', '097000010', 'Chuyên viên', 1),
-(2, 121, 11, 'Staff PetPro Luxury Boarding', 'SUPPORT', '097000011', 'Chuyên viên', 1),
-(3, 122, 12, 'Staff Sasaki Grooming & Spa', 'GROOMER', '097000012', 'Chuyên viên', 1),
-(4, 123, 13, 'Staff Pawsome Clinic Q3', 'VETERINARIAN', '097000013', 'Chuyên viên', 1),
-(5, 124, 14, 'Staff Meowtel District 1', 'SUPPORT', '097000014', 'Chuyên viên', 1);
+-- 3. WAITING_SHOP_APPROVAL (4) -- booking IDs 10-13, Shop1 MANUAL
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, status, note, payos_order_code, created_at) VALUES
+(10, 5, 1, 1, NULL, '2026-08-20 09:00:00', 'WAITING_SHOP_APPROVAL', 'Mochi cần spa nhẹ nhàng', 202406003, '2026-08-17 10:30:00'),
+(11, 6, 1, 3, NULL, '2026-08-21 14:00:00', 'WAITING_SHOP_APPROVAL', NULL, 202406004, '2026-08-17 15:00:00'),
+(12, 7, 1, 4, NULL, '2026-08-22 10:00:00', 'WAITING_SHOP_APPROVAL', 'Max cần nhân viên có kinh nghiệm với chó lớn', 202406005, '2026-08-18 07:00:00'),
+(13, 8, 1, 5, NULL, '2026-08-23 11:00:00', 'WAITING_SHOP_APPROVAL', NULL, 202406006, '2026-08-18 08:30:00');
 
-INSERT INTO `pet_service` (`id`, `shop_id`, `service_name`, `description`, `price`, `duration_minutes`, `category`, `active`, `created_at`) VALUES
-(1001, 10, 'Khám tổng quát', 'Kiểm tra sức khỏe toàn diện: tim mạch, hô hấp, tiêu hóa, da lông. Tư vấn dinh dưỡng và lịch tiêm phòng.', 200000, 45, 'CLINIC', 1, NOW()),
-(1002, 10, 'Tiêm phòng đầy đủ', 'Tiêm vaccine phòng các bệnh nguy hiểm: Care, Parvo, Dại, Lepto. Cấp sổ tiêm phòng có dấu xác nhận.', 350000, 30, 'CLINIC', 1, NOW()),
-(1003, 10, 'Phẫu thuật triệt sản', 'Phẫu thuật triệt sản an toàn với gây mê chuyên nghiệp. Theo dõi hậu phẫu, tái khám miễn phí sau 7 ngày.', 1500000, 180, 'CLINIC', 1, NOW()),
-(1004, 10, 'Xét nghiệm máu cơ bản', 'Xét nghiệm công thức máu toàn phần và sinh hóa máu. Phát hiện sớm các bệnh tiềm ẩn, kết quả trong 1 giờ.', 300000, 60, 'CLINIC', 1, NOW()),
-(1005, 10, 'Siêu âm ổ bụng', 'Siêu âm kiểm tra các cơ quan nội tạng: gan, thận, lách, bàng quang. Phát hiện u nang, sỏi, dị vật.', 400000, 45, 'CLINIC', 1, NOW()),
-(1006, 10, 'Điều trị ngoại ký sinh', 'Điều trị ve, bọ chét, ghẻ, nấm da. Tắm thuốc diệt ký sinh, bôi thuốc chuyên dụng, tư vấn phòng ngừa.', 150000, 30, 'CLINIC', 1, NOW()),
-(1101, 11, 'Lưu trú tiêu chuẩn (1 đêm)', 'Phòng riêng thoáng mát, ăn uống 3 bữa/ngày theo khẩu phần chuẩn, vui chơi có giám sát, báo cáo ảnh hàng ngày.', 200000, 1440, 'BOARDING', 1, NOW()),
-(1102, 11, 'Lưu trú VIP (1 đêm)', 'Phòng VIP điều hòa riêng, giường êm ái, ăn uống theo yêu cầu, camera HD 24/7, video call với chủ, tắm miễn phí.', 450000, 1440, 'BOARDING', 1, NOW()),
-(1103, 11, 'Trông giữ ban ngày (8h)', 'Trông giữ thú cưng trong ngày làm việc (8 tiếng), vui chơi tự do, ăn nhẹ 2 lần, tắm nếu cần thêm phí.', 120000, 480, 'BOARDING', 1, NOW()),
-(1104, 11, 'Lưu trú tuần (7 đêm)', 'Gói lưu trú 7 đêm tiết kiệm 15%, phòng tiêu chuẩn, ăn uống đầy đủ, tắm 2 lần/tuần, báo cáo ảnh hàng ngày.', 1200000, 10080, 'BOARDING', 1, NOW()),
-(1105, 11, 'Tắm & Grooming tại khách sạn', 'Dịch vụ tắm và cắt tỉa ngay tại khách sạn, không cần di chuyển. Tiện lợi cho thú cưng đang lưu trú.', 200000, 90, 'BOARDING', 1, NOW()),
-(1106, 11, 'Huấn luyện cơ bản (1 buổi)', 'Huấn luyện các lệnh cơ bản: ngồi, nằm, đứng, đi theo. Phù hợp cho chó từ 3 tháng tuổi trở lên.', 300000, 60, 'BOARDING', 1, NOW()),
-(1201, 12, 'Tắm & Sấy cơ bản', 'Tắm sạch bằng sữa tắm chuyên dụng, sấy khô hoàn toàn, vệ sinh tai và cắt móng.', 150000, 60, 'SPA_GROOMING', 1, NOW()),
-(1202, 12, 'Cắt tỉa lông toàn thân', 'Cắt tỉa lông theo yêu cầu hoặc theo giống, tạo kiểu chuyên nghiệp. Bao gồm tắm và sấy.', 250000, 90, 'SPA_GROOMING', 1, NOW()),
-(1203, 12, 'Gói Spa thư giãn', 'Tắm thơm, massage toàn thân, dưỡng lông mềm mượt, cắt móng, vệ sinh tai, xịt nước hoa.', 450000, 120, 'SPA_GROOMING', 1, NOW()),
-(1204, 12, 'Vệ sinh răng miệng', 'Đánh răng bằng kem chuyên dụng, làm sạch cao răng, khử mùi hôi miệng.', 80000, 30, 'SPA_GROOMING', 1, NOW()),
-(1205, 12, 'Tắm thơm & Dưỡng lông', 'Tắm bằng sữa tắm cao cấp nhập khẩu, ủ dưỡng lông 15 phút, sấy tạo phồng, lông mềm mượt và thơm lâu.', 180000, 75, 'SPA_GROOMING', 1, NOW()),
-(1206, 12, 'Nhuộm lông nghệ thuật', 'Nhuộm lông bằng màu thực phẩm 100% an toàn, không gây hại. Tạo điểm nhấn thời trang, màu bền 4-6 tuần.', 500000, 150, 'SPA_GROOMING', 1, NOW()),
-(1301, 13, 'Khám tổng quát', 'Kiểm tra sức khỏe toàn diện: tim mạch, hô hấp, tiêu hóa, da lông. Tư vấn dinh dưỡng và lịch tiêm phòng.', 200000, 45, 'CLINIC', 1, NOW()),
-(1302, 13, 'Tiêm phòng đầy đủ', 'Tiêm vaccine phòng các bệnh nguy hiểm: Care, Parvo, Dại, Lepto. Cấp sổ tiêm phòng có dấu xác nhận.', 350000, 30, 'CLINIC', 1, NOW()),
-(1303, 13, 'Phẫu thuật triệt sản', 'Phẫu thuật triệt sản an toàn với gây mê chuyên nghiệp. Theo dõi hậu phẫu, tái khám miễn phí sau 7 ngày.', 1500000, 180, 'CLINIC', 1, NOW()),
-(1304, 13, 'Xét nghiệm máu cơ bản', 'Xét nghiệm công thức máu toàn phần và sinh hóa máu. Phát hiện sớm các bệnh tiềm ẩn, kết quả trong 1 giờ.', 300000, 60, 'CLINIC', 1, NOW()),
-(1305, 13, 'Siêu âm ổ bụng', 'Siêu âm kiểm tra các cơ quan nội tạng: gan, thận, lách, bàng quang. Phát hiện u nang, sỏi, dị vật.', 400000, 45, 'CLINIC', 1, NOW()),
-(1306, 13, 'Điều trị ngoại ký sinh', 'Điều trị ve, bọ chét, ghẻ, nấm da. Tắm thuốc diệt ký sinh, bôi thuốc chuyên dụng, tư vấn phòng ngừa.', 150000, 30, 'CLINIC', 1, NOW()),
-(1401, 14, 'Lưu trú tiêu chuẩn (1 đêm)', 'Phòng riêng thoáng mát, ăn uống 3 bữa/ngày theo khẩu phần chuẩn, vui chơi có giám sát, báo cáo ảnh hàng ngày.', 200000, 1440, 'BOARDING', 1, NOW()),
-(1402, 14, 'Lưu trú VIP (1 đêm)', 'Phòng VIP điều hòa riêng, giường êm ái, ăn uống theo yêu cầu, camera HD 24/7, video call với chủ, tắm miễn phí.', 450000, 1440, 'BOARDING', 1, NOW()),
-(1403, 14, 'Trông giữ ban ngày (8h)', 'Trông giữ thú cưng trong ngày làm việc (8 tiếng), vui chơi tự do, ăn nhẹ 2 lần, tắm nếu cần thêm phí.', 120000, 480, 'BOARDING', 1, NOW()),
-(1404, 14, 'Lưu trú tuần (7 đêm)', 'Gói lưu trú 7 đêm tiết kiệm 15%, phòng tiêu chuẩn, ăn uống đầy đủ, tắm 2 lần/tuần, báo cáo ảnh hàng ngày.', 1200000, 10080, 'BOARDING', 1, NOW()),
-(1405, 14, 'Tắm & Grooming tại khách sạn', 'Dịch vụ tắm và cắt tỉa ngay tại khách sạn, không cần di chuyển. Tiện lợi cho thú cưng đang lưu trú.', 200000, 90, 'BOARDING', 1, NOW()),
-(1406, 14, 'Huấn luyện cơ bản (1 buổi)', 'Huấn luyện các lệnh cơ bản: ngồi, nằm, đứng, đi theo. Phù hợp cho chó từ 3 tháng tuổi trở lên.', 300000, 60, 'BOARDING', 1, NOW());
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(10, 3),
+(11, 1),
+(12, 2),
+(13, 1);
 
-INSERT INTO `pet` (`id`, `owner_id`, `name`, `species`, `breed`, `gender`, `color`, `avatar`, `sterilized`, `weight`, `dob`, `health_note`, `favorite_food`, `allergies`, `hobbies`, `walk_time`, `is_active`) VALUES
-(1, 104, 'Max', 'CAT', 'Munchkin', 'FEMALE', 'Trắng', NULL, 1, 3.9, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(2, 104, 'Charlie 1', 'CAT', 'Munchkin', 'MALE', 'Trắng', NULL, 1, 20.9, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(3, 104, 'Max 2', 'DOG', 'Golden Retriever', 'FEMALE', 'Trắng', NULL, 1, 8.7, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(4, 105, 'Charlie', 'CAT', 'Persian', 'MALE', 'Trắng', NULL, 1, 2.8, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(5, 105, 'Milo 1', 'DOG', 'Golden Retriever', 'MALE', 'Trắng', NULL, 1, 4.9, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(6, 105, 'Bella 2', 'CAT', 'Munchkin', 'FEMALE', 'Trắng', NULL, 1, 14.8, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(7, 106, 'Milo', 'CAT', 'Munchkin', 'MALE', 'Trắng', NULL, 1, 17.8, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(8, 106, 'Bella 1', 'CAT', 'Scottish Fold', 'MALE', 'Trắng', NULL, 1, 3.6, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(9, 106, 'Bella 2', 'CAT', 'Persian', 'MALE', 'Trắng', NULL, 1, 3.1, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(10, 107, 'Luna', 'CAT', 'British Shorthair', 'MALE', 'Trắng', NULL, 1, 4.2, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(11, 107, 'Lucy 1', 'CAT', 'British Shorthair', 'MALE', 'Trắng', NULL, 1, 16.0, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(12, 107, 'Bella 2', 'CAT', 'Munchkin', 'FEMALE', 'Trắng', NULL, 1, 17.0, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(13, 108, 'Luna', 'CAT', 'British Shorthair', 'MALE', 'Trắng', NULL, 1, 6.8, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(14, 108, 'Charlie 1', 'DOG', 'Golden Retriever', 'FEMALE', 'Trắng', NULL, 1, 12.3, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1),
-(15, 108, 'Lucy 2', 'CAT', 'Scottish Fold', 'MALE', 'Trắng', NULL, 1, 14.3, '2024-01-01', 'Khỏe mạnh', 'Hạt khô', 'Không', 'Chơi bóng', '17:00', 1);
+-- 4. CONFIRMED (5) -- booking IDs 14-18
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, status, note, payos_order_code, created_at) VALUES
+(14, 5, 2, 2, 3, '2026-08-20 08:30:00', 'CONFIRMED', 'Buddy cần tiêm nhắc lại vaccine dại', 202406007, '2026-08-15 09:00:00'),
+(15, 6, 2, 3, 3, '2026-08-21 09:00:00', 'CONFIRMED', NULL, 202406008, '2026-08-16 10:00:00'),
+(16, 5, 3, 1, 4, '2026-08-25 14:00:00', 'CONFIRMED', 'Mochi lưu trú 3 ngày, cần phòng yên tĩnh', 202406009, '2026-08-14 20:00:00'),
+(17, 7, 2, 4, 3, '2026-08-24 10:00:00', 'CONFIRMED', 'Max siêu âm theo lịch tái khám', 202406010, '2026-08-16 14:00:00'),
+(18, 8, 3, 5, 4, '2026-08-26 10:00:00', 'CONFIRMED', 'Coco lưu trú 2 ngày cuối tuần', 202406011, '2026-08-15 11:00:00');
 
-INSERT INTO `pet_medical_record` (`id`, `pet_id`, `booking_id`, `staff_id`, `diagnosis`, `treatment`, `prescription`, `visit_date`, `veterinarian_note`) VALUES
-(1, 1, NULL, NULL, 'Rối loạn tiêu hóa', 'Kiêng đồ ăn mỡ, uống men', 'Men vi sinh Bio', '2026-05-15 14:37:24', 'Tránh cho ăn linh tinh.'),
-(2, 2, NULL, NULL, 'Viêm da nhẹ', 'Bôi thuốc 7 ngày', 'Thuốc bôi ngoài da Dermaleen', '2026-07-06 14:37:24', 'Bé đã hồi phục tốt.'),
-(3, 2, NULL, NULL, 'Viêm tai ngoài', 'Nhỏ thuốc tai 5 ngày', 'Thuốc nhỏ tai Dexoryl', '2026-04-24 14:37:24', 'Vệ sinh tai thường xuyên.'),
-(4, 3, NULL, NULL, 'Viêm tai ngoài', 'Nhỏ thuốc tai 5 ngày', 'Thuốc nhỏ tai Dexoryl', '2026-06-27 14:37:24', 'Vệ sinh tai thường xuyên.'),
-(5, 3, NULL, NULL, 'Viêm tai ngoài', 'Nhỏ thuốc tai 5 ngày', 'Thuốc nhỏ tai Dexoryl', '2026-07-06 14:37:24', 'Vệ sinh tai thường xuyên.'),
-(6, 4, NULL, NULL, 'Rối loạn tiêu hóa', 'Kiêng đồ ăn mỡ, uống men', 'Men vi sinh Bio', '2026-06-23 14:37:24', 'Tránh cho ăn linh tinh.'),
-(7, 5, NULL, NULL, 'Sổ mũi, cảm lạnh', 'Giữ ấm, uống siro', 'Siro cảm cúm PetHealth', '2026-06-08 14:37:24', 'Nhắc nhở mặc áo ấm.'),
-(8, 6, NULL, NULL, 'Viêm tai ngoài', 'Nhỏ thuốc tai 5 ngày', 'Thuốc nhỏ tai Dexoryl', '2026-06-18 14:37:24', 'Vệ sinh tai thường xuyên.'),
-(9, 6, NULL, NULL, 'Rối loạn tiêu hóa', 'Kiêng đồ ăn mỡ, uống men', 'Men vi sinh Bio', '2026-06-13 14:37:24', 'Tránh cho ăn linh tinh.'),
-(10, 7, NULL, NULL, 'Viêm da nhẹ', 'Bôi thuốc 7 ngày', 'Thuốc bôi ngoài da Dermaleen', '2026-05-08 14:37:24', 'Bé đã hồi phục tốt.'),
-(11, 8, NULL, NULL, 'Dị ứng thức ăn', 'Đổi hạt, tiêm chống dị ứng', 'Thuốc chống dị ứng', '2026-06-13 14:37:24', 'Theo dõi phân của bé.'),
-(12, 9, NULL, NULL, 'Dị ứng thức ăn', 'Đổi hạt, tiêm chống dị ứng', 'Thuốc chống dị ứng', '2026-05-12 14:37:24', 'Theo dõi phân của bé.'),
-(13, 9, NULL, NULL, 'Rối loạn tiêu hóa', 'Kiêng đồ ăn mỡ, uống men', 'Men vi sinh Bio', '2026-05-03 14:37:24', 'Tránh cho ăn linh tinh.'),
-(14, 10, NULL, NULL, 'Sổ mũi, cảm lạnh', 'Giữ ấm, uống siro', 'Siro cảm cúm PetHealth', '2026-06-09 14:37:24', 'Nhắc nhở mặc áo ấm.'),
-(15, 11, NULL, NULL, 'Rối loạn tiêu hóa', 'Kiêng đồ ăn mỡ, uống men', 'Men vi sinh Bio', '2026-05-14 14:37:24', 'Tránh cho ăn linh tinh.'),
-(16, 11, NULL, NULL, 'Viêm da nhẹ', 'Bôi thuốc 7 ngày', 'Thuốc bôi ngoài da Dermaleen', '2026-06-01 14:37:24', 'Bé đã hồi phục tốt.'),
-(17, 12, NULL, NULL, 'Viêm da nhẹ', 'Bôi thuốc 7 ngày', 'Thuốc bôi ngoài da Dermaleen', '2026-05-06 14:37:24', 'Bé đã hồi phục tốt.'),
-(18, 13, NULL, NULL, 'Viêm da nhẹ', 'Bôi thuốc 7 ngày', 'Thuốc bôi ngoài da Dermaleen', '2026-07-03 14:37:24', 'Bé đã hồi phục tốt.'),
-(19, 13, NULL, NULL, 'Dị ứng thức ăn', 'Đổi hạt, tiêm chống dị ứng', 'Thuốc chống dị ứng', '2026-05-05 14:37:24', 'Theo dõi phân của bé.'),
-(20, 14, NULL, NULL, 'Dị ứng thức ăn', 'Đổi hạt, tiêm chống dị ứng', 'Thuốc chống dị ứng', '2026-05-20 14:37:24', 'Theo dõi phân của bé.'),
-(21, 15, NULL, NULL, 'Viêm tai ngoài', 'Nhỏ thuốc tai 5 ngày', 'Thuốc nhỏ tai Dexoryl', '2026-05-05 14:37:24', 'Vệ sinh tai thường xuyên.');
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(14, 6),
+(15, 5), (15, 6),
+(16, 9),
+(17, 8),
+(18, 9);
 
-INSERT INTO `pet_vaccination` (`id`, `pet_id`, `booking_id`, `staff_id`, `name`, `drug`, `clinic`, `date`, `status`) VALUES
-(1, 1, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(2, 1, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(3, 2, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(4, 2, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(5, 3, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(6, 3, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(7, 4, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(8, 4, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(9, 5, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(10, 5, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(11, 6, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(12, 6, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(13, 7, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(14, 7, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(15, 8, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(16, 8, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(17, 9, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(18, 9, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(19, 10, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(20, 10, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(21, 11, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(22, 11, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(23, 12, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(24, 12, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(25, 13, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(26, 13, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(27, 14, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(28, 14, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done'),
-(29, 15, NULL, NULL, 'Mũi 5 bệnh', 'Vanguard Plus 5', 'PetCare Clinic Q1', '2025-12-29 14:37:24', 'done'),
-(30, 15, NULL, NULL, 'Tiêm Dại (Rabies)', 'Rabisin', 'PetCare Clinic Q1', '2026-04-08 14:37:24', 'done');
+-- 5. IN_PROGRESS (4) -- booking IDs 19-22, dang dien ra hom nay
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, check_in, service_start_datetime,
+                     status, note, payos_order_code, created_at) VALUES
+(19, 5, 1, 2, 1, '2026-08-18 09:00:00', '2026-08-18 09:05:00', '2026-08-18 09:10:00',
+    'IN_PROGRESS', NULL, 202406012, '2026-08-17 20:00:00'),
+(20, 6, 2, 3, 3, '2026-08-18 08:30:00', '2026-08-18 08:32:00', '2026-08-18 08:40:00',
+    'IN_PROGRESS', 'Luna cần xét nghiệm máu định kỳ', 202406013, '2026-08-17 21:00:00'),
+(21, 7, 1, 4, 2, '2026-08-18 10:00:00', '2026-08-18 10:03:00', '2026-08-18 10:15:00',
+    'IN_PROGRESS', 'Max cần spa toàn thân', 202406014, '2026-08-17 18:00:00'),
+(22, 8, 3, 5, 4, '2026-08-17 12:00:00', '2026-08-17 12:05:00', '2026-08-17 12:10:00',
+    'IN_PROGRESS', 'Coco lưu trú 2 ngày', 202406015, '2026-08-16 09:00:00');
 
-INSERT INTO `booking` (`id`, `user_id`, `shop_id`, `pet_id`, `staff_id`, `appointment_datetime`, `status`, `note`, `cancellation_reason`, `payos_order_code`, `created_at`) VALUES
-(1, 104, 10, 2, 1, '2026-05-09 03:00:00', 'COMPLETED', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100000, '2026-05-06 03:00:00'),
-(2, 106, 10, 7, 1, '2026-05-25 07:00:00', 'COMPLETED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100001, '2026-05-22 07:00:00'),
-(3, 106, 10, 8, 1, '2026-05-24 04:00:00', 'CANCELLED', 'Không có lưu ý gì thêm', 'Quá hạn', 100002, '2026-05-21 04:00:00'),
-(4, 104, 10, 3, 1, '2026-05-10 11:00:00', 'COMPLETED', 'Bé thích được vuốt ve', NULL, 100003, '2026-05-07 11:00:00'),
-(5, 105, 10, 4, 1, '2026-05-07 04:00:00', 'COMPLETED', 'Đón bé đúng giờ giúp mình', NULL, 100004, '2026-05-04 04:00:00'),
-(6, 107, 10, 11, 1, '2026-05-07 05:00:00', 'CANCELLED', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', 'Quá hạn', 100005, '2026-05-04 05:00:00'),
-(7, 104, 10, 1, 1, '2026-05-27 01:00:00', 'IN_PROGRESS', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100006, '2026-05-24 01:00:00'),
-(8, 106, 10, 7, 1, '2026-05-04 02:00:00', 'COMPLETED', 'Đón bé đúng giờ giúp mình', NULL, 100007, '2026-05-01 02:00:00'),
-(9, 106, 10, 8, 1, '2026-05-07 10:00:00', 'IN_PROGRESS', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100008, '2026-05-04 10:00:00'),
-(10, 106, 10, 8, 1, '2026-05-19 06:00:00', 'COMPLETED', 'Cho bé tắm bằng sữa tắm loại không mùi nha', NULL, 100009, '2026-05-16 06:00:00'),
-(11, 108, 11, 15, 2, '2026-05-29 11:00:00', 'COMPLETED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100010, '2026-05-26 11:00:00'),
-(12, 106, 11, 7, 2, '2026-05-23 11:00:00', 'CANCELLED', 'Bé đang rụng lông nhiều', 'Đổi ý', 100011, '2026-05-20 11:00:00'),
-(13, 105, 11, 4, 2, '2026-05-07 02:00:00', 'IN_PROGRESS', 'Cho bé tắm bằng sữa tắm loại không mùi nha', NULL, 100012, '2026-05-04 02:00:00'),
-(14, 106, 11, 9, 2, '2026-05-20 07:00:00', 'COMPLETED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100013, '2026-05-17 07:00:00'),
-(15, 107, 11, 12, 2, '2026-05-25 06:00:00', 'IN_PROGRESS', 'Bé thích được vuốt ve', NULL, 100014, '2026-05-22 06:00:00'),
-(16, 108, 11, 13, 2, '2026-05-10 07:00:00', 'IN_PROGRESS', 'Bé hơi nhát người, shop chú ý nhé', NULL, 100015, '2026-05-07 07:00:00'),
-(17, 108, 11, 13, 2, '2026-05-05 09:00:00', 'CANCELLED', 'Khách yêu cầu chăm sóc kỹ', 'Xe hỏng không đưa bé đi được', 100016, '2026-05-02 09:00:00'),
-(18, 104, 11, 3, 2, '2026-05-30 09:00:00', 'CANCELLED', 'Không có lưu ý gì thêm', 'Tìm được chỗ rẻ hơn', 100017, '2026-05-27 09:00:00'),
-(19, 106, 11, 7, 2, '2026-05-31 11:00:00', 'IN_PROGRESS', 'Khách yêu cầu chăm sóc kỹ', NULL, 100018, '2026-05-28 11:00:00'),
-(20, 105, 11, 6, 2, '2026-05-01 11:00:00', 'CANCELLED', 'Nhờ shop kiểm tra kỹ phần tai', 'Tìm được chỗ rẻ hơn', 100019, '2026-04-28 11:00:00'),
-(21, 105, 12, 5, 3, '2026-05-07 10:00:00', 'IN_PROGRESS', 'Bé thích được vuốt ve', NULL, 100020, '2026-05-04 10:00:00'),
-(22, 106, 12, 9, 3, '2026-05-24 07:00:00', 'COMPLETED', 'Gọi trước khi xong 30 phút nha', NULL, 100021, '2026-05-21 07:00:00'),
-(23, 105, 12, 4, 3, '2026-05-16 09:00:00', 'COMPLETED', 'Bé thích được vuốt ve', NULL, 100022, '2026-05-13 09:00:00'),
-(24, 105, 12, 5, 3, '2026-05-14 10:00:00', 'CANCELLED', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', 'Mình đặt nhầm ngày, xin lỗi shop', 100023, '2026-05-11 10:00:00'),
-(25, 104, 12, 2, 3, '2026-05-12 05:00:00', 'IN_PROGRESS', 'Bé thích được vuốt ve', NULL, 100024, '2026-05-09 05:00:00'),
-(26, 105, 12, 6, 3, '2026-05-16 05:00:00', 'COMPLETED', 'Khách yêu cầu chăm sóc kỹ', NULL, 100025, '2026-05-13 05:00:00'),
-(27, 107, 12, 11, 3, '2026-05-03 01:00:00', 'IN_PROGRESS', 'Bé đang rụng lông nhiều', NULL, 100026, '2026-04-30 01:00:00'),
-(28, 108, 12, 15, 3, '2026-05-16 04:00:00', 'COMPLETED', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100027, '2026-05-13 04:00:00'),
-(29, 104, 12, 2, 3, '2026-05-26 11:00:00', 'COMPLETED', 'Đón bé đúng giờ giúp mình', NULL, 100028, '2026-05-23 11:00:00'),
-(30, 108, 12, 13, 3, '2026-05-16 01:00:00', 'CANCELLED', 'Gọi trước khi xong 30 phút nha', 'Bận việc đột xuất không qua được', 100029, '2026-05-13 01:00:00'),
-(31, 107, 13, 11, 4, '2026-05-18 10:00:00', 'COMPLETED', 'Gọi trước khi xong 30 phút nha', NULL, 100030, '2026-05-15 10:00:00'),
-(32, 107, 13, 11, 4, '2026-05-31 06:00:00', 'COMPLETED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100031, '2026-05-28 06:00:00'),
-(33, 106, 13, 9, 4, '2026-05-10 10:00:00', 'COMPLETED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100032, '2026-05-07 10:00:00'),
-(34, 106, 13, 7, 4, '2026-05-27 02:00:00', 'CANCELLED', 'Bé đang rụng lông nhiều', 'Shop ở hơi xa, mình đổi chỗ khác', 100033, '2026-05-24 02:00:00'),
-(35, 105, 13, 5, 4, '2026-05-24 08:00:00', 'IN_PROGRESS', 'Gọi trước khi xong 30 phút nha', NULL, 100034, '2026-05-21 08:00:00'),
-(36, 107, 13, 12, 4, '2026-05-10 10:00:00', 'COMPLETED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100035, '2026-05-07 10:00:00'),
-(37, 106, 13, 7, 4, '2026-05-27 11:00:00', 'COMPLETED', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100036, '2026-05-24 11:00:00'),
-(38, 108, 13, 15, 4, '2026-05-16 08:00:00', 'CANCELLED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', 'Shop ở hơi xa, mình đổi chỗ khác', 100037, '2026-05-13 08:00:00'),
-(39, 108, 13, 15, 4, '2026-05-18 09:00:00', 'IN_PROGRESS', 'Bé hơi nhát người, shop chú ý nhé', NULL, 100038, '2026-05-15 09:00:00'),
-(40, 106, 13, 7, 4, '2026-05-27 03:00:00', 'IN_PROGRESS', 'Đón bé đúng giờ giúp mình', NULL, 100039, '2026-05-24 03:00:00'),
-(41, 104, 14, 3, 5, '2026-05-16 05:00:00', 'CANCELLED', 'Không có lưu ý gì thêm', 'Bận việc đột xuất không qua được', 100040, '2026-05-13 05:00:00'),
-(42, 105, 14, 4, 5, '2026-05-18 01:00:00', 'COMPLETED', 'Bé hơi nhát người, shop chú ý nhé', NULL, 100041, '2026-05-15 01:00:00'),
-(43, 105, 14, 6, 5, '2026-05-09 09:00:00', 'IN_PROGRESS', 'Bé thích được vuốt ve', NULL, 100042, '2026-05-06 09:00:00'),
-(44, 108, 14, 14, 5, '2026-05-05 07:00:00', 'IN_PROGRESS', 'Gọi trước khi xong 30 phút nha', NULL, 100043, '2026-05-02 07:00:00'),
-(45, 106, 14, 8, 5, '2026-05-16 06:00:00', 'IN_PROGRESS', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100044, '2026-05-13 06:00:00'),
-(46, 107, 14, 11, 5, '2026-05-26 03:00:00', 'CANCELLED', 'Đón bé đúng giờ giúp mình', 'Mình đặt nhầm ngày, xin lỗi shop', 100045, '2026-05-23 03:00:00'),
-(47, 108, 14, 15, 5, '2026-05-13 03:00:00', 'COMPLETED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100046, '2026-05-10 03:00:00'),
-(48, 108, 14, 14, 5, '2026-05-14 05:00:00', 'COMPLETED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100047, '2026-05-11 05:00:00'),
-(49, 104, 14, 2, 5, '2026-05-06 11:00:00', 'CANCELLED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', 'Tìm được chỗ rẻ hơn', 100048, '2026-05-03 11:00:00'),
-(50, 106, 14, 8, 5, '2026-05-24 04:00:00', 'CANCELLED', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', 'Shop ở hơi xa, mình đổi chỗ khác', 100049, '2026-05-21 04:00:00'),
-(51, 108, 10, 13, 1, '2026-06-29 06:00:00', 'COMPLETED', 'Gọi trước khi xong 30 phút nha', NULL, 100050, '2026-06-26 06:00:00'),
-(52, 108, 10, 15, 1, '2026-06-28 04:00:00', 'COMPLETED', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', NULL, 100051, '2026-06-25 04:00:00'),
-(53, 108, 10, 13, 1, '2026-06-13 09:00:00', 'COMPLETED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100052, '2026-06-10 09:00:00'),
-(54, 105, 10, 4, 1, '2026-06-01 10:00:00', 'IN_PROGRESS', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100053, '2026-05-29 10:00:00'),
-(55, 104, 10, 3, 1, '2026-06-05 05:00:00', 'IN_PROGRESS', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100054, '2026-06-02 05:00:00'),
-(56, 105, 10, 6, 1, '2026-06-15 06:00:00', 'COMPLETED', 'Không có lưu ý gì thêm', NULL, 100055, '2026-06-12 06:00:00'),
-(57, 106, 10, 9, 1, '2026-06-24 06:00:00', 'CANCELLED', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', 'Tìm được chỗ rẻ hơn', 100056, '2026-06-21 06:00:00'),
-(58, 105, 10, 5, 1, '2026-06-14 06:00:00', 'COMPLETED', 'Bé đang rụng lông nhiều', NULL, 100057, '2026-06-11 06:00:00'),
-(59, 108, 10, 15, 1, '2026-06-25 06:00:00', 'CANCELLED', 'Nhờ shop kiểm tra kỹ phần tai', 'Shop ở hơi xa, mình đổi chỗ khác', 100058, '2026-06-22 06:00:00'),
-(60, 108, 10, 14, 1, '2026-06-10 11:00:00', 'IN_PROGRESS', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100059, '2026-06-07 11:00:00'),
-(61, 105, 11, 5, 2, '2026-06-05 10:00:00', 'IN_PROGRESS', 'Gọi trước khi xong 30 phút nha', NULL, 100060, '2026-06-02 10:00:00'),
-(62, 105, 11, 6, 2, '2026-06-17 01:00:00', 'CANCELLED', 'Bé hơi nhát người, shop chú ý nhé', 'Shop ở hơi xa, mình đổi chỗ khác', 100061, '2026-06-14 01:00:00'),
-(63, 105, 11, 6, 2, '2026-06-02 05:00:00', 'COMPLETED', 'Khách yêu cầu chăm sóc kỹ', NULL, 100062, '2026-05-30 05:00:00'),
-(64, 108, 11, 13, 2, '2026-06-28 05:00:00', 'CANCELLED', 'Bé hơi nhát người, shop chú ý nhé', 'Tìm được chỗ rẻ hơn', 100063, '2026-06-25 05:00:00'),
-(65, 107, 11, 11, 2, '2026-06-03 02:00:00', 'COMPLETED', 'Gọi trước khi xong 30 phút nha', NULL, 100064, '2026-05-31 02:00:00'),
-(66, 107, 11, 10, 2, '2026-06-30 01:00:00', 'COMPLETED', 'Bé hơi nhát người, shop chú ý nhé', NULL, 100065, '2026-06-27 01:00:00'),
-(67, 104, 11, 3, 2, '2026-06-30 11:00:00', 'COMPLETED', 'Gọi trước khi xong 30 phút nha', NULL, 100066, '2026-06-27 11:00:00'),
-(68, 105, 11, 5, 2, '2026-06-03 07:00:00', 'COMPLETED', 'Cho bé tắm bằng sữa tắm loại không mùi nha', NULL, 100067, '2026-05-31 07:00:00'),
-(69, 104, 11, 1, 2, '2026-06-27 07:00:00', 'COMPLETED', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', NULL, 100068, '2026-06-24 07:00:00'),
-(70, 105, 11, 5, 2, '2026-06-02 03:00:00', 'COMPLETED', 'Bé thích được vuốt ve', NULL, 100069, '2026-05-30 03:00:00'),
-(71, 106, 12, 9, 3, '2026-06-06 01:00:00', 'IN_PROGRESS', 'Không có lưu ý gì thêm', NULL, 100070, '2026-06-03 01:00:00'),
-(72, 108, 12, 15, 3, '2026-06-25 10:00:00', 'COMPLETED', 'Khách yêu cầu chăm sóc kỹ', NULL, 100071, '2026-06-22 10:00:00'),
-(73, 107, 12, 10, 3, '2026-06-28 08:00:00', 'IN_PROGRESS', 'Cho bé tắm bằng sữa tắm loại không mùi nha', NULL, 100072, '2026-06-25 08:00:00'),
-(74, 106, 12, 9, 3, '2026-06-15 09:00:00', 'CANCELLED', 'Gọi trước khi xong 30 phút nha', 'Xe hỏng không đưa bé đi được', 100073, '2026-06-12 09:00:00'),
-(75, 107, 12, 10, 3, '2026-06-03 03:00:00', 'IN_PROGRESS', 'Gọi trước khi xong 30 phút nha', NULL, 100074, '2026-05-31 03:00:00'),
-(76, 105, 12, 6, 3, '2026-06-27 09:00:00', 'IN_PROGRESS', 'Gọi trước khi xong 30 phút nha', NULL, 100075, '2026-06-24 09:00:00'),
-(77, 105, 12, 5, 3, '2026-06-19 02:00:00', 'IN_PROGRESS', 'Bé hơi nhát người, shop chú ý nhé', NULL, 100076, '2026-06-16 02:00:00'),
-(78, 104, 12, 3, 3, '2026-06-12 01:00:00', 'IN_PROGRESS', 'Không có lưu ý gì thêm', NULL, 100077, '2026-06-09 01:00:00'),
-(79, 104, 12, 3, 3, '2026-06-19 10:00:00', 'COMPLETED', 'Đón bé đúng giờ giúp mình', NULL, 100078, '2026-06-16 10:00:00'),
-(80, 105, 12, 4, 3, '2026-06-09 05:00:00', 'COMPLETED', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100079, '2026-06-06 05:00:00'),
-(81, 108, 13, 15, 4, '2026-06-26 10:00:00', 'CANCELLED', 'Đón bé đúng giờ giúp mình', 'Xe hỏng không đưa bé đi được', 100080, '2026-06-23 10:00:00'),
-(82, 106, 13, 8, 4, '2026-06-28 06:00:00', 'CANCELLED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', 'Bé ở nhà bị ốm nên không đi được', 100081, '2026-06-25 06:00:00'),
-(83, 105, 13, 5, 4, '2026-06-03 10:00:00', 'COMPLETED', 'Khách yêu cầu chăm sóc kỹ', NULL, 100082, '2026-05-31 10:00:00'),
-(84, 105, 13, 6, 4, '2026-06-27 03:00:00', 'COMPLETED', 'Bé đang rụng lông nhiều', NULL, 100083, '2026-06-24 03:00:00'),
-(85, 105, 13, 4, 4, '2026-06-04 07:00:00', 'COMPLETED', 'Gọi trước khi xong 30 phút nha', NULL, 100084, '2026-06-01 07:00:00'),
-(86, 104, 13, 3, 4, '2026-06-15 05:00:00', 'COMPLETED', 'Bé thích được vuốt ve', NULL, 100085, '2026-06-12 05:00:00'),
-(87, 105, 13, 5, 4, '2026-06-18 06:00:00', 'CANCELLED', 'Bé đang rụng lông nhiều', 'Mình đặt nhầm ngày, xin lỗi shop', 100086, '2026-06-15 06:00:00'),
-(88, 108, 13, 14, 4, '2026-06-04 09:00:00', 'COMPLETED', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100087, '2026-06-01 09:00:00'),
-(89, 105, 13, 6, 4, '2026-06-27 10:00:00', 'COMPLETED', 'Gọi trước khi xong 30 phút nha', NULL, 100088, '2026-06-24 10:00:00'),
-(90, 106, 13, 9, 4, '2026-06-03 01:00:00', 'CANCELLED', 'Khách yêu cầu chăm sóc kỹ', 'Bé ở nhà bị ốm nên không đi được', 100089, '2026-05-31 01:00:00'),
-(91, 106, 14, 8, 5, '2026-06-12 09:00:00', 'CANCELLED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', 'Xe hỏng không đưa bé đi được', 100090, '2026-06-09 09:00:00'),
-(92, 105, 14, 5, 5, '2026-06-11 04:00:00', 'COMPLETED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100091, '2026-06-08 04:00:00'),
-(93, 104, 14, 1, 5, '2026-06-14 10:00:00', 'COMPLETED', 'Đón bé đúng giờ giúp mình', NULL, 100092, '2026-06-11 10:00:00'),
-(94, 106, 14, 7, 5, '2026-06-28 11:00:00', 'IN_PROGRESS', 'Gọi trước khi xong 30 phút nha', NULL, 100093, '2026-06-25 11:00:00'),
-(95, 108, 14, 13, 5, '2026-06-10 08:00:00', 'COMPLETED', 'Đón bé đúng giờ giúp mình', NULL, 100094, '2026-06-07 08:00:00'),
-(96, 104, 14, 1, 5, '2026-06-27 01:00:00', 'COMPLETED', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100095, '2026-06-24 01:00:00'),
-(97, 108, 14, 14, 5, '2026-06-18 10:00:00', 'COMPLETED', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100096, '2026-06-15 10:00:00'),
-(98, 106, 14, 8, 5, '2026-06-05 10:00:00', 'IN_PROGRESS', 'Bé thích được vuốt ve', NULL, 100097, '2026-06-02 10:00:00'),
-(99, 105, 14, 4, 5, '2026-06-28 05:00:00', 'CANCELLED', 'Bé hơi nhát người, shop chú ý nhé', 'Xe hỏng không đưa bé đi được', 100098, '2026-06-25 05:00:00'),
-(100, 105, 14, 5, 5, '2026-06-25 01:00:00', 'COMPLETED', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100099, '2026-06-22 01:00:00'),
-(101, 105, 10, 6, 1, '2026-07-04 08:00:00', 'IN_PROGRESS', 'Không có lưu ý gì thêm', NULL, 100100, '2026-07-01 08:00:00'),
-(102, 107, 10, 10, 1, '2026-07-05 08:00:00', 'CANCELLED', 'Gọi trước khi xong 30 phút nha', 'Xe hỏng không đưa bé đi được', 100101, '2026-07-02 08:00:00'),
-(103, 104, 10, 2, 1, '2026-07-29 05:00:00', 'CONFIRMED', 'Bé hơi nhát người, shop chú ý nhé', NULL, 100102, '2026-07-26 05:00:00'),
-(104, 105, 10, 4, 1, '2026-07-01 07:00:00', 'IN_PROGRESS', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100103, '2026-06-28 07:00:00'),
-(105, 104, 10, 3, 1, '2026-07-22 10:00:00', 'CONFIRMED', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100104, '2026-07-19 10:00:00'),
-(106, 106, 10, 8, 1, '2026-07-08 09:00:00', 'CANCELLED', 'Cho bé tắm bằng sữa tắm loại không mùi nha', 'Tìm được chỗ rẻ hơn', 100105, '2026-07-05 09:00:00'),
-(107, 108, 10, 14, 1, '2026-07-23 03:00:00', 'CONFIRMED', 'Khách yêu cầu chăm sóc kỹ', NULL, 100106, '2026-07-20 03:00:00'),
-(108, 104, 10, 1, 1, '2026-07-11 11:00:00', 'IN_PROGRESS', 'Không có lưu ý gì thêm', NULL, 100107, '2026-07-08 11:00:00'),
-(109, 108, 10, 13, 1, '2026-07-16 11:00:00', 'COMPLETED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100108, '2026-07-13 11:00:00'),
-(110, 107, 10, 10, 1, '2026-07-23 01:00:00', 'PENDING_PAYMENT', 'Đón bé đúng giờ giúp mình', NULL, 100109, '2026-07-20 01:00:00'),
-(111, 107, 11, 12, 2, '2026-07-20 09:00:00', 'CONFIRMED', 'Bé thích được vuốt ve', NULL, 100110, '2026-07-17 09:00:00'),
-(112, 104, 11, 2, 2, '2026-07-09 09:00:00', 'CANCELLED', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', 'Đổi ý', 100111, '2026-07-06 09:00:00'),
-(113, 105, 11, 4, 2, '2026-07-22 06:00:00', 'CONFIRMED', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100112, '2026-07-19 06:00:00'),
-(114, 107, 11, 12, 2, '2026-07-07 11:00:00', 'COMPLETED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100113, '2026-07-04 11:00:00'),
-(115, 108, 11, 15, 2, '2026-07-01 09:00:00', 'COMPLETED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100114, '2026-06-28 09:00:00'),
-(116, 107, 11, 11, 2, '2026-07-07 02:00:00', 'COMPLETED', 'Không có lưu ý gì thêm', NULL, 100115, '2026-07-04 02:00:00'),
-(117, 106, 11, 9, 2, '2026-07-07 09:00:00', 'CANCELLED', 'Gọi trước khi xong 30 phút nha', 'Xe hỏng không đưa bé đi được', 100116, '2026-07-04 09:00:00'),
-(118, 106, 11, 8, 2, '2026-07-27 07:00:00', 'PENDING_PAYMENT', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100117, '2026-07-24 07:00:00'),
-(119, 108, 11, 13, 2, '2026-07-27 11:00:00', 'CONFIRMED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100118, '2026-07-24 11:00:00'),
-(120, 107, 11, 12, 2, '2026-07-12 10:00:00', 'CANCELLED', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', 'Mình đặt nhầm ngày, xin lỗi shop', 100119, '2026-07-09 10:00:00'),
-(121, 104, 12, 2, 3, '2026-07-17 01:00:00', 'IN_PROGRESS', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100120, '2026-07-14 01:00:00'),
-(122, 106, 12, 7, 3, '2026-07-14 01:00:00', 'CANCELLED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', 'Xe hỏng không đưa bé đi được', 100121, '2026-07-11 01:00:00'),
-(123, 106, 12, 9, 3, '2026-07-20 08:00:00', 'PENDING_PAYMENT', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100122, '2026-07-17 08:00:00'),
-(124, 106, 12, 8, 3, '2026-07-18 05:00:00', 'PENDING_PAYMENT', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100123, '2026-07-15 05:00:00'),
-(125, 106, 12, 8, 3, '2026-07-22 01:00:00', 'PENDING_PAYMENT', 'Đón bé đúng giờ giúp mình', NULL, 100124, '2026-07-19 01:00:00'),
-(126, 106, 12, 7, 3, '2026-07-30 09:00:00', 'CONFIRMED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100125, '2026-07-27 09:00:00'),
-(127, 104, 12, 1, 3, '2026-07-02 06:00:00', 'IN_PROGRESS', 'Không có lưu ý gì thêm', NULL, 100126, '2026-06-29 06:00:00'),
-(128, 106, 12, 9, 3, '2026-07-13 11:00:00', 'COMPLETED', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', NULL, 100127, '2026-07-10 11:00:00'),
-(129, 104, 12, 1, 3, '2026-07-01 09:00:00', 'COMPLETED', 'Không có lưu ý gì thêm', NULL, 100128, '2026-06-28 09:00:00'),
-(130, 107, 12, 12, 3, '2026-07-30 11:00:00', 'PENDING_PAYMENT', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', NULL, 100129, '2026-07-27 11:00:00'),
-(131, 108, 13, 13, 4, '2026-07-18 07:00:00', 'PENDING_PAYMENT', 'Bé thích được vuốt ve', NULL, 100130, '2026-07-15 07:00:00'),
-(132, 104, 13, 2, 4, '2026-07-25 08:00:00', 'CONFIRMED', 'Bé thích được vuốt ve', NULL, 100131, '2026-07-22 08:00:00'),
-(133, 106, 13, 9, 4, '2026-07-28 04:00:00', 'PENDING_PAYMENT', 'Gọi trước khi xong 30 phút nha', NULL, 100132, '2026-07-25 04:00:00'),
-(134, 106, 13, 9, 4, '2026-07-12 04:00:00', 'COMPLETED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100133, '2026-07-09 04:00:00'),
-(135, 107, 13, 12, 4, '2026-07-01 09:00:00', 'COMPLETED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100134, '2026-06-28 09:00:00'),
-(136, 107, 13, 10, 4, '2026-07-25 05:00:00', 'PENDING_PAYMENT', 'Không có lưu ý gì thêm', NULL, 100135, '2026-07-22 05:00:00'),
-(137, 105, 13, 4, 4, '2026-07-14 09:00:00', 'COMPLETED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100136, '2026-07-11 09:00:00'),
-(138, 108, 13, 13, 4, '2026-07-25 09:00:00', 'PENDING_PAYMENT', 'Khách yêu cầu chăm sóc kỹ', NULL, 100137, '2026-07-22 09:00:00'),
-(139, 105, 13, 4, 4, '2026-07-02 07:00:00', 'COMPLETED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100138, '2026-06-29 07:00:00'),
-(140, 108, 13, 15, 4, '2026-07-23 05:00:00', 'CONFIRMED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100139, '2026-07-20 05:00:00'),
-(141, 104, 14, 3, 5, '2026-07-20 07:00:00', 'PENDING_PAYMENT', 'Gọi trước khi xong 30 phút nha', NULL, 100140, '2026-07-17 07:00:00'),
-(142, 108, 14, 15, 5, '2026-07-22 06:00:00', 'PENDING_PAYMENT', 'Không có lưu ý gì thêm', NULL, 100141, '2026-07-19 06:00:00'),
-(143, 104, 14, 1, 5, '2026-07-23 05:00:00', 'CONFIRMED', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100142, '2026-07-20 05:00:00'),
-(144, 104, 14, 3, 5, '2026-07-20 06:00:00', 'PENDING_PAYMENT', 'Bé đang rụng lông nhiều', NULL, 100143, '2026-07-17 06:00:00'),
-(145, 104, 14, 3, 5, '2026-07-20 04:00:00', 'PENDING_PAYMENT', 'Không có lưu ý gì thêm', NULL, 100144, '2026-07-17 04:00:00'),
-(146, 106, 14, 7, 5, '2026-07-07 06:00:00', 'IN_PROGRESS', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100145, '2026-07-04 06:00:00'),
-(147, 104, 14, 1, 5, '2026-07-17 09:00:00', 'CANCELLED', 'Cho bé tắm bằng sữa tắm loại không mùi nha', 'Xe hỏng không đưa bé đi được', 100146, '2026-07-14 09:00:00'),
-(148, 104, 14, 2, 5, '2026-07-12 10:00:00', 'COMPLETED', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100147, '2026-07-09 10:00:00'),
-(149, 106, 14, 9, 5, '2026-07-04 06:00:00', 'COMPLETED', 'Bé thích được vuốt ve', NULL, 100148, '2026-07-01 06:00:00'),
-(150, 107, 14, 10, 5, '2026-07-30 10:00:00', 'CONFIRMED', 'Đón bé đúng giờ giúp mình', NULL, 100149, '2026-07-27 10:00:00'),
-(151, 106, 10, 9, 1, '2026-08-10 11:00:00', 'CONFIRMED', 'Bé thích được vuốt ve', NULL, 100150, '2026-08-07 11:00:00'),
-(152, 104, 10, 3, 1, '2026-08-21 10:00:00', 'PENDING_PAYMENT', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100151, '2026-08-18 10:00:00'),
-(153, 106, 10, 9, 1, '2026-08-23 09:00:00', 'PENDING_PAYMENT', 'Cho bé tắm bằng sữa tắm loại không mùi nha', NULL, 100152, '2026-08-20 09:00:00'),
-(154, 105, 10, 6, 1, '2026-08-04 02:00:00', 'PENDING_PAYMENT', 'Bé hơi nhát người, shop chú ý nhé', NULL, 100153, '2026-08-01 02:00:00'),
-(155, 108, 10, 14, 1, '2026-08-08 02:00:00', 'PENDING_PAYMENT', 'Bé đang rụng lông nhiều', NULL, 100154, '2026-08-05 02:00:00'),
-(156, 108, 10, 15, 1, '2026-08-05 10:00:00', 'PENDING_PAYMENT', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100155, '2026-08-02 10:00:00'),
-(157, 104, 10, 2, 1, '2026-08-20 09:00:00', 'CONFIRMED', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100156, '2026-08-17 09:00:00'),
-(158, 105, 10, 4, 1, '2026-08-21 10:00:00', 'PENDING_PAYMENT', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100157, '2026-08-18 10:00:00'),
-(159, 104, 10, 2, 1, '2026-08-08 01:00:00', 'PENDING_PAYMENT', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100158, '2026-08-05 01:00:00'),
-(160, 107, 10, 10, 1, '2026-08-22 08:00:00', 'PENDING_PAYMENT', 'Bé thích được vuốt ve', NULL, 100159, '2026-08-19 08:00:00'),
-(161, 105, 11, 5, 2, '2026-08-08 04:00:00', 'CONFIRMED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100160, '2026-08-05 04:00:00'),
-(162, 106, 11, 9, 2, '2026-08-12 04:00:00', 'PENDING_PAYMENT', 'Bé đang rụng lông nhiều', NULL, 100161, '2026-08-09 04:00:00'),
-(163, 107, 11, 11, 2, '2026-08-20 05:00:00', 'PENDING_PAYMENT', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', NULL, 100162, '2026-08-17 05:00:00'),
-(164, 108, 11, 14, 2, '2026-08-23 09:00:00', 'CONFIRMED', 'Đón bé đúng giờ giúp mình', NULL, 100163, '2026-08-20 09:00:00'),
-(165, 105, 11, 6, 2, '2026-08-03 04:00:00', 'CONFIRMED', 'Cho bé tắm bằng sữa tắm loại không mùi nha', NULL, 100164, '2026-07-31 04:00:00'),
-(166, 105, 11, 6, 2, '2026-08-07 10:00:00', 'PENDING_PAYMENT', 'Gọi trước khi xong 30 phút nha', NULL, 100165, '2026-08-04 10:00:00'),
-(167, 104, 11, 3, 2, '2026-08-18 01:00:00', 'PENDING_PAYMENT', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100166, '2026-08-15 01:00:00'),
-(168, 105, 11, 6, 2, '2026-08-15 10:00:00', 'CONFIRMED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100167, '2026-08-12 10:00:00'),
-(169, 107, 11, 10, 2, '2026-08-05 01:00:00', 'CONFIRMED', 'Đón bé đúng giờ giúp mình', NULL, 100168, '2026-08-02 01:00:00'),
-(170, 104, 11, 3, 2, '2026-08-17 05:00:00', 'PENDING_PAYMENT', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100169, '2026-08-14 05:00:00'),
-(171, 107, 12, 10, 3, '2026-08-29 08:00:00', 'CONFIRMED', 'Bé thích được vuốt ve', NULL, 100170, '2026-08-26 08:00:00'),
-(172, 107, 12, 12, 3, '2026-08-18 09:00:00', 'CONFIRMED', 'Bé nhà mình mới khỏi ốm, nhờ shop nhẹ tay', NULL, 100171, '2026-08-15 09:00:00'),
-(173, 107, 12, 11, 3, '2026-08-28 08:00:00', 'CONFIRMED', 'Cho bé tắm bằng sữa tắm loại không mùi nha', NULL, 100172, '2026-08-25 08:00:00'),
-(174, 105, 12, 6, 3, '2026-08-28 03:00:00', 'CONFIRMED', 'Bé thích được vuốt ve', NULL, 100173, '2026-08-25 03:00:00'),
-(175, 105, 12, 4, 3, '2026-08-12 09:00:00', 'PENDING_PAYMENT', 'Bé thích được vuốt ve', NULL, 100174, '2026-08-09 09:00:00'),
-(176, 106, 12, 9, 3, '2026-08-21 11:00:00', 'PENDING_PAYMENT', 'Gọi trước khi xong 30 phút nha', NULL, 100175, '2026-08-18 11:00:00'),
-(177, 106, 12, 7, 3, '2026-08-13 02:00:00', 'CONFIRMED', 'Bé đang rụng lông nhiều', NULL, 100176, '2026-08-10 02:00:00'),
-(178, 106, 12, 7, 3, '2026-08-23 04:00:00', 'CONFIRMED', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100177, '2026-08-20 04:00:00'),
-(179, 107, 12, 10, 3, '2026-08-16 05:00:00', 'CONFIRMED', 'Bé đang rụng lông nhiều', NULL, 100178, '2026-08-13 05:00:00'),
-(180, 108, 12, 13, 3, '2026-08-26 10:00:00', 'CONFIRMED', 'Gọi trước khi xong 30 phút nha', NULL, 100179, '2026-08-23 10:00:00'),
-(181, 105, 13, 4, 4, '2026-08-18 03:00:00', 'CONFIRMED', 'Bé thích được vuốt ve', NULL, 100180, '2026-08-15 03:00:00'),
-(182, 106, 13, 9, 4, '2026-08-22 10:00:00', 'CONFIRMED', 'Không có lưu ý gì thêm', NULL, 100181, '2026-08-19 10:00:00'),
-(183, 108, 13, 14, 4, '2026-08-04 11:00:00', 'PENDING_PAYMENT', 'Bé thích được vuốt ve', NULL, 100182, '2026-08-01 11:00:00'),
-(184, 107, 13, 12, 4, '2026-08-17 08:00:00', 'PENDING_PAYMENT', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100183, '2026-08-14 08:00:00'),
-(185, 107, 13, 10, 4, '2026-08-21 02:00:00', 'PENDING_PAYMENT', 'Khách yêu cầu chăm sóc kỹ', NULL, 100184, '2026-08-18 02:00:00'),
-(186, 108, 13, 15, 4, '2026-08-23 08:00:00', 'CONFIRMED', 'Không có lưu ý gì thêm', NULL, 100185, '2026-08-20 08:00:00'),
-(187, 105, 13, 6, 4, '2026-08-22 06:00:00', 'PENDING_PAYMENT', 'Không có lưu ý gì thêm', NULL, 100186, '2026-08-19 06:00:00'),
-(188, 104, 13, 1, 4, '2026-08-14 08:00:00', 'PENDING_PAYMENT', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100187, '2026-08-11 08:00:00'),
-(189, 108, 13, 13, 4, '2026-08-23 05:00:00', 'PENDING_PAYMENT', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100188, '2026-08-20 05:00:00'),
-(190, 107, 13, 10, 4, '2026-08-07 09:00:00', 'PENDING_PAYMENT', 'Không có lưu ý gì thêm', NULL, 100189, '2026-08-04 09:00:00'),
-(191, 106, 14, 9, 5, '2026-08-28 02:00:00', 'PENDING_PAYMENT', 'Nếu bé sủa nhiều thì cho bé ăn hạt này nhé', NULL, 100190, '2026-08-25 02:00:00'),
-(192, 108, 14, 14, 5, '2026-08-17 02:00:00', 'CONFIRMED', 'Bé hay cắn bậy, mang sẵn rọ mõm rồi ạ', NULL, 100191, '2026-08-14 02:00:00'),
-(193, 107, 14, 12, 5, '2026-08-19 01:00:00', 'PENDING_PAYMENT', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100192, '2026-08-16 01:00:00'),
-(194, 104, 14, 2, 5, '2026-08-05 03:00:00', 'PENDING_PAYMENT', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100193, '2026-08-02 03:00:00'),
-(195, 105, 14, 5, 5, '2026-08-14 08:00:00', 'PENDING_PAYMENT', 'Nhờ shop kiểm tra kỹ phần tai', NULL, 100194, '2026-08-11 08:00:00'),
-(196, 105, 14, 4, 5, '2026-08-26 10:00:00', 'CONFIRMED', 'Cho bé tắm bằng sữa tắm loại không mùi nha', NULL, 100195, '2026-08-23 10:00:00'),
-(197, 105, 14, 6, 5, '2026-08-16 07:00:00', 'CONFIRMED', 'Bé thích được vuốt ve', NULL, 100196, '2026-08-13 07:00:00'),
-(198, 106, 14, 8, 5, '2026-08-15 08:00:00', 'PENDING_PAYMENT', 'Cắt tỉa gọn gàng phần lông quanh mắt giúp mình', NULL, 100197, '2026-08-12 08:00:00'),
-(199, 105, 14, 5, 5, '2026-08-15 08:00:00', 'PENDING_PAYMENT', 'Mình sẽ đến trễ 10 phút, shop thông cảm nhé', NULL, 100198, '2026-08-12 08:00:00'),
-(200, 107, 14, 11, 5, '2026-08-20 04:00:00', 'PENDING_PAYMENT', 'Đón bé đúng giờ giúp mình', NULL, 100199, '2026-08-17 04:00:00');
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(19, 2),
+(20, 7),
+(21, 3),
+(22, 9);
 
-INSERT INTO `booking_services` (`booking_id`, `service_id`) VALUES
-(1, 1004),
-(2, 1006),
-(3, 1003),
-(4, 1005),
-(5, 1001),
-(6, 1001),
-(7, 1005),
-(8, 1003),
-(9, 1001),
-(10, 1005),
-(11, 1104),
-(12, 1102),
-(12, 1103),
-(13, 1106),
-(14, 1104),
-(15, 1105),
-(15, 1104),
-(16, 1102),
-(17, 1105),
-(18, 1105),
-(19, 1106),
-(20, 1102),
-(20, 1103),
-(21, 1201),
-(22, 1206),
-(23, 1204),
-(24, 1202),
-(25, 1206),
-(25, 1204),
-(26, 1202),
-(27, 1201),
-(28, 1203),
-(28, 1205),
-(29, 1205),
-(30, 1201),
-(31, 1302),
-(32, 1303),
-(32, 1305),
-(33, 1303),
-(34, 1303),
-(35, 1302),
-(36, 1301),
-(37, 1306),
-(38, 1304),
-(39, 1301),
-(39, 1305),
-(40, 1303),
-(40, 1305),
-(41, 1405),
-(41, 1404),
-(42, 1402),
-(42, 1403),
-(43, 1401),
-(44, 1403),
-(45, 1403),
-(46, 1405),
-(47, 1402),
-(48, 1403),
-(49, 1402),
-(49, 1405),
-(50, 1402),
-(51, 1001),
-(52, 1002),
-(53, 1006),
-(54, 1001),
-(55, 1004),
-(56, 1006),
-(57, 1004),
-(58, 1004),
-(59, 1003),
-(60, 1002),
-(61, 1103),
-(61, 1106),
-(62, 1102),
-(63, 1101),
-(64, 1104),
-(65, 1102),
-(66, 1101),
-(67, 1103),
-(68, 1103),
-(69, 1106),
-(70, 1105),
-(71, 1201),
-(72, 1203),
-(73, 1205),
-(74, 1203),
-(75, 1202),
-(76, 1201),
-(76, 1202),
-(77, 1201),
-(77, 1203),
-(78, 1201),
-(78, 1204),
-(79, 1203),
-(80, 1202),
-(81, 1306),
-(82, 1305),
-(82, 1301),
-(83, 1305),
-(83, 1301),
-(84, 1305),
-(85, 1304),
-(85, 1303),
-(86, 1303),
-(87, 1303),
-(88, 1306),
-(89, 1301),
-(89, 1306),
-(90, 1304),
-(91, 1406),
-(92, 1401),
-(93, 1404),
-(94, 1405),
-(95, 1405),
-(95, 1401),
-(96, 1405),
-(97, 1403),
-(98, 1403),
-(99, 1406),
-(99, 1405),
-(100, 1406),
-(100, 1401),
-(101, 1001),
-(102, 1002),
-(103, 1001),
-(104, 1004),
-(105, 1004),
-(106, 1006),
-(107, 1003),
-(108, 1004),
-(109, 1004),
-(110, 1006),
-(110, 1004),
-(111, 1105),
-(111, 1101),
-(112, 1102),
-(112, 1106),
-(113, 1102),
-(114, 1106),
-(114, 1103),
-(115, 1104),
-(116, 1101),
-(117, 1106),
-(117, 1101),
-(118, 1106),
-(119, 1104),
-(120, 1105),
-(121, 1201),
-(122, 1202),
-(123, 1205),
-(124, 1203),
-(125, 1202),
-(126, 1201),
-(127, 1202),
-(128, 1204),
-(129, 1205),
-(129, 1206),
-(130, 1204),
-(131, 1301),
-(132, 1301),
-(133, 1301),
-(133, 1302),
-(134, 1302),
-(135, 1306),
-(136, 1303),
-(137, 1302),
-(138, 1305),
-(138, 1303),
-(139, 1302),
-(140, 1301),
-(141, 1403),
-(141, 1404),
-(142, 1403),
-(142, 1404),
-(143, 1405),
-(143, 1402),
-(144, 1404),
-(145, 1402),
-(145, 1406),
-(146, 1406),
-(147, 1404),
-(148, 1406),
-(149, 1405),
-(149, 1404),
-(150, 1405),
-(151, 1001),
-(152, 1006),
-(152, 1001),
-(153, 1001),
-(154, 1005),
-(154, 1001),
-(155, 1006),
-(156, 1006),
-(157, 1001),
-(157, 1006),
-(158, 1004),
-(158, 1001),
-(159, 1005),
-(159, 1006),
-(160, 1006),
-(161, 1103),
-(161, 1105),
-(162, 1102),
-(163, 1104),
-(164, 1103),
-(165, 1105),
-(166, 1105),
-(167, 1104),
-(168, 1104),
-(169, 1101),
-(170, 1101),
-(170, 1105),
-(171, 1202),
-(172, 1203),
-(172, 1202),
-(173, 1206),
-(174, 1203),
-(174, 1202),
-(175, 1202),
-(175, 1205),
-(176, 1205),
-(177, 1203),
-(177, 1205),
-(178, 1202),
-(179, 1206),
-(179, 1203),
-(180, 1206),
-(181, 1302),
-(182, 1301),
-(183, 1306),
-(184, 1306),
-(184, 1302),
-(185, 1301),
-(186, 1302),
-(186, 1303),
-(187, 1302),
-(188, 1303),
-(189, 1305),
-(190, 1305),
-(191, 1406),
-(192, 1401),
-(192, 1403),
-(193, 1404),
-(194, 1404),
-(195, 1402),
-(195, 1406),
-(196, 1401),
-(197, 1401),
-(198, 1401),
-(198, 1405),
-(199, 1403),
-(200, 1403);
+-- 6. PENDING_PAYMENT (4) -- booking IDs 23-26, vua tao
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, status, note, payos_order_code, created_at) VALUES
+(23, 5, 3, 1, NULL, '2026-08-27 14:00:00', 'PENDING_PAYMENT', 'Mochi lưu trú phòng VIP 2 ngày', 202406016, '2026-08-18 09:00:00'),
+(24, 6, 1, 3, NULL, '2026-08-25 15:00:00', 'PENDING_PAYMENT', NULL, 202406017, '2026-08-18 09:30:00'),
+(25, 7, 2, 4, NULL, '2026-08-26 09:00:00', 'PENDING_PAYMENT', 'Khám tổng quát và xét nghiệm máu', 202406018, '2026-08-18 10:00:00'),
+(26, 8, 2, 5, NULL, '2026-08-28 10:00:00', 'PENDING_PAYMENT', NULL, 202406019, '2026-08-18 10:30:00');
 
-INSERT INTO `payment` (`id`, `booking_id`, `amount`, `method`, `status`, `payos_order_code`, `checkout_url`, `gateway_transaction_id`, `payment_time`, `description`) VALUES
-(1, 1, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100001, 'http://payos.vn/dummy', 'GW100001', '2026-05-06 03:00:00', 'Thanh toán cọc 10%'),
-(2, 2, 150000, 'PAYOS', 'SUCCESS', 100002, 'http://payos.vn/dummy', 'GW100002', '2026-05-22 07:00:00', 'Thanh toán 100%'),
-(3, 4, 400000, 'PAYOS', 'SUCCESS', 100004, 'http://payos.vn/dummy', 'GW100004', '2026-05-07 11:00:00', 'Thanh toán 100%'),
-(4, 5, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100005, 'http://payos.vn/dummy', 'GW100005', '2026-05-04 04:00:00', 'Thanh toán cọc 10%'),
-(5, 7, 40000, 'CASH_DEPOSIT', 'SUCCESS', 100007, 'http://payos.vn/dummy', 'GW100007', '2026-05-24 01:00:00', 'Thanh toán cọc 10%'),
-(6, 8, 1500000, 'PAYOS', 'SUCCESS', 100008, 'http://payos.vn/dummy', 'GW100008', '2026-05-01 02:00:00', 'Thanh toán 100%'),
-(7, 9, 200000, 'PAYOS', 'SUCCESS', 100009, 'http://payos.vn/dummy', 'GW100009', '2026-05-04 10:00:00', 'Thanh toán 100%'),
-(8, 10, 400000, 'PAYOS', 'SUCCESS', 100010, 'http://payos.vn/dummy', 'GW100010', '2026-05-16 06:00:00', 'Thanh toán 100%'),
-(9, 11, 180000, 'CASH_DEPOSIT', 'SUCCESS', 100011, 'http://payos.vn/dummy', 'GW100011', '2026-05-26 11:00:00', 'Thanh toán cọc 15%'),
-(10, 13, 300000, 'PAYOS', 'SUCCESS', 100013, 'http://payos.vn/dummy', 'GW100013', '2026-05-04 02:00:00', 'Thanh toán 100%'),
-(11, 14, 180000, 'CASH_DEPOSIT', 'SUCCESS', 100014, 'http://payos.vn/dummy', 'GW100014', '2026-05-17 07:00:00', 'Thanh toán cọc 15%'),
-(12, 15, 1400000, 'PAYOS', 'SUCCESS', 100015, 'http://payos.vn/dummy', 'GW100015', '2026-05-22 06:00:00', 'Thanh toán 100%'),
-(13, 16, 450000, 'PAYOS', 'SUCCESS', 100016, 'http://payos.vn/dummy', 'GW100016', '2026-05-07 07:00:00', 'Thanh toán 100%'),
-(14, 19, 300000, 'PAYOS', 'SUCCESS', 100019, 'http://payos.vn/dummy', 'GW100019', '2026-05-28 11:00:00', 'Thanh toán 100%'),
-(15, 21, 150000, 'PAYOS', 'SUCCESS', 100021, 'http://payos.vn/dummy', 'GW100021', '2026-05-04 10:00:00', 'Thanh toán 100%'),
-(16, 22, 125000, 'CASH_DEPOSIT', 'SUCCESS', 100022, 'http://payos.vn/dummy', 'GW100022', '2026-05-21 07:00:00', 'Thanh toán cọc 25%'),
-(17, 23, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100023, 'http://payos.vn/dummy', 'GW100023', '2026-05-13 09:00:00', 'Thanh toán cọc 25%'),
-(18, 25, 145000, 'CASH_DEPOSIT', 'SUCCESS', 100025, 'http://payos.vn/dummy', 'GW100025', '2026-05-09 05:00:00', 'Thanh toán cọc 25%'),
-(19, 26, 62500, 'CASH_DEPOSIT', 'SUCCESS', 100026, 'http://payos.vn/dummy', 'GW100026', '2026-05-13 05:00:00', 'Thanh toán cọc 25%'),
-(20, 27, 37500, 'CASH_DEPOSIT', 'SUCCESS', 100027, 'http://payos.vn/dummy', 'GW100027', '2026-04-30 01:00:00', 'Thanh toán cọc 25%'),
-(21, 28, 157500, 'CASH_DEPOSIT', 'SUCCESS', 100028, 'http://payos.vn/dummy', 'GW100028', '2026-05-13 04:00:00', 'Thanh toán cọc 25%'),
-(22, 29, 45000, 'CASH_DEPOSIT', 'SUCCESS', 100029, 'http://payos.vn/dummy', 'GW100029', '2026-05-23 11:00:00', 'Thanh toán cọc 25%'),
-(23, 31, 350000, 'PAYOS', 'SUCCESS', 100031, 'http://payos.vn/dummy', 'GW100031', '2026-05-15 10:00:00', 'Thanh toán 100%'),
-(24, 32, 1900000, 'PAYOS', 'SUCCESS', 100032, 'http://payos.vn/dummy', 'GW100032', '2026-05-28 06:00:00', 'Thanh toán 100%'),
-(25, 33, 1500000, 'PAYOS', 'SUCCESS', 100033, 'http://payos.vn/dummy', 'GW100033', '2026-05-07 10:00:00', 'Thanh toán 100%'),
-(26, 35, 35000, 'CASH_DEPOSIT', 'SUCCESS', 100035, 'http://payos.vn/dummy', 'GW100035', '2026-05-21 08:00:00', 'Thanh toán cọc 10%'),
-(27, 36, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100036, 'http://payos.vn/dummy', 'GW100036', '2026-05-07 10:00:00', 'Thanh toán cọc 10%'),
-(28, 37, 15000, 'CASH_DEPOSIT', 'SUCCESS', 100037, 'http://payos.vn/dummy', 'GW100037', '2026-05-24 11:00:00', 'Thanh toán cọc 10%'),
-(29, 39, 600000, 'PAYOS', 'SUCCESS', 100039, 'http://payos.vn/dummy', 'GW100039', '2026-05-15 09:00:00', 'Thanh toán 100%'),
-(30, 40, 190000, 'CASH_DEPOSIT', 'SUCCESS', 100040, 'http://payos.vn/dummy', 'GW100040', '2026-05-24 03:00:00', 'Thanh toán cọc 10%'),
-(31, 42, 85500, 'CASH_DEPOSIT', 'SUCCESS', 100042, 'http://payos.vn/dummy', 'GW100042', '2026-05-15 01:00:00', 'Thanh toán cọc 15%'),
-(32, 43, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100043, 'http://payos.vn/dummy', 'GW100043', '2026-05-06 09:00:00', 'Thanh toán cọc 15%'),
-(33, 44, 120000, 'PAYOS', 'SUCCESS', 100044, 'http://payos.vn/dummy', 'GW100044', '2026-05-02 07:00:00', 'Thanh toán 100%'),
-(34, 45, 18000, 'CASH_DEPOSIT', 'SUCCESS', 100045, 'http://payos.vn/dummy', 'GW100045', '2026-05-13 06:00:00', 'Thanh toán cọc 15%'),
-(35, 47, 67500, 'CASH_DEPOSIT', 'SUCCESS', 100047, 'http://payos.vn/dummy', 'GW100047', '2026-05-10 03:00:00', 'Thanh toán cọc 15%'),
-(36, 48, 18000, 'CASH_DEPOSIT', 'SUCCESS', 100048, 'http://payos.vn/dummy', 'GW100048', '2026-05-11 05:00:00', 'Thanh toán cọc 15%'),
-(37, 51, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100051, 'http://payos.vn/dummy', 'GW100051', '2026-06-26 06:00:00', 'Thanh toán cọc 10%'),
-(38, 52, 35000, 'CASH_DEPOSIT', 'SUCCESS', 100052, 'http://payos.vn/dummy', 'GW100052', '2026-06-25 04:00:00', 'Thanh toán cọc 10%'),
-(39, 53, 150000, 'PAYOS', 'SUCCESS', 100053, 'http://payos.vn/dummy', 'GW100053', '2026-06-10 09:00:00', 'Thanh toán 100%'),
-(40, 54, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100054, 'http://payos.vn/dummy', 'GW100054', '2026-05-29 10:00:00', 'Thanh toán cọc 10%'),
-(41, 55, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100055, 'http://payos.vn/dummy', 'GW100055', '2026-06-02 05:00:00', 'Thanh toán cọc 10%'),
-(42, 56, 150000, 'PAYOS', 'SUCCESS', 100056, 'http://payos.vn/dummy', 'GW100056', '2026-06-12 06:00:00', 'Thanh toán 100%'),
-(43, 58, 300000, 'PAYOS', 'SUCCESS', 100058, 'http://payos.vn/dummy', 'GW100058', '2026-06-11 06:00:00', 'Thanh toán 100%'),
-(44, 60, 350000, 'PAYOS', 'SUCCESS', 100060, 'http://payos.vn/dummy', 'GW100060', '2026-06-07 11:00:00', 'Thanh toán 100%'),
-(45, 61, 420000, 'PAYOS', 'SUCCESS', 100061, 'http://payos.vn/dummy', 'GW100061', '2026-06-02 10:00:00', 'Thanh toán 100%'),
-(46, 63, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100063, 'http://payos.vn/dummy', 'GW100063', '2026-05-30 05:00:00', 'Thanh toán cọc 15%'),
-(47, 65, 450000, 'PAYOS', 'SUCCESS', 100065, 'http://payos.vn/dummy', 'GW100065', '2026-05-31 02:00:00', 'Thanh toán 100%'),
-(48, 66, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100066, 'http://payos.vn/dummy', 'GW100066', '2026-06-27 01:00:00', 'Thanh toán cọc 15%'),
-(49, 67, 120000, 'PAYOS', 'SUCCESS', 100067, 'http://payos.vn/dummy', 'GW100067', '2026-06-27 11:00:00', 'Thanh toán 100%'),
-(50, 68, 120000, 'PAYOS', 'SUCCESS', 100068, 'http://payos.vn/dummy', 'GW100068', '2026-05-31 07:00:00', 'Thanh toán 100%'),
-(51, 69, 45000, 'CASH_DEPOSIT', 'SUCCESS', 100069, 'http://payos.vn/dummy', 'GW100069', '2026-06-24 07:00:00', 'Thanh toán cọc 15%'),
-(52, 70, 200000, 'PAYOS', 'SUCCESS', 100070, 'http://payos.vn/dummy', 'GW100070', '2026-05-30 03:00:00', 'Thanh toán 100%'),
-(53, 71, 150000, 'PAYOS', 'SUCCESS', 100071, 'http://payos.vn/dummy', 'GW100071', '2026-06-03 01:00:00', 'Thanh toán 100%'),
-(54, 72, 450000, 'PAYOS', 'SUCCESS', 100072, 'http://payos.vn/dummy', 'GW100072', '2026-06-22 10:00:00', 'Thanh toán 100%'),
-(55, 73, 45000, 'CASH_DEPOSIT', 'SUCCESS', 100073, 'http://payos.vn/dummy', 'GW100073', '2026-06-25 08:00:00', 'Thanh toán cọc 25%'),
-(56, 75, 250000, 'PAYOS', 'SUCCESS', 100075, 'http://payos.vn/dummy', 'GW100075', '2026-05-31 03:00:00', 'Thanh toán 100%'),
-(57, 76, 100000, 'CASH_DEPOSIT', 'SUCCESS', 100076, 'http://payos.vn/dummy', 'GW100076', '2026-06-24 09:00:00', 'Thanh toán cọc 25%'),
-(58, 77, 600000, 'PAYOS', 'SUCCESS', 100077, 'http://payos.vn/dummy', 'GW100077', '2026-06-16 02:00:00', 'Thanh toán 100%'),
-(59, 78, 57500, 'CASH_DEPOSIT', 'SUCCESS', 100078, 'http://payos.vn/dummy', 'GW100078', '2026-06-09 01:00:00', 'Thanh toán cọc 25%'),
-(60, 79, 450000, 'PAYOS', 'SUCCESS', 100079, 'http://payos.vn/dummy', 'GW100079', '2026-06-16 10:00:00', 'Thanh toán 100%'),
-(61, 80, 250000, 'PAYOS', 'SUCCESS', 100080, 'http://payos.vn/dummy', 'GW100080', '2026-06-06 05:00:00', 'Thanh toán 100%'),
-(62, 83, 60000, 'CASH_DEPOSIT', 'SUCCESS', 100083, 'http://payos.vn/dummy', 'GW100083', '2026-05-31 10:00:00', 'Thanh toán cọc 10%'),
-(63, 84, 400000, 'PAYOS', 'SUCCESS', 100084, 'http://payos.vn/dummy', 'GW100084', '2026-06-24 03:00:00', 'Thanh toán 100%'),
-(64, 85, 180000, 'CASH_DEPOSIT', 'SUCCESS', 100085, 'http://payos.vn/dummy', 'GW100085', '2026-06-01 07:00:00', 'Thanh toán cọc 10%'),
-(65, 86, 1500000, 'PAYOS', 'SUCCESS', 100086, 'http://payos.vn/dummy', 'GW100086', '2026-06-12 05:00:00', 'Thanh toán 100%'),
-(66, 88, 150000, 'PAYOS', 'SUCCESS', 100088, 'http://payos.vn/dummy', 'GW100088', '2026-06-01 09:00:00', 'Thanh toán 100%'),
-(67, 89, 35000, 'CASH_DEPOSIT', 'SUCCESS', 100089, 'http://payos.vn/dummy', 'GW100089', '2026-06-24 10:00:00', 'Thanh toán cọc 10%'),
-(68, 92, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100092, 'http://payos.vn/dummy', 'GW100092', '2026-06-08 04:00:00', 'Thanh toán cọc 15%'),
-(69, 93, 180000, 'CASH_DEPOSIT', 'SUCCESS', 100093, 'http://payos.vn/dummy', 'GW100093', '2026-06-11 10:00:00', 'Thanh toán cọc 15%'),
-(70, 94, 200000, 'PAYOS', 'SUCCESS', 100094, 'http://payos.vn/dummy', 'GW100094', '2026-06-25 11:00:00', 'Thanh toán 100%'),
-(71, 95, 400000, 'PAYOS', 'SUCCESS', 100095, 'http://payos.vn/dummy', 'GW100095', '2026-06-07 08:00:00', 'Thanh toán 100%'),
-(72, 96, 200000, 'PAYOS', 'SUCCESS', 100096, 'http://payos.vn/dummy', 'GW100096', '2026-06-24 01:00:00', 'Thanh toán 100%'),
-(73, 97, 120000, 'PAYOS', 'SUCCESS', 100097, 'http://payos.vn/dummy', 'GW100097', '2026-06-15 10:00:00', 'Thanh toán 100%'),
-(74, 98, 18000, 'CASH_DEPOSIT', 'SUCCESS', 100098, 'http://payos.vn/dummy', 'GW100098', '2026-06-02 10:00:00', 'Thanh toán cọc 15%'),
-(75, 100, 500000, 'PAYOS', 'SUCCESS', 100100, 'http://payos.vn/dummy', 'GW100100', '2026-06-22 01:00:00', 'Thanh toán 100%'),
-(76, 101, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100101, 'http://payos.vn/dummy', 'GW100101', '2026-07-01 08:00:00', 'Thanh toán cọc 10%'),
-(77, 103, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100103, 'http://payos.vn/dummy', 'GW100103', '2026-07-26 05:00:00', 'Thanh toán cọc 10%'),
-(78, 104, 300000, 'PAYOS', 'SUCCESS', 100104, 'http://payos.vn/dummy', 'GW100104', '2026-06-28 07:00:00', 'Thanh toán 100%'),
-(79, 105, 300000, 'PAYOS', 'SUCCESS', 100105, 'http://payos.vn/dummy', 'GW100105', '2026-07-19 10:00:00', 'Thanh toán 100%'),
-(80, 107, 1500000, 'PAYOS', 'SUCCESS', 100107, 'http://payos.vn/dummy', 'GW100107', '2026-07-20 03:00:00', 'Thanh toán 100%'),
-(81, 108, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100108, 'http://payos.vn/dummy', 'GW100108', '2026-07-08 11:00:00', 'Thanh toán cọc 10%'),
-(82, 109, 300000, 'PAYOS', 'SUCCESS', 100109, 'http://payos.vn/dummy', 'GW100109', '2026-07-13 11:00:00', 'Thanh toán 100%'),
-(83, 111, 400000, 'PAYOS', 'SUCCESS', 100111, 'http://payos.vn/dummy', 'GW100111', '2026-07-17 09:00:00', 'Thanh toán 100%'),
-(84, 113, 450000, 'PAYOS', 'SUCCESS', 100113, 'http://payos.vn/dummy', 'GW100113', '2026-07-19 06:00:00', 'Thanh toán 100%'),
-(85, 114, 420000, 'PAYOS', 'SUCCESS', 100114, 'http://payos.vn/dummy', 'GW100114', '2026-07-04 11:00:00', 'Thanh toán 100%'),
-(86, 115, 180000, 'CASH_DEPOSIT', 'SUCCESS', 100115, 'http://payos.vn/dummy', 'GW100115', '2026-06-28 09:00:00', 'Thanh toán cọc 15%'),
-(87, 116, 200000, 'PAYOS', 'SUCCESS', 100116, 'http://payos.vn/dummy', 'GW100116', '2026-07-04 02:00:00', 'Thanh toán 100%'),
-(88, 119, 1200000, 'PAYOS', 'SUCCESS', 100119, 'http://payos.vn/dummy', 'GW100119', '2026-07-24 11:00:00', 'Thanh toán 100%'),
-(89, 121, 37500, 'CASH_DEPOSIT', 'SUCCESS', 100121, 'http://payos.vn/dummy', 'GW100121', '2026-07-14 01:00:00', 'Thanh toán cọc 25%'),
-(90, 126, 150000, 'PAYOS', 'SUCCESS', 100126, 'http://payos.vn/dummy', 'GW100126', '2026-07-27 09:00:00', 'Thanh toán 100%'),
-(91, 127, 62500, 'CASH_DEPOSIT', 'SUCCESS', 100127, 'http://payos.vn/dummy', 'GW100127', '2026-06-29 06:00:00', 'Thanh toán cọc 25%'),
-(92, 128, 80000, 'PAYOS', 'SUCCESS', 100128, 'http://payos.vn/dummy', 'GW100128', '2026-07-10 11:00:00', 'Thanh toán 100%'),
-(93, 129, 170000, 'CASH_DEPOSIT', 'SUCCESS', 100129, 'http://payos.vn/dummy', 'GW100129', '2026-06-28 09:00:00', 'Thanh toán cọc 25%'),
-(94, 132, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100132, 'http://payos.vn/dummy', 'GW100132', '2026-07-22 08:00:00', 'Thanh toán cọc 10%'),
-(95, 134, 35000, 'CASH_DEPOSIT', 'SUCCESS', 100134, 'http://payos.vn/dummy', 'GW100134', '2026-07-09 04:00:00', 'Thanh toán cọc 10%'),
-(96, 135, 15000, 'CASH_DEPOSIT', 'SUCCESS', 100135, 'http://payos.vn/dummy', 'GW100135', '2026-06-28 09:00:00', 'Thanh toán cọc 10%'),
-(97, 137, 35000, 'CASH_DEPOSIT', 'SUCCESS', 100137, 'http://payos.vn/dummy', 'GW100137', '2026-07-11 09:00:00', 'Thanh toán cọc 10%'),
-(98, 139, 35000, 'CASH_DEPOSIT', 'SUCCESS', 100139, 'http://payos.vn/dummy', 'GW100139', '2026-06-29 07:00:00', 'Thanh toán cọc 10%'),
-(99, 140, 200000, 'PAYOS', 'SUCCESS', 100140, 'http://payos.vn/dummy', 'GW100140', '2026-07-20 05:00:00', 'Thanh toán 100%'),
-(100, 143, 97500, 'CASH_DEPOSIT', 'SUCCESS', 100143, 'http://payos.vn/dummy', 'GW100143', '2026-07-20 05:00:00', 'Thanh toán cọc 15%'),
-(101, 146, 45000, 'CASH_DEPOSIT', 'SUCCESS', 100146, 'http://payos.vn/dummy', 'GW100146', '2026-07-04 06:00:00', 'Thanh toán cọc 15%'),
-(102, 148, 45000, 'CASH_DEPOSIT', 'SUCCESS', 100148, 'http://payos.vn/dummy', 'GW100148', '2026-07-09 10:00:00', 'Thanh toán cọc 15%'),
-(103, 149, 210000, 'CASH_DEPOSIT', 'SUCCESS', 100149, 'http://payos.vn/dummy', 'GW100149', '2026-07-01 06:00:00', 'Thanh toán cọc 15%'),
-(104, 150, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100150, 'http://payos.vn/dummy', 'GW100150', '2026-07-27 10:00:00', 'Thanh toán cọc 15%'),
-(105, 151, 200000, 'PAYOS', 'SUCCESS', 100151, 'http://payos.vn/dummy', 'GW100151', '2026-08-07 11:00:00', 'Thanh toán 100%'),
-(106, 157, 35000, 'CASH_DEPOSIT', 'SUCCESS', 100157, 'http://payos.vn/dummy', 'GW100157', '2026-08-17 09:00:00', 'Thanh toán cọc 10%'),
-(107, 161, 48000, 'CASH_DEPOSIT', 'SUCCESS', 100161, 'http://payos.vn/dummy', 'GW100161', '2026-08-05 04:00:00', 'Thanh toán cọc 15%'),
-(108, 164, 120000, 'PAYOS', 'SUCCESS', 100164, 'http://payos.vn/dummy', 'GW100164', '2026-08-20 09:00:00', 'Thanh toán 100%'),
-(109, 165, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100165, 'http://payos.vn/dummy', 'GW100165', '2026-07-31 04:00:00', 'Thanh toán cọc 15%'),
-(110, 168, 1200000, 'PAYOS', 'SUCCESS', 100168, 'http://payos.vn/dummy', 'GW100168', '2026-08-12 10:00:00', 'Thanh toán 100%'),
-(111, 169, 30000, 'CASH_DEPOSIT', 'SUCCESS', 100169, 'http://payos.vn/dummy', 'GW100169', '2026-08-02 01:00:00', 'Thanh toán cọc 15%'),
-(112, 171, 250000, 'PAYOS', 'SUCCESS', 100171, 'http://payos.vn/dummy', 'GW100171', '2026-08-26 08:00:00', 'Thanh toán 100%'),
-(113, 172, 700000, 'PAYOS', 'SUCCESS', 100172, 'http://payos.vn/dummy', 'GW100172', '2026-08-15 09:00:00', 'Thanh toán 100%'),
-(114, 173, 500000, 'PAYOS', 'SUCCESS', 100173, 'http://payos.vn/dummy', 'GW100173', '2026-08-25 08:00:00', 'Thanh toán 100%'),
-(115, 174, 175000, 'CASH_DEPOSIT', 'SUCCESS', 100174, 'http://payos.vn/dummy', 'GW100174', '2026-08-25 03:00:00', 'Thanh toán cọc 25%'),
-(116, 177, 630000, 'PAYOS', 'SUCCESS', 100177, 'http://payos.vn/dummy', 'GW100177', '2026-08-10 02:00:00', 'Thanh toán 100%'),
-(117, 178, 250000, 'PAYOS', 'SUCCESS', 100178, 'http://payos.vn/dummy', 'GW100178', '2026-08-20 04:00:00', 'Thanh toán 100%'),
-(118, 179, 950000, 'PAYOS', 'SUCCESS', 100179, 'http://payos.vn/dummy', 'GW100179', '2026-08-13 05:00:00', 'Thanh toán 100%'),
-(119, 180, 125000, 'CASH_DEPOSIT', 'SUCCESS', 100180, 'http://payos.vn/dummy', 'GW100180', '2026-08-23 10:00:00', 'Thanh toán cọc 25%'),
-(120, 181, 350000, 'PAYOS', 'SUCCESS', 100181, 'http://payos.vn/dummy', 'GW100181', '2026-08-15 03:00:00', 'Thanh toán 100%'),
-(121, 182, 20000, 'CASH_DEPOSIT', 'SUCCESS', 100182, 'http://payos.vn/dummy', 'GW100182', '2026-08-19 10:00:00', 'Thanh toán cọc 10%'),
-(122, 186, 1850000, 'PAYOS', 'SUCCESS', 100186, 'http://payos.vn/dummy', 'GW100186', '2026-08-20 08:00:00', 'Thanh toán 100%'),
-(123, 192, 320000, 'PAYOS', 'SUCCESS', 100192, 'http://payos.vn/dummy', 'GW100192', '2026-08-14 02:00:00', 'Thanh toán 100%'),
-(124, 196, 200000, 'PAYOS', 'SUCCESS', 100196, 'http://payos.vn/dummy', 'GW100196', '2026-08-23 10:00:00', 'Thanh toán 100%'),
-(125, 197, 200000, 'PAYOS', 'SUCCESS', 100197, 'http://payos.vn/dummy', 'GW100197', '2026-08-13 07:00:00', 'Thanh toán 100%');
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(23, 11),
+(24, 3),
+(25, 5), (25, 7),
+(26, 6);
 
-INSERT INTO `transaction` (`id`, `booking_id`, `shop_id`, `user_id`, `withdrawal_id`, `type`, `amount`, `payment_method`, `status`, `payos_order_code`, `gateway_transaction_id`, `description`, `note`, `created_at`, `completed_at`) VALUES
-(1, 1, 10, 104, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100001, 'GW100001', 'Thanh toán cọc 10%', NULL, '2026-05-06 03:00:00', '2026-05-06 03:00:00'),
-(2, 2, 10, 106, NULL, 'BOOKING_PAYMENT', 150000, 'PAYOS', 'SUCCESS', 100002, 'GW100002', 'Thanh toán 100%', NULL, '2026-05-22 07:00:00', '2026-05-22 07:00:00'),
-(3, 2, 10, NULL, NULL, 'WALLET_CREDIT', 135000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-05-25 07:00:00', '2026-05-25 07:00:00'),
-(4, 4, 10, 104, NULL, 'BOOKING_PAYMENT', 400000, 'PAYOS', 'SUCCESS', 100004, 'GW100004', 'Thanh toán 100%', NULL, '2026-05-07 11:00:00', '2026-05-07 11:00:00'),
-(5, 4, 10, NULL, NULL, 'WALLET_CREDIT', 360000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-05-10 11:00:00', '2026-05-10 11:00:00'),
-(6, 5, 10, 105, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100005, 'GW100005', 'Thanh toán cọc 10%', NULL, '2026-05-04 04:00:00', '2026-05-04 04:00:00'),
-(7, 7, 10, 104, NULL, 'BOOKING_PAYMENT', 40000, 'CASH_DEPOSIT', 'SUCCESS', 100007, 'GW100007', 'Thanh toán cọc 10%', NULL, '2026-05-24 01:00:00', '2026-05-24 01:00:00'),
-(8, 8, 10, 106, NULL, 'BOOKING_PAYMENT', 1500000, 'PAYOS', 'SUCCESS', 100008, 'GW100008', 'Thanh toán 100%', NULL, '2026-05-01 02:00:00', '2026-05-01 02:00:00'),
-(9, 8, 10, NULL, NULL, 'WALLET_CREDIT', 1350000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-05-04 02:00:00', '2026-05-04 02:00:00'),
-(10, 9, 10, 106, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100009, 'GW100009', 'Thanh toán 100%', NULL, '2026-05-04 10:00:00', '2026-05-04 10:00:00'),
-(11, 10, 10, 106, NULL, 'BOOKING_PAYMENT', 400000, 'PAYOS', 'SUCCESS', 100010, 'GW100010', 'Thanh toán 100%', NULL, '2026-05-16 06:00:00', '2026-05-16 06:00:00'),
-(12, 10, 10, NULL, NULL, 'WALLET_CREDIT', 360000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-05-19 06:00:00', '2026-05-19 06:00:00'),
-(13, 11, 11, 108, NULL, 'BOOKING_PAYMENT', 180000, 'CASH_DEPOSIT', 'SUCCESS', 100011, 'GW100011', 'Thanh toán cọc 15%', NULL, '2026-05-26 11:00:00', '2026-05-26 11:00:00'),
-(14, 13, 11, 105, NULL, 'BOOKING_PAYMENT', 300000, 'PAYOS', 'SUCCESS', 100013, 'GW100013', 'Thanh toán 100%', NULL, '2026-05-04 02:00:00', '2026-05-04 02:00:00'),
-(15, 14, 11, 106, NULL, 'BOOKING_PAYMENT', 180000, 'CASH_DEPOSIT', 'SUCCESS', 100014, 'GW100014', 'Thanh toán cọc 15%', NULL, '2026-05-17 07:00:00', '2026-05-17 07:00:00'),
-(16, 15, 11, 107, NULL, 'BOOKING_PAYMENT', 1400000, 'PAYOS', 'SUCCESS', 100015, 'GW100015', 'Thanh toán 100%', NULL, '2026-05-22 06:00:00', '2026-05-22 06:00:00'),
-(17, 16, 11, 108, NULL, 'BOOKING_PAYMENT', 450000, 'PAYOS', 'SUCCESS', 100016, 'GW100016', 'Thanh toán 100%', NULL, '2026-05-07 07:00:00', '2026-05-07 07:00:00'),
-(18, 19, 11, 106, NULL, 'BOOKING_PAYMENT', 300000, 'PAYOS', 'SUCCESS', 100019, 'GW100019', 'Thanh toán 100%', NULL, '2026-05-28 11:00:00', '2026-05-28 11:00:00'),
-(19, 21, 12, 105, NULL, 'BOOKING_PAYMENT', 150000, 'PAYOS', 'SUCCESS', 100021, 'GW100021', 'Thanh toán 100%', NULL, '2026-05-04 10:00:00', '2026-05-04 10:00:00'),
-(20, 22, 12, 106, NULL, 'BOOKING_PAYMENT', 125000, 'CASH_DEPOSIT', 'SUCCESS', 100022, 'GW100022', 'Thanh toán cọc 25%', NULL, '2026-05-21 07:00:00', '2026-05-21 07:00:00'),
-(21, 23, 12, 105, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100023, 'GW100023', 'Thanh toán cọc 25%', NULL, '2026-05-13 09:00:00', '2026-05-13 09:00:00'),
-(22, 25, 12, 104, NULL, 'BOOKING_PAYMENT', 145000, 'CASH_DEPOSIT', 'SUCCESS', 100025, 'GW100025', 'Thanh toán cọc 25%', NULL, '2026-05-09 05:00:00', '2026-05-09 05:00:00'),
-(23, 26, 12, 105, NULL, 'BOOKING_PAYMENT', 62500, 'CASH_DEPOSIT', 'SUCCESS', 100026, 'GW100026', 'Thanh toán cọc 25%', NULL, '2026-05-13 05:00:00', '2026-05-13 05:00:00'),
-(24, 27, 12, 107, NULL, 'BOOKING_PAYMENT', 37500, 'CASH_DEPOSIT', 'SUCCESS', 100027, 'GW100027', 'Thanh toán cọc 25%', NULL, '2026-04-30 01:00:00', '2026-04-30 01:00:00'),
-(25, 28, 12, 108, NULL, 'BOOKING_PAYMENT', 157500, 'CASH_DEPOSIT', 'SUCCESS', 100028, 'GW100028', 'Thanh toán cọc 25%', NULL, '2026-05-13 04:00:00', '2026-05-13 04:00:00'),
-(26, 29, 12, 104, NULL, 'BOOKING_PAYMENT', 45000, 'CASH_DEPOSIT', 'SUCCESS', 100029, 'GW100029', 'Thanh toán cọc 25%', NULL, '2026-05-23 11:00:00', '2026-05-23 11:00:00'),
-(27, 31, 13, 107, NULL, 'BOOKING_PAYMENT', 350000, 'PAYOS', 'SUCCESS', 100031, 'GW100031', 'Thanh toán 100%', NULL, '2026-05-15 10:00:00', '2026-05-15 10:00:00'),
-(28, 31, 13, NULL, NULL, 'WALLET_CREDIT', 315000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-05-18 10:00:00', '2026-05-18 10:00:00'),
-(29, 32, 13, 107, NULL, 'BOOKING_PAYMENT', 1900000, 'PAYOS', 'SUCCESS', 100032, 'GW100032', 'Thanh toán 100%', NULL, '2026-05-28 06:00:00', '2026-05-28 06:00:00'),
-(30, 32, 13, NULL, NULL, 'WALLET_CREDIT', 1710000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-05-31 06:00:00', '2026-05-31 06:00:00'),
-(31, 33, 13, 106, NULL, 'BOOKING_PAYMENT', 1500000, 'PAYOS', 'SUCCESS', 100033, 'GW100033', 'Thanh toán 100%', NULL, '2026-05-07 10:00:00', '2026-05-07 10:00:00'),
-(32, 33, 13, NULL, NULL, 'WALLET_CREDIT', 1350000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-05-10 10:00:00', '2026-05-10 10:00:00'),
-(33, 35, 13, 105, NULL, 'BOOKING_PAYMENT', 35000, 'CASH_DEPOSIT', 'SUCCESS', 100035, 'GW100035', 'Thanh toán cọc 10%', NULL, '2026-05-21 08:00:00', '2026-05-21 08:00:00'),
-(34, 36, 13, 107, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100036, 'GW100036', 'Thanh toán cọc 10%', NULL, '2026-05-07 10:00:00', '2026-05-07 10:00:00'),
-(35, 37, 13, 106, NULL, 'BOOKING_PAYMENT', 15000, 'CASH_DEPOSIT', 'SUCCESS', 100037, 'GW100037', 'Thanh toán cọc 10%', NULL, '2026-05-24 11:00:00', '2026-05-24 11:00:00'),
-(36, 39, 13, 108, NULL, 'BOOKING_PAYMENT', 600000, 'PAYOS', 'SUCCESS', 100039, 'GW100039', 'Thanh toán 100%', NULL, '2026-05-15 09:00:00', '2026-05-15 09:00:00'),
-(37, 40, 13, 106, NULL, 'BOOKING_PAYMENT', 190000, 'CASH_DEPOSIT', 'SUCCESS', 100040, 'GW100040', 'Thanh toán cọc 10%', NULL, '2026-05-24 03:00:00', '2026-05-24 03:00:00'),
-(38, 42, 14, 105, NULL, 'BOOKING_PAYMENT', 85500, 'CASH_DEPOSIT', 'SUCCESS', 100042, 'GW100042', 'Thanh toán cọc 15%', NULL, '2026-05-15 01:00:00', '2026-05-15 01:00:00'),
-(39, 43, 14, 105, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100043, 'GW100043', 'Thanh toán cọc 15%', NULL, '2026-05-06 09:00:00', '2026-05-06 09:00:00'),
-(40, 44, 14, 108, NULL, 'BOOKING_PAYMENT', 120000, 'PAYOS', 'SUCCESS', 100044, 'GW100044', 'Thanh toán 100%', NULL, '2026-05-02 07:00:00', '2026-05-02 07:00:00'),
-(41, 45, 14, 106, NULL, 'BOOKING_PAYMENT', 18000, 'CASH_DEPOSIT', 'SUCCESS', 100045, 'GW100045', 'Thanh toán cọc 15%', NULL, '2026-05-13 06:00:00', '2026-05-13 06:00:00'),
-(42, 47, 14, 108, NULL, 'BOOKING_PAYMENT', 67500, 'CASH_DEPOSIT', 'SUCCESS', 100047, 'GW100047', 'Thanh toán cọc 15%', NULL, '2026-05-10 03:00:00', '2026-05-10 03:00:00'),
-(43, 48, 14, 108, NULL, 'BOOKING_PAYMENT', 18000, 'CASH_DEPOSIT', 'SUCCESS', 100048, 'GW100048', 'Thanh toán cọc 15%', NULL, '2026-05-11 05:00:00', '2026-05-11 05:00:00'),
-(44, 51, 10, 108, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100051, 'GW100051', 'Thanh toán cọc 10%', NULL, '2026-06-26 06:00:00', '2026-06-26 06:00:00'),
-(45, 52, 10, 108, NULL, 'BOOKING_PAYMENT', 35000, 'CASH_DEPOSIT', 'SUCCESS', 100052, 'GW100052', 'Thanh toán cọc 10%', NULL, '2026-06-25 04:00:00', '2026-06-25 04:00:00'),
-(46, 53, 10, 108, NULL, 'BOOKING_PAYMENT', 150000, 'PAYOS', 'SUCCESS', 100053, 'GW100053', 'Thanh toán 100%', NULL, '2026-06-10 09:00:00', '2026-06-10 09:00:00'),
-(47, 53, 10, NULL, NULL, 'WALLET_CREDIT', 135000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-13 09:00:00', '2026-06-13 09:00:00'),
-(48, 54, 10, 105, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100054, 'GW100054', 'Thanh toán cọc 10%', NULL, '2026-05-29 10:00:00', '2026-05-29 10:00:00'),
-(49, 55, 10, 104, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100055, 'GW100055', 'Thanh toán cọc 10%', NULL, '2026-06-02 05:00:00', '2026-06-02 05:00:00'),
-(50, 56, 10, 105, NULL, 'BOOKING_PAYMENT', 150000, 'PAYOS', 'SUCCESS', 100056, 'GW100056', 'Thanh toán 100%', NULL, '2026-06-12 06:00:00', '2026-06-12 06:00:00'),
-(51, 56, 10, NULL, NULL, 'WALLET_CREDIT', 135000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-15 06:00:00', '2026-06-15 06:00:00'),
-(52, 58, 10, 105, NULL, 'BOOKING_PAYMENT', 300000, 'PAYOS', 'SUCCESS', 100058, 'GW100058', 'Thanh toán 100%', NULL, '2026-06-11 06:00:00', '2026-06-11 06:00:00'),
-(53, 58, 10, NULL, NULL, 'WALLET_CREDIT', 270000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-14 06:00:00', '2026-06-14 06:00:00'),
-(54, 60, 10, 108, NULL, 'BOOKING_PAYMENT', 350000, 'PAYOS', 'SUCCESS', 100060, 'GW100060', 'Thanh toán 100%', NULL, '2026-06-07 11:00:00', '2026-06-07 11:00:00'),
-(55, 61, 11, 105, NULL, 'BOOKING_PAYMENT', 420000, 'PAYOS', 'SUCCESS', 100061, 'GW100061', 'Thanh toán 100%', NULL, '2026-06-02 10:00:00', '2026-06-02 10:00:00'),
-(56, 63, 11, 105, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100063, 'GW100063', 'Thanh toán cọc 15%', NULL, '2026-05-30 05:00:00', '2026-05-30 05:00:00'),
-(57, 65, 11, 107, NULL, 'BOOKING_PAYMENT', 450000, 'PAYOS', 'SUCCESS', 100065, 'GW100065', 'Thanh toán 100%', NULL, '2026-05-31 02:00:00', '2026-05-31 02:00:00'),
-(58, 65, 11, NULL, NULL, 'WALLET_CREDIT', 382500, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-03 02:00:00', '2026-06-03 02:00:00'),
-(59, 66, 11, 107, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100066, 'GW100066', 'Thanh toán cọc 15%', NULL, '2026-06-27 01:00:00', '2026-06-27 01:00:00'),
-(60, 67, 11, 104, NULL, 'BOOKING_PAYMENT', 120000, 'PAYOS', 'SUCCESS', 100067, 'GW100067', 'Thanh toán 100%', NULL, '2026-06-27 11:00:00', '2026-06-27 11:00:00'),
-(61, 67, 11, NULL, NULL, 'WALLET_CREDIT', 102000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-30 11:00:00', '2026-06-30 11:00:00'),
-(62, 68, 11, 105, NULL, 'BOOKING_PAYMENT', 120000, 'PAYOS', 'SUCCESS', 100068, 'GW100068', 'Thanh toán 100%', NULL, '2026-05-31 07:00:00', '2026-05-31 07:00:00'),
-(63, 68, 11, NULL, NULL, 'WALLET_CREDIT', 102000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-03 07:00:00', '2026-06-03 07:00:00'),
-(64, 69, 11, 104, NULL, 'BOOKING_PAYMENT', 45000, 'CASH_DEPOSIT', 'SUCCESS', 100069, 'GW100069', 'Thanh toán cọc 15%', NULL, '2026-06-24 07:00:00', '2026-06-24 07:00:00'),
-(65, 70, 11, 105, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100070, 'GW100070', 'Thanh toán 100%', NULL, '2026-05-30 03:00:00', '2026-05-30 03:00:00'),
-(66, 70, 11, NULL, NULL, 'WALLET_CREDIT', 170000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-02 03:00:00', '2026-06-02 03:00:00'),
-(67, 71, 12, 106, NULL, 'BOOKING_PAYMENT', 150000, 'PAYOS', 'SUCCESS', 100071, 'GW100071', 'Thanh toán 100%', NULL, '2026-06-03 01:00:00', '2026-06-03 01:00:00'),
-(68, 72, 12, 108, NULL, 'BOOKING_PAYMENT', 450000, 'PAYOS', 'SUCCESS', 100072, 'GW100072', 'Thanh toán 100%', NULL, '2026-06-22 10:00:00', '2026-06-22 10:00:00'),
-(69, 72, 12, NULL, NULL, 'WALLET_CREDIT', 337500, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-25 10:00:00', '2026-06-25 10:00:00'),
-(70, 73, 12, 107, NULL, 'BOOKING_PAYMENT', 45000, 'CASH_DEPOSIT', 'SUCCESS', 100073, 'GW100073', 'Thanh toán cọc 25%', NULL, '2026-06-25 08:00:00', '2026-06-25 08:00:00'),
-(71, 75, 12, 107, NULL, 'BOOKING_PAYMENT', 250000, 'PAYOS', 'SUCCESS', 100075, 'GW100075', 'Thanh toán 100%', NULL, '2026-05-31 03:00:00', '2026-05-31 03:00:00'),
-(72, 76, 12, 105, NULL, 'BOOKING_PAYMENT', 100000, 'CASH_DEPOSIT', 'SUCCESS', 100076, 'GW100076', 'Thanh toán cọc 25%', NULL, '2026-06-24 09:00:00', '2026-06-24 09:00:00'),
-(73, 77, 12, 105, NULL, 'BOOKING_PAYMENT', 600000, 'PAYOS', 'SUCCESS', 100077, 'GW100077', 'Thanh toán 100%', NULL, '2026-06-16 02:00:00', '2026-06-16 02:00:00'),
-(74, 78, 12, 104, NULL, 'BOOKING_PAYMENT', 57500, 'CASH_DEPOSIT', 'SUCCESS', 100078, 'GW100078', 'Thanh toán cọc 25%', NULL, '2026-06-09 01:00:00', '2026-06-09 01:00:00'),
-(75, 79, 12, 104, NULL, 'BOOKING_PAYMENT', 450000, 'PAYOS', 'SUCCESS', 100079, 'GW100079', 'Thanh toán 100%', NULL, '2026-06-16 10:00:00', '2026-06-16 10:00:00'),
-(76, 79, 12, NULL, NULL, 'WALLET_CREDIT', 337500, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-19 10:00:00', '2026-06-19 10:00:00'),
-(77, 80, 12, 105, NULL, 'BOOKING_PAYMENT', 250000, 'PAYOS', 'SUCCESS', 100080, 'GW100080', 'Thanh toán 100%', NULL, '2026-06-06 05:00:00', '2026-06-06 05:00:00'),
-(78, 80, 12, NULL, NULL, 'WALLET_CREDIT', 187500, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-09 05:00:00', '2026-06-09 05:00:00'),
-(79, 83, 13, 105, NULL, 'BOOKING_PAYMENT', 60000, 'CASH_DEPOSIT', 'SUCCESS', 100083, 'GW100083', 'Thanh toán cọc 10%', NULL, '2026-05-31 10:00:00', '2026-05-31 10:00:00'),
-(80, 84, 13, 105, NULL, 'BOOKING_PAYMENT', 400000, 'PAYOS', 'SUCCESS', 100084, 'GW100084', 'Thanh toán 100%', NULL, '2026-06-24 03:00:00', '2026-06-24 03:00:00'),
-(81, 84, 13, NULL, NULL, 'WALLET_CREDIT', 360000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-27 03:00:00', '2026-06-27 03:00:00'),
-(82, 85, 13, 105, NULL, 'BOOKING_PAYMENT', 180000, 'CASH_DEPOSIT', 'SUCCESS', 100085, 'GW100085', 'Thanh toán cọc 10%', NULL, '2026-06-01 07:00:00', '2026-06-01 07:00:00'),
-(83, 86, 13, 104, NULL, 'BOOKING_PAYMENT', 1500000, 'PAYOS', 'SUCCESS', 100086, 'GW100086', 'Thanh toán 100%', NULL, '2026-06-12 05:00:00', '2026-06-12 05:00:00'),
-(84, 86, 13, NULL, NULL, 'WALLET_CREDIT', 1350000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-15 05:00:00', '2026-06-15 05:00:00'),
-(85, 88, 13, 108, NULL, 'BOOKING_PAYMENT', 150000, 'PAYOS', 'SUCCESS', 100088, 'GW100088', 'Thanh toán 100%', NULL, '2026-06-01 09:00:00', '2026-06-01 09:00:00'),
-(86, 88, 13, NULL, NULL, 'WALLET_CREDIT', 135000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-04 09:00:00', '2026-06-04 09:00:00'),
-(87, 89, 13, 105, NULL, 'BOOKING_PAYMENT', 35000, 'CASH_DEPOSIT', 'SUCCESS', 100089, 'GW100089', 'Thanh toán cọc 10%', NULL, '2026-06-24 10:00:00', '2026-06-24 10:00:00'),
-(88, 92, 14, 105, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100092, 'GW100092', 'Thanh toán cọc 15%', NULL, '2026-06-08 04:00:00', '2026-06-08 04:00:00'),
-(89, 93, 14, 104, NULL, 'BOOKING_PAYMENT', 180000, 'CASH_DEPOSIT', 'SUCCESS', 100093, 'GW100093', 'Thanh toán cọc 15%', NULL, '2026-06-11 10:00:00', '2026-06-11 10:00:00'),
-(90, 94, 14, 106, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100094, 'GW100094', 'Thanh toán 100%', NULL, '2026-06-25 11:00:00', '2026-06-25 11:00:00'),
-(91, 95, 14, 108, NULL, 'BOOKING_PAYMENT', 400000, 'PAYOS', 'SUCCESS', 100095, 'GW100095', 'Thanh toán 100%', NULL, '2026-06-07 08:00:00', '2026-06-07 08:00:00'),
-(92, 95, 14, NULL, NULL, 'WALLET_CREDIT', 340000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-10 08:00:00', '2026-06-10 08:00:00'),
-(93, 96, 14, 104, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100096, 'GW100096', 'Thanh toán 100%', NULL, '2026-06-24 01:00:00', '2026-06-24 01:00:00'),
-(94, 96, 14, NULL, NULL, 'WALLET_CREDIT', 170000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-27 01:00:00', '2026-06-27 01:00:00'),
-(95, 97, 14, 108, NULL, 'BOOKING_PAYMENT', 120000, 'PAYOS', 'SUCCESS', 100097, 'GW100097', 'Thanh toán 100%', NULL, '2026-06-15 10:00:00', '2026-06-15 10:00:00'),
-(96, 97, 14, NULL, NULL, 'WALLET_CREDIT', 102000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-18 10:00:00', '2026-06-18 10:00:00'),
-(97, 98, 14, 106, NULL, 'BOOKING_PAYMENT', 18000, 'CASH_DEPOSIT', 'SUCCESS', 100098, 'GW100098', 'Thanh toán cọc 15%', NULL, '2026-06-02 10:00:00', '2026-06-02 10:00:00'),
-(98, 100, 14, 105, NULL, 'BOOKING_PAYMENT', 500000, 'PAYOS', 'SUCCESS', 100100, 'GW100100', 'Thanh toán 100%', NULL, '2026-06-22 01:00:00', '2026-06-22 01:00:00'),
-(99, 100, 14, NULL, NULL, 'WALLET_CREDIT', 425000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-06-25 01:00:00', '2026-06-25 01:00:00'),
-(100, 101, 10, 105, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100101, 'GW100101', 'Thanh toán cọc 10%', NULL, '2026-07-01 08:00:00', '2026-07-01 08:00:00'),
-(101, 103, 10, 104, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100103, 'GW100103', 'Thanh toán cọc 10%', NULL, '2026-07-26 05:00:00', '2026-07-26 05:00:00'),
-(102, 104, 10, 105, NULL, 'BOOKING_PAYMENT', 300000, 'PAYOS', 'SUCCESS', 100104, 'GW100104', 'Thanh toán 100%', NULL, '2026-06-28 07:00:00', '2026-06-28 07:00:00'),
-(103, 105, 10, 104, NULL, 'BOOKING_PAYMENT', 300000, 'PAYOS', 'SUCCESS', 100105, 'GW100105', 'Thanh toán 100%', NULL, '2026-07-19 10:00:00', '2026-07-19 10:00:00'),
-(104, 107, 10, 108, NULL, 'BOOKING_PAYMENT', 1500000, 'PAYOS', 'SUCCESS', 100107, 'GW100107', 'Thanh toán 100%', NULL, '2026-07-20 03:00:00', '2026-07-20 03:00:00'),
-(105, 108, 10, 104, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100108, 'GW100108', 'Thanh toán cọc 10%', NULL, '2026-07-08 11:00:00', '2026-07-08 11:00:00'),
-(106, 109, 10, 108, NULL, 'BOOKING_PAYMENT', 300000, 'PAYOS', 'SUCCESS', 100109, 'GW100109', 'Thanh toán 100%', NULL, '2026-07-13 11:00:00', '2026-07-13 11:00:00'),
-(107, 109, 10, NULL, NULL, 'WALLET_CREDIT', 270000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-07-16 11:00:00', '2026-07-16 11:00:00'),
-(108, 111, 11, 107, NULL, 'BOOKING_PAYMENT', 400000, 'PAYOS', 'SUCCESS', 100111, 'GW100111', 'Thanh toán 100%', NULL, '2026-07-17 09:00:00', '2026-07-17 09:00:00'),
-(109, 113, 11, 105, NULL, 'BOOKING_PAYMENT', 450000, 'PAYOS', 'SUCCESS', 100113, 'GW100113', 'Thanh toán 100%', NULL, '2026-07-19 06:00:00', '2026-07-19 06:00:00'),
-(110, 114, 11, 107, NULL, 'BOOKING_PAYMENT', 420000, 'PAYOS', 'SUCCESS', 100114, 'GW100114', 'Thanh toán 100%', NULL, '2026-07-04 11:00:00', '2026-07-04 11:00:00'),
-(111, 114, 11, NULL, NULL, 'WALLET_CREDIT', 357000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-07-07 11:00:00', '2026-07-07 11:00:00'),
-(112, 115, 11, 108, NULL, 'BOOKING_PAYMENT', 180000, 'CASH_DEPOSIT', 'SUCCESS', 100115, 'GW100115', 'Thanh toán cọc 15%', NULL, '2026-06-28 09:00:00', '2026-06-28 09:00:00'),
-(113, 116, 11, 107, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100116, 'GW100116', 'Thanh toán 100%', NULL, '2026-07-04 02:00:00', '2026-07-04 02:00:00'),
-(114, 116, 11, NULL, NULL, 'WALLET_CREDIT', 170000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-07-07 02:00:00', '2026-07-07 02:00:00'),
-(115, 119, 11, 108, NULL, 'BOOKING_PAYMENT', 1200000, 'PAYOS', 'SUCCESS', 100119, 'GW100119', 'Thanh toán 100%', NULL, '2026-07-24 11:00:00', '2026-07-24 11:00:00'),
-(116, 121, 12, 104, NULL, 'BOOKING_PAYMENT', 37500, 'CASH_DEPOSIT', 'SUCCESS', 100121, 'GW100121', 'Thanh toán cọc 25%', NULL, '2026-07-14 01:00:00', '2026-07-14 01:00:00'),
-(117, 126, 12, 106, NULL, 'BOOKING_PAYMENT', 150000, 'PAYOS', 'SUCCESS', 100126, 'GW100126', 'Thanh toán 100%', NULL, '2026-07-27 09:00:00', '2026-07-27 09:00:00'),
-(118, 127, 12, 104, NULL, 'BOOKING_PAYMENT', 62500, 'CASH_DEPOSIT', 'SUCCESS', 100127, 'GW100127', 'Thanh toán cọc 25%', NULL, '2026-06-29 06:00:00', '2026-06-29 06:00:00'),
-(119, 128, 12, 106, NULL, 'BOOKING_PAYMENT', 80000, 'PAYOS', 'SUCCESS', 100128, 'GW100128', 'Thanh toán 100%', NULL, '2026-07-10 11:00:00', '2026-07-10 11:00:00'),
-(120, 128, 12, NULL, NULL, 'WALLET_CREDIT', 60000, 'WALLET', 'SUCCESS', NULL, NULL, 'Cộng tiền vào ví (đã trừ phí)', NULL, '2026-07-13 11:00:00', '2026-07-13 11:00:00'),
-(121, 129, 12, 104, NULL, 'BOOKING_PAYMENT', 170000, 'CASH_DEPOSIT', 'SUCCESS', 100129, 'GW100129', 'Thanh toán cọc 25%', NULL, '2026-06-28 09:00:00', '2026-06-28 09:00:00'),
-(122, 132, 13, 104, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100132, 'GW100132', 'Thanh toán cọc 10%', NULL, '2026-07-22 08:00:00', '2026-07-22 08:00:00'),
-(123, 134, 13, 106, NULL, 'BOOKING_PAYMENT', 35000, 'CASH_DEPOSIT', 'SUCCESS', 100134, 'GW100134', 'Thanh toán cọc 10%', NULL, '2026-07-09 04:00:00', '2026-07-09 04:00:00'),
-(124, 135, 13, 107, NULL, 'BOOKING_PAYMENT', 15000, 'CASH_DEPOSIT', 'SUCCESS', 100135, 'GW100135', 'Thanh toán cọc 10%', NULL, '2026-06-28 09:00:00', '2026-06-28 09:00:00'),
-(125, 137, 13, 105, NULL, 'BOOKING_PAYMENT', 35000, 'CASH_DEPOSIT', 'SUCCESS', 100137, 'GW100137', 'Thanh toán cọc 10%', NULL, '2026-07-11 09:00:00', '2026-07-11 09:00:00'),
-(126, 139, 13, 105, NULL, 'BOOKING_PAYMENT', 35000, 'CASH_DEPOSIT', 'SUCCESS', 100139, 'GW100139', 'Thanh toán cọc 10%', NULL, '2026-06-29 07:00:00', '2026-06-29 07:00:00'),
-(127, 140, 13, 108, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100140, 'GW100140', 'Thanh toán 100%', NULL, '2026-07-20 05:00:00', '2026-07-20 05:00:00'),
-(128, 143, 14, 104, NULL, 'BOOKING_PAYMENT', 97500, 'CASH_DEPOSIT', 'SUCCESS', 100143, 'GW100143', 'Thanh toán cọc 15%', NULL, '2026-07-20 05:00:00', '2026-07-20 05:00:00'),
-(129, 146, 14, 106, NULL, 'BOOKING_PAYMENT', 45000, 'CASH_DEPOSIT', 'SUCCESS', 100146, 'GW100146', 'Thanh toán cọc 15%', NULL, '2026-07-04 06:00:00', '2026-07-04 06:00:00'),
-(130, 148, 14, 104, NULL, 'BOOKING_PAYMENT', 45000, 'CASH_DEPOSIT', 'SUCCESS', 100148, 'GW100148', 'Thanh toán cọc 15%', NULL, '2026-07-09 10:00:00', '2026-07-09 10:00:00'),
-(131, 149, 14, 106, NULL, 'BOOKING_PAYMENT', 210000, 'CASH_DEPOSIT', 'SUCCESS', 100149, 'GW100149', 'Thanh toán cọc 15%', NULL, '2026-07-01 06:00:00', '2026-07-01 06:00:00'),
-(132, 150, 14, 107, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100150, 'GW100150', 'Thanh toán cọc 15%', NULL, '2026-07-27 10:00:00', '2026-07-27 10:00:00'),
-(133, 151, 10, 106, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100151, 'GW100151', 'Thanh toán 100%', NULL, '2026-08-07 11:00:00', '2026-08-07 11:00:00'),
-(134, 157, 10, 104, NULL, 'BOOKING_PAYMENT', 35000, 'CASH_DEPOSIT', 'SUCCESS', 100157, 'GW100157', 'Thanh toán cọc 10%', NULL, '2026-08-17 09:00:00', '2026-08-17 09:00:00'),
-(135, 161, 11, 105, NULL, 'BOOKING_PAYMENT', 48000, 'CASH_DEPOSIT', 'SUCCESS', 100161, 'GW100161', 'Thanh toán cọc 15%', NULL, '2026-08-05 04:00:00', '2026-08-05 04:00:00'),
-(136, 164, 11, 108, NULL, 'BOOKING_PAYMENT', 120000, 'PAYOS', 'SUCCESS', 100164, 'GW100164', 'Thanh toán 100%', NULL, '2026-08-20 09:00:00', '2026-08-20 09:00:00'),
-(137, 165, 11, 105, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100165, 'GW100165', 'Thanh toán cọc 15%', NULL, '2026-07-31 04:00:00', '2026-07-31 04:00:00'),
-(138, 168, 11, 105, NULL, 'BOOKING_PAYMENT', 1200000, 'PAYOS', 'SUCCESS', 100168, 'GW100168', 'Thanh toán 100%', NULL, '2026-08-12 10:00:00', '2026-08-12 10:00:00'),
-(139, 169, 11, 107, NULL, 'BOOKING_PAYMENT', 30000, 'CASH_DEPOSIT', 'SUCCESS', 100169, 'GW100169', 'Thanh toán cọc 15%', NULL, '2026-08-02 01:00:00', '2026-08-02 01:00:00'),
-(140, 171, 12, 107, NULL, 'BOOKING_PAYMENT', 250000, 'PAYOS', 'SUCCESS', 100171, 'GW100171', 'Thanh toán 100%', NULL, '2026-08-26 08:00:00', '2026-08-26 08:00:00'),
-(141, 172, 12, 107, NULL, 'BOOKING_PAYMENT', 700000, 'PAYOS', 'SUCCESS', 100172, 'GW100172', 'Thanh toán 100%', NULL, '2026-08-15 09:00:00', '2026-08-15 09:00:00'),
-(142, 173, 12, 107, NULL, 'BOOKING_PAYMENT', 500000, 'PAYOS', 'SUCCESS', 100173, 'GW100173', 'Thanh toán 100%', NULL, '2026-08-25 08:00:00', '2026-08-25 08:00:00'),
-(143, 174, 12, 105, NULL, 'BOOKING_PAYMENT', 175000, 'CASH_DEPOSIT', 'SUCCESS', 100174, 'GW100174', 'Thanh toán cọc 25%', NULL, '2026-08-25 03:00:00', '2026-08-25 03:00:00'),
-(144, 177, 12, 106, NULL, 'BOOKING_PAYMENT', 630000, 'PAYOS', 'SUCCESS', 100177, 'GW100177', 'Thanh toán 100%', NULL, '2026-08-10 02:00:00', '2026-08-10 02:00:00'),
-(145, 178, 12, 106, NULL, 'BOOKING_PAYMENT', 250000, 'PAYOS', 'SUCCESS', 100178, 'GW100178', 'Thanh toán 100%', NULL, '2026-08-20 04:00:00', '2026-08-20 04:00:00'),
-(146, 179, 12, 107, NULL, 'BOOKING_PAYMENT', 950000, 'PAYOS', 'SUCCESS', 100179, 'GW100179', 'Thanh toán 100%', NULL, '2026-08-13 05:00:00', '2026-08-13 05:00:00'),
-(147, 180, 12, 108, NULL, 'BOOKING_PAYMENT', 125000, 'CASH_DEPOSIT', 'SUCCESS', 100180, 'GW100180', 'Thanh toán cọc 25%', NULL, '2026-08-23 10:00:00', '2026-08-23 10:00:00'),
-(148, 181, 13, 105, NULL, 'BOOKING_PAYMENT', 350000, 'PAYOS', 'SUCCESS', 100181, 'GW100181', 'Thanh toán 100%', NULL, '2026-08-15 03:00:00', '2026-08-15 03:00:00'),
-(149, 182, 13, 106, NULL, 'BOOKING_PAYMENT', 20000, 'CASH_DEPOSIT', 'SUCCESS', 100182, 'GW100182', 'Thanh toán cọc 10%', NULL, '2026-08-19 10:00:00', '2026-08-19 10:00:00'),
-(150, 186, 13, 108, NULL, 'BOOKING_PAYMENT', 1850000, 'PAYOS', 'SUCCESS', 100186, 'GW100186', 'Thanh toán 100%', NULL, '2026-08-20 08:00:00', '2026-08-20 08:00:00'),
-(151, 192, 14, 108, NULL, 'BOOKING_PAYMENT', 320000, 'PAYOS', 'SUCCESS', 100192, 'GW100192', 'Thanh toán 100%', NULL, '2026-08-14 02:00:00', '2026-08-14 02:00:00'),
-(152, 196, 14, 105, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100196, 'GW100196', 'Thanh toán 100%', NULL, '2026-08-23 10:00:00', '2026-08-23 10:00:00'),
-(153, 197, 14, 105, NULL, 'BOOKING_PAYMENT', 200000, 'PAYOS', 'SUCCESS', 100197, 'GW100197', 'Thanh toán 100%', NULL, '2026-08-13 07:00:00', '2026-08-13 07:00:00');
+-- 7. CONFIRMED, gộp LƯU TRÚ + SPA cùng 1 booking (test thanh toán 2 dịch vụ khác loại) -- booking ID 32
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, status, note, payos_order_code, created_at) VALUES
+(32, 6, 3, 3, 4, '2026-08-29 09:00:00', 'CONFIRMED', 'Luna lưu trú phòng riêng kèm gói spa toàn thân', 202406021, '2026-08-18 11:00:00');
 
-INSERT INTO `care_log` (`id`, `booking_id`, `staff_id`, `type`, `note`, `timestamp`, `image_url`) VALUES
-(1, 1, 1, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-05-09 03:30:00', NULL),
-(2, 2, 1, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-05-25 07:30:00', NULL),
-(3, 4, 1, 'MEDICAL', 'Bé đã được thăm khám tổng quát. Tình trạng sức khỏe ổn định, nhiệt độ cơ thể bình thường.', '2026-05-10 11:30:00', NULL),
-(4, 5, 1, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-05-07 04:30:00', NULL),
-(5, 7, 1, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-05-27 01:30:00', NULL),
-(6, 8, 1, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-05-04 02:30:00', NULL),
-(7, 9, 1, 'MEDICAL', 'Bé đã được thăm khám tổng quát. Tình trạng sức khỏe ổn định, nhiệt độ cơ thể bình thường.', '2026-05-07 10:30:00', NULL),
-(8, 10, 1, 'MEDICAL', 'Bé đã được thăm khám tổng quát. Tình trạng sức khỏe ổn định, nhiệt độ cơ thể bình thường.', '2026-05-19 06:30:00', NULL),
-(9, 13, 2, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-05-07 02:30:00', NULL),
-(10, 14, 2, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-05-20 07:30:00', NULL),
-(11, 15, 2, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-05-25 06:30:00', NULL),
-(12, 21, 3, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-05-07 10:30:00', NULL),
-(13, 22, 3, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-05-24 07:30:00', NULL),
-(14, 23, 3, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-05-16 09:30:00', NULL),
-(15, 26, 3, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-05-16 05:30:00', NULL),
-(16, 27, 3, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-05-03 01:30:00', NULL),
-(17, 28, 3, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-05-16 04:30:00', NULL),
-(18, 29, 3, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-05-26 11:30:00', NULL),
-(19, 31, 4, 'MEDICAL', 'Bé đã được thăm khám tổng quát. Tình trạng sức khỏe ổn định, nhiệt độ cơ thể bình thường.', '2026-05-18 10:30:00', NULL),
-(20, 32, 4, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-05-31 06:30:00', NULL),
-(21, 33, 4, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-05-10 10:30:00', NULL),
-(22, 35, 4, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-05-24 08:30:00', NULL),
-(23, 36, 4, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-05-10 10:30:00', NULL),
-(24, 37, 4, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-05-27 11:30:00', NULL),
-(25, 39, 4, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-05-18 09:30:00', NULL),
-(26, 40, 4, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-05-27 03:30:00', NULL),
-(27, 42, 5, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-05-18 01:30:00', NULL),
-(28, 43, 5, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-05-09 09:30:00', NULL),
-(29, 44, 5, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-05-05 07:30:00', NULL),
-(30, 45, 5, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-05-16 06:30:00', NULL),
-(31, 47, 5, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-05-13 03:30:00', NULL),
-(32, 48, 5, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-05-14 05:30:00', NULL),
-(33, 51, 1, 'MEDICAL', 'Bé đã được thăm khám tổng quát. Tình trạng sức khỏe ổn định, nhiệt độ cơ thể bình thường.', '2026-06-29 06:30:00', NULL),
-(34, 52, 1, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-06-28 04:30:00', NULL),
-(35, 53, 1, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-06-13 09:30:00', NULL),
-(36, 54, 1, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-06-01 10:30:00', NULL),
-(37, 55, 1, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-06-05 05:30:00', NULL),
-(38, 56, 1, 'MEDICAL', 'Bé phản ứng tốt với thuốc, nhịp tim bình thường, không có dấu hiệu bất thường.', '2026-06-15 06:30:00', NULL),
-(39, 58, 1, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-06-14 06:30:00', NULL),
-(40, 60, 1, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-06-10 11:30:00', NULL),
-(41, 61, 2, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-06-05 10:30:00', NULL),
-(42, 63, 2, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-06-02 05:30:00', NULL),
-(43, 65, 2, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-06-03 02:30:00', NULL),
-(44, 66, 2, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-06-30 01:30:00', NULL),
-(45, 67, 2, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-06-30 11:30:00', NULL),
-(46, 68, 2, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-06-03 07:30:00', NULL),
-(47, 69, 2, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-06-27 07:30:00', NULL),
-(48, 70, 2, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-06-02 03:30:00', NULL),
-(49, 71, 3, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-06-06 01:30:00', NULL),
-(50, 72, 3, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-06-25 10:30:00', NULL),
-(51, 73, 3, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-06-28 08:30:00', NULL),
-(52, 75, 3, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-06-03 03:30:00', NULL),
-(53, 76, 3, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-06-27 09:30:00', NULL),
-(54, 77, 3, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-06-19 02:30:00', NULL),
-(55, 79, 3, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-06-19 10:30:00', NULL),
-(56, 80, 3, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-06-09 05:30:00', NULL),
-(57, 83, 4, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-06-03 10:30:00', NULL),
-(58, 86, 4, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-06-15 05:30:00', NULL),
-(59, 88, 4, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-06-04 09:30:00', NULL),
-(60, 89, 4, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-06-27 10:30:00', NULL),
-(61, 92, 5, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-06-11 04:30:00', NULL),
-(62, 93, 5, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-06-14 10:30:00', NULL),
-(63, 94, 5, 'CLEANING', 'Bé có chút nhát nước nhưng được xoa dịu nên đã hoàn thành tốt buổi spa.', '2026-06-28 11:30:00', NULL),
-(64, 96, 5, 'CLEANING', 'Lông bé khá rối nhưng đã được gỡ kỹ và sấy phồng đẹp. Thơm tho sạch sẽ.', '2026-06-27 01:30:00', NULL),
-(65, 97, 5, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-06-18 10:30:00', NULL),
-(66, 98, 5, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-06-05 10:30:00', NULL),
-(67, 100, 5, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-06-25 01:30:00', NULL),
-(68, 104, 1, 'MEDICAL', 'Đã vệ sinh vết thương và bôi thuốc. Khuyến cáo hạn chế chạy nhảy.', '2026-07-01 07:30:00', NULL),
-(69, 108, 1, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-07-11 11:30:00', NULL),
-(70, 109, 1, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-07-16 11:30:00', NULL),
-(71, 114, 2, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-07-07 11:30:00', NULL),
-(72, 115, 2, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-07-01 09:30:00', NULL),
-(73, 116, 2, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-07-07 02:30:00', NULL),
-(74, 121, 3, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-07-17 01:30:00', NULL),
-(75, 127, 3, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-07-02 06:30:00', NULL),
-(76, 129, 3, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-07-01 09:30:00', NULL),
-(77, 134, 4, 'MEDICAL', 'Bé đã được thăm khám tổng quát. Tình trạng sức khỏe ổn định, nhiệt độ cơ thể bình thường.', '2026-07-12 04:30:00', NULL),
-(78, 135, 4, 'MEDICAL', 'Bé đã được thăm khám tổng quát. Tình trạng sức khỏe ổn định, nhiệt độ cơ thể bình thường.', '2026-07-01 09:30:00', NULL),
-(79, 137, 4, 'MEDICAL', 'Bé đã được thăm khám tổng quát. Tình trạng sức khỏe ổn định, nhiệt độ cơ thể bình thường.', '2026-07-14 09:30:00', NULL),
-(80, 139, 4, 'MEDICAL', 'Bé hơi sợ hãi lúc tiêm nhưng sau đó đã ngoan hơn. Sức khỏe tốt.', '2026-07-02 07:30:00', NULL),
-(81, 146, 5, 'CLEANING', 'Cắt tỉa gọn gàng theo yêu cầu. Vệ sinh tuyến mồ hôi sạch sẽ.', '2026-07-07 06:30:00', NULL),
-(82, 148, 5, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-07-12 10:30:00', NULL),
-(83, 149, 5, 'CLEANING', 'Đã tiến hành tắm sấy, cắt mài móng và vệ sinh tai. Bé rất ngoan và hợp tác.', '2026-07-04 06:30:00', NULL);
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(32, 10), (32, 13);
 
-INSERT INTO `review` (`id`, `shop_id`, `user_id`, `service_id`, `booking_id`, `rating`, `comment`, `created_at`, `reply`, `replied_at`, `image_url`) VALUES
-(1, 10, 104, 1004, 1, 5, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-05-10 03:00:00', 'Dạ shop cảm ơn bạn nhiều ạ, hẹn gặp lại bé lần sau nha.', '2026-05-11 03:00:00', NULL),
-(2, 10, 106, 1006, 2, 5, 'Dịch vụ chu đáo, cắt tỉa lông siêu đẹp luôn.', '2026-05-26 07:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-05-27 07:00:00', NULL),
-(3, 10, 104, 1005, 4, 4, 'Dịch vụ chu đáo, cắt tỉa lông siêu đẹp luôn.', '2026-05-11 11:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-05-12 11:00:00', NULL),
-(4, 10, 106, 1003, 8, 4, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-05-05 02:00:00', 'Cảm ơn bạn đã ủng hộ shop ạ!', '2026-05-06 02:00:00', NULL),
-(5, 10, 106, 1005, 10, 4, 'Shop làm dịch vụ rất tuyệt vời, ưng ý!', '2026-05-20 06:00:00', 'Cảm ơn bạn đã ủng hộ shop ạ!', '2026-05-21 06:00:00', NULL),
-(6, 11, 108, 1104, 11, 4, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-05-30 11:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-05-31 11:00:00', NULL),
-(7, 11, 106, 1104, 14, 4, 'Không gian sạch sẽ, bác sĩ tư vấn rất tận tâm.', '2026-05-21 07:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-05-22 07:00:00', NULL),
-(8, 12, 106, 1206, 22, 4, 'Dịch vụ chu đáo, cắt tỉa lông siêu đẹp luôn.', '2026-05-25 07:00:00', 'Cảm ơn bạn đã ủng hộ shop ạ!', '2026-05-26 07:00:00', NULL),
-(9, 12, 105, 1202, 26, 5, 'Không gian sạch sẽ, bác sĩ tư vấn rất tận tâm.', '2026-05-17 05:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-05-18 05:00:00', NULL),
-(10, 12, 108, 1203, 28, 4, 'Shop làm dịch vụ rất tuyệt vời, ưng ý!', '2026-05-17 04:00:00', 'Shop rất vui vì bạn và bé đã hài lòng. Chúc bé luôn khỏe mạnh!', '2026-05-18 04:00:00', NULL),
-(11, 13, 107, 1302, 31, 5, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-05-19 10:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-05-20 10:00:00', NULL),
-(12, 13, 106, 1303, 33, 5, 'Dịch vụ chu đáo, cắt tỉa lông siêu đẹp luôn.', '2026-05-11 10:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-05-12 10:00:00', NULL),
-(13, 13, 107, 1301, 36, 4, 'Giá cả hợp lý, chất lượng dịch vụ tốt. Sẽ quay lại!', '2026-05-11 10:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-05-12 10:00:00', NULL),
-(14, 13, 106, 1306, 37, 5, 'Shop làm dịch vụ rất tuyệt vời, ưng ý!', '2026-05-28 11:00:00', 'Cảm ơn bạn đã ủng hộ shop ạ!', '2026-05-29 11:00:00', NULL),
-(15, 14, 105, 1402, 42, 5, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-05-19 01:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-05-20 01:00:00', NULL),
-(16, 14, 108, 1403, 48, 4, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-05-15 05:00:00', 'Dạ shop cảm ơn bạn nhiều ạ, hẹn gặp lại bé lần sau nha.', '2026-05-16 05:00:00', NULL),
-(17, 10, 108, 1002, 52, 5, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-06-29 04:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-06-30 04:00:00', NULL),
-(18, 10, 105, 1006, 56, 4, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-06-16 06:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-06-17 06:00:00', NULL),
-(19, 11, 105, 1101, 63, 5, 'Giá cả hợp lý, chất lượng dịch vụ tốt. Sẽ quay lại!', '2026-06-03 05:00:00', 'Shop rất vui vì bạn và bé đã hài lòng. Chúc bé luôn khỏe mạnh!', '2026-06-04 05:00:00', NULL),
-(20, 11, 107, 1102, 65, 5, 'Không gian sạch sẽ, bác sĩ tư vấn rất tận tâm.', '2026-06-04 02:00:00', 'Shop rất vui vì bạn và bé đã hài lòng. Chúc bé luôn khỏe mạnh!', '2026-06-05 02:00:00', NULL),
-(21, 11, 107, 1101, 66, 4, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-07-01 01:00:00', 'Dạ shop cảm ơn bạn nhiều ạ, hẹn gặp lại bé lần sau nha.', '2026-07-02 01:00:00', NULL),
-(22, 11, 104, 1103, 67, 5, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-07-01 11:00:00', 'Cảm ơn bạn đã ủng hộ shop ạ!', '2026-07-02 11:00:00', NULL),
-(23, 11, 105, 1103, 68, 4, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-06-04 07:00:00', 'Shop rất vui vì bạn và bé đã hài lòng. Chúc bé luôn khỏe mạnh!', '2026-06-05 07:00:00', NULL),
-(24, 11, 104, 1106, 69, 4, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-06-28 07:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-06-29 07:00:00', NULL),
-(25, 11, 105, 1105, 70, 5, 'Không gian sạch sẽ, bác sĩ tư vấn rất tận tâm.', '2026-06-03 03:00:00', 'Dạ shop cảm ơn bạn nhiều ạ, hẹn gặp lại bé lần sau nha.', '2026-06-04 03:00:00', NULL),
-(26, 12, 108, 1203, 72, 5, 'Không gian sạch sẽ, bác sĩ tư vấn rất tận tâm.', '2026-06-26 10:00:00', 'Shop rất vui vì bạn và bé đã hài lòng. Chúc bé luôn khỏe mạnh!', '2026-06-27 10:00:00', NULL),
-(27, 12, 104, 1203, 79, 5, 'Không gian sạch sẽ, bác sĩ tư vấn rất tận tâm.', '2026-06-20 10:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-06-21 10:00:00', NULL),
-(28, 12, 105, 1202, 80, 5, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-06-10 05:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-06-11 05:00:00', NULL),
-(29, 13, 105, 1305, 83, 5, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-06-04 10:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-06-05 10:00:00', NULL),
-(30, 13, 105, 1305, 84, 4, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-06-28 03:00:00', 'Cảm ơn bạn đã ủng hộ shop ạ!', '2026-06-29 03:00:00', NULL),
-(31, 13, 105, 1304, 85, 5, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-06-05 07:00:00', 'Shop rất vui vì bạn và bé đã hài lòng. Chúc bé luôn khỏe mạnh!', '2026-06-06 07:00:00', NULL),
-(32, 13, 104, 1303, 86, 4, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-06-16 05:00:00', 'Shop rất vui vì bạn và bé đã hài lòng. Chúc bé luôn khỏe mạnh!', '2026-06-17 05:00:00', NULL),
-(33, 13, 108, 1306, 88, 4, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-06-05 09:00:00', 'Dạ shop cảm ơn bạn nhiều ạ, hẹn gặp lại bé lần sau nha.', '2026-06-06 09:00:00', NULL),
-(34, 14, 105, 1401, 92, 4, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-06-12 04:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-06-13 04:00:00', NULL),
-(35, 14, 104, 1404, 93, 4, 'Không gian sạch sẽ, bác sĩ tư vấn rất tận tâm.', '2026-06-15 10:00:00', 'Cảm ơn bạn đã ủng hộ shop ạ!', '2026-06-16 10:00:00', NULL),
-(36, 14, 108, 1405, 95, 4, 'Dịch vụ chu đáo, cắt tỉa lông siêu đẹp luôn.', '2026-06-11 08:00:00', 'Dạ shop cảm ơn bạn nhiều ạ, hẹn gặp lại bé lần sau nha.', '2026-06-12 08:00:00', NULL),
-(37, 14, 108, 1403, 97, 4, 'Không gian sạch sẽ, bác sĩ tư vấn rất tận tâm.', '2026-06-19 10:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-06-20 10:00:00', NULL),
-(38, 14, 105, 1406, 100, 4, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-06-26 01:00:00', 'Dạ shop cảm ơn bạn nhiều ạ, hẹn gặp lại bé lần sau nha.', '2026-06-27 01:00:00', NULL),
-(39, 10, 108, 1004, 109, 5, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-07-17 11:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-07-18 11:00:00', NULL),
-(40, 11, 107, 1106, 114, 5, 'Shop làm dịch vụ rất tuyệt vời, ưng ý!', '2026-07-08 11:00:00', 'Dạ shop cảm ơn bạn nhiều ạ, hẹn gặp lại bé lần sau nha.', '2026-07-09 11:00:00', NULL),
-(41, 11, 108, 1104, 115, 5, 'Nhân viên nhiệt tình, bé nhà mình rất thích đến đây.', '2026-07-02 09:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-07-03 09:00:00', NULL),
-(42, 11, 107, 1101, 116, 5, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-07-08 02:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-07-09 02:00:00', NULL),
-(43, 12, 104, 1205, 129, 4, 'Giá cả hợp lý, chất lượng dịch vụ tốt. Sẽ quay lại!', '2026-07-02 09:00:00', 'Cảm ơn bạn đã tin tưởng dịch vụ của shop!', '2026-07-03 09:00:00', NULL),
-(44, 13, 106, 1302, 134, 5, 'Shop làm dịch vụ rất tuyệt vời, ưng ý!', '2026-07-13 04:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-07-14 04:00:00', NULL),
-(45, 13, 107, 1306, 135, 5, 'Rất hài lòng với cách chăm sóc thú cưng của shop.', '2026-07-02 09:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-07-03 09:00:00', NULL),
-(46, 13, 105, 1302, 137, 4, 'Dịch vụ chu đáo, cắt tỉa lông siêu đẹp luôn.', '2026-07-15 09:00:00', 'Cảm ơn bạn đã ủng hộ shop ạ!', '2026-07-16 09:00:00', NULL),
-(47, 14, 104, 1406, 148, 5, 'Giá cả hợp lý, chất lượng dịch vụ tốt. Sẽ quay lại!', '2026-07-13 10:00:00', 'Shop rất vui vì bạn và bé đã hài lòng. Chúc bé luôn khỏe mạnh!', '2026-07-14 10:00:00', NULL),
-(48, 14, 106, 1405, 149, 5, 'Shop làm dịch vụ rất tuyệt vời, ưng ý!', '2026-07-05 06:00:00', 'Cảm ơn đánh giá tích cực của bạn, shop sẽ tiếp tục phát huy!', '2026-07-06 06:00:00', NULL);
+-- ============================================================================
+-- PAYMENTS
+-- ============================================================================
+INSERT INTO payment (id, booking_id, amount, method, status, payos_order_code,
+                     gateway_transaction_id, payment_time, description) VALUES
+-- COMPLETED → SUCCESS
+(1,  1,  150000, 'PAYOS', 'SUCCESS', 202405001, 'TXN-SPA-001', '2026-07-04 20:05:00', 'Thanh toán Tắm & Sấy'),
+(2,  2,  350000, 'PAYOS', 'SUCCESS', 202405002, 'TXN-SPA-002', '2026-07-09 18:35:00', 'Thanh toán Spa Toàn Thân'),
+(3,  3,  200000, 'PAYOS', 'SUCCESS', 202405003, 'TXN-CLI-001', '2026-07-11 21:05:00', 'Thanh toán Khám Tổng Quát'),
+(4,  4,  500000, 'PAYOS', 'SUCCESS', 202405004, 'TXN-CLI-002', '2026-07-19 15:05:00', 'Thanh toán Khám + Xét nghiệm'),
+(5,  5,  150000, 'PAYOS', 'SUCCESS', 202405005, 'TXN-SPA-003', '2026-07-27 10:05:00', 'Thanh toán Tắm & Sấy'),
+-- CANCELLED → REFUNDED
+(6,  6,  200000, 'PAYOS', 'REFUNDED', 202405006, 'TXN-CLI-003', '2026-07-14 10:05:00', 'Hoàn tiền hủy lịch'),
+(7,  7,  200000, 'PAYOS', 'REFUNDED', 202405007, 'TXN-SPA-004', '2026-07-21 08:05:00', 'Hoàn tiền hủy lịch'),
+(8,  8,  350000, 'PAYOS', 'REFUNDED', 202406001, 'TXN-HOT-001', '2026-07-30 19:05:00', 'Hoàn tiền hủy phòng'),
+(9,  9,  150000, 'PAYOS', 'REFUNDED', 202406002, 'TXN-CLI-004', '2026-08-04 09:05:00', 'Hoàn tiền hủy lịch'),
+-- WAITING_SHOP_APPROVAL → SUCCESS (da thanh toan, cho shop duyet)
+(10, 10, 350000, 'PAYOS', 'SUCCESS', 202406003, 'TXN-SPA-005', '2026-08-17 10:35:00', 'Thanh toán Spa Toàn Thân'),
+(11, 11, 150000, 'PAYOS', 'SUCCESS', 202406004, 'TXN-SPA-006', '2026-08-17 15:05:00', 'Thanh toán Tắm & Sấy'),
+(12, 12, 200000, 'PAYOS', 'SUCCESS', 202406005, 'TXN-SPA-007', '2026-08-18 07:05:00', 'Thanh toán Cắt Tỉa Lông'),
+(13, 13, 150000, 'PAYOS', 'SUCCESS', 202406006, 'TXN-SPA-008', '2026-08-18 08:35:00', 'Thanh toán Tắm & Sấy'),
+-- CONFIRMED → SUCCESS
+(14, 14, 150000, 'PAYOS', 'SUCCESS', 202406007, 'TXN-CLI-005', '2026-08-15 09:05:00', 'Thanh toán Tiêm Phòng'),
+(15, 15, 350000, 'PAYOS', 'SUCCESS', 202406008, 'TXN-CLI-006', '2026-08-16 10:05:00', 'Thanh toán Khám + Tiêm'),
+(16, 16, 200000, 'PAYOS', 'SUCCESS', 202406009, 'TXN-HOT-002', '2026-08-14 20:05:00', 'Thanh toán Lưu Trú'),
+(17, 17, 400000, 'PAYOS', 'SUCCESS', 202406010, 'TXN-CLI-007', '2026-08-16 14:05:00', 'Thanh toán Siêu Âm'),
+(18, 18, 200000, 'PAYOS', 'SUCCESS', 202406011, 'TXN-HOT-003', '2026-08-15 11:05:00', 'Thanh toán Lưu Trú'),
+-- IN_PROGRESS → SUCCESS
+(19, 19, 200000, 'PAYOS', 'SUCCESS', 202406012, 'TXN-SPA-009', '2026-08-17 20:05:00', 'Thanh toán Cắt Tỉa Lông'),
+(20, 20, 300000, 'PAYOS', 'SUCCESS', 202406013, 'TXN-CLI-008', '2026-08-17 21:05:00', 'Thanh toán Xét Nghiệm Máu'),
+(21, 21, 350000, 'PAYOS', 'SUCCESS', 202406014, 'TXN-SPA-010', '2026-08-17 18:05:00', 'Thanh toán Spa Toàn Thân'),
+(22, 22, 200000, 'PAYOS', 'SUCCESS', 202406015, 'TXN-HOT-004', '2026-08-16 09:05:00', 'Thanh toán Lưu Trú'),
+-- PENDING_PAYMENT → PENDING
+(23, 23, 550000, 'PAYOS', 'PENDING', 202406016, NULL, NULL, 'Chờ thanh toán Lưu Trú VIP'),
+(24, 24, 350000, 'PAYOS', 'PENDING', 202406017, NULL, NULL, 'Chờ thanh toán Spa Toàn Thân'),
+(25, 25, 500000, 'PAYOS', 'PENDING', 202406018, NULL, NULL, 'Chờ thanh toán Khám + Xét nghiệm'),
+(26, 26, 150000, 'PAYOS', 'PENDING', 202406019, NULL, NULL, 'Chờ thanh toán Tiêm Phòng'),
+-- CONFIRMED, gop Luu Tru + Spa → SUCCESS
+(32, 32, 700000, 'PAYOS', 'SUCCESS', 202406021, 'TXN-HOT-005', '2026-08-18 11:05:00', 'Thanh toán Lưu Trú Phòng Riêng + Spa Toàn Thân');
 
-INSERT INTO `notification` (`id`, `user_id`, `title`, `content`, `broadcast_id`, `notification_type`, `is_read`, `created_at`) VALUES
-(1, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #1 hiện đang ở trạng thái COMPLETED.', 'bcast-user-1', 'BOOKING', 0, '2026-05-06 03:00:00'),
-(2, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #2 hiện đang ở trạng thái COMPLETED.', 'bcast-user-2', 'BOOKING', 0, '2026-05-22 07:00:00'),
-(3, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #3 hiện đang ở trạng thái CANCELLED.', 'bcast-user-3', 'BOOKING', 0, '2026-05-21 04:00:00'),
-(4, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #4 hiện đang ở trạng thái COMPLETED.', 'bcast-user-4', 'BOOKING', 0, '2026-05-07 11:00:00'),
-(5, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #5 hiện đang ở trạng thái COMPLETED.', 'bcast-user-5', 'BOOKING', 0, '2026-05-04 04:00:00'),
-(6, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #6 hiện đang ở trạng thái CANCELLED.', 'bcast-user-6', 'BOOKING', 0, '2026-05-04 05:00:00'),
-(7, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #7 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-7', 'BOOKING', 0, '2026-05-24 01:00:00'),
-(8, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #8 hiện đang ở trạng thái COMPLETED.', 'bcast-user-8', 'BOOKING', 0, '2026-05-01 02:00:00'),
-(9, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #9 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-9', 'BOOKING', 0, '2026-05-04 10:00:00'),
-(10, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #10 hiện đang ở trạng thái COMPLETED.', 'bcast-user-10', 'BOOKING', 0, '2026-05-16 06:00:00'),
-(11, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #11 hiện đang ở trạng thái COMPLETED.', 'bcast-user-11', 'BOOKING', 0, '2026-05-26 11:00:00'),
-(12, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #12 hiện đang ở trạng thái CANCELLED.', 'bcast-user-12', 'BOOKING', 0, '2026-05-20 11:00:00'),
-(13, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #13 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-13', 'BOOKING', 0, '2026-05-04 02:00:00'),
-(14, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #14 hiện đang ở trạng thái COMPLETED.', 'bcast-user-14', 'BOOKING', 0, '2026-05-17 07:00:00'),
-(15, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #15 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-15', 'BOOKING', 0, '2026-05-22 06:00:00'),
-(16, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #16 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-16', 'BOOKING', 0, '2026-05-07 07:00:00'),
-(17, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #17 hiện đang ở trạng thái CANCELLED.', 'bcast-user-17', 'BOOKING', 0, '2026-05-02 09:00:00'),
-(18, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #18 hiện đang ở trạng thái CANCELLED.', 'bcast-user-18', 'BOOKING', 0, '2026-05-27 09:00:00'),
-(19, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #19 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-19', 'BOOKING', 0, '2026-05-28 11:00:00'),
-(20, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #20 hiện đang ở trạng thái CANCELLED.', 'bcast-user-20', 'BOOKING', 0, '2026-04-28 11:00:00'),
-(21, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #21 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-21', 'BOOKING', 0, '2026-05-04 10:00:00'),
-(22, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #22 hiện đang ở trạng thái COMPLETED.', 'bcast-user-22', 'BOOKING', 0, '2026-05-21 07:00:00'),
-(23, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #23 hiện đang ở trạng thái COMPLETED.', 'bcast-user-23', 'BOOKING', 0, '2026-05-13 09:00:00'),
-(24, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #24 hiện đang ở trạng thái CANCELLED.', 'bcast-user-24', 'BOOKING', 0, '2026-05-11 10:00:00'),
-(25, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #25 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-25', 'BOOKING', 0, '2026-05-09 05:00:00'),
-(26, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #26 hiện đang ở trạng thái COMPLETED.', 'bcast-user-26', 'BOOKING', 0, '2026-05-13 05:00:00'),
-(27, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #27 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-27', 'BOOKING', 0, '2026-04-30 01:00:00'),
-(28, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #28 hiện đang ở trạng thái COMPLETED.', 'bcast-user-28', 'BOOKING', 0, '2026-05-13 04:00:00'),
-(29, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #29 hiện đang ở trạng thái COMPLETED.', 'bcast-user-29', 'BOOKING', 0, '2026-05-23 11:00:00'),
-(30, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #30 hiện đang ở trạng thái CANCELLED.', 'bcast-user-30', 'BOOKING', 0, '2026-05-13 01:00:00'),
-(31, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #31 hiện đang ở trạng thái COMPLETED.', 'bcast-user-31', 'BOOKING', 0, '2026-05-15 10:00:00'),
-(32, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #32 hiện đang ở trạng thái COMPLETED.', 'bcast-user-32', 'BOOKING', 0, '2026-05-28 06:00:00'),
-(33, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #33 hiện đang ở trạng thái COMPLETED.', 'bcast-user-33', 'BOOKING', 0, '2026-05-07 10:00:00'),
-(34, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #34 hiện đang ở trạng thái CANCELLED.', 'bcast-user-34', 'BOOKING', 0, '2026-05-24 02:00:00'),
-(35, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #35 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-35', 'BOOKING', 0, '2026-05-21 08:00:00'),
-(36, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #36 hiện đang ở trạng thái COMPLETED.', 'bcast-user-36', 'BOOKING', 0, '2026-05-07 10:00:00'),
-(37, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #37 hiện đang ở trạng thái COMPLETED.', 'bcast-user-37', 'BOOKING', 0, '2026-05-24 11:00:00'),
-(38, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #38 hiện đang ở trạng thái CANCELLED.', 'bcast-user-38', 'BOOKING', 0, '2026-05-13 08:00:00'),
-(39, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #39 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-39', 'BOOKING', 0, '2026-05-15 09:00:00'),
-(40, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #40 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-40', 'BOOKING', 0, '2026-05-24 03:00:00'),
-(41, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #41 hiện đang ở trạng thái CANCELLED.', 'bcast-user-41', 'BOOKING', 0, '2026-05-13 05:00:00'),
-(42, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #42 hiện đang ở trạng thái COMPLETED.', 'bcast-user-42', 'BOOKING', 0, '2026-05-15 01:00:00'),
-(43, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #43 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-43', 'BOOKING', 0, '2026-05-06 09:00:00'),
-(44, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #44 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-44', 'BOOKING', 0, '2026-05-02 07:00:00'),
-(45, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #45 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-45', 'BOOKING', 0, '2026-05-13 06:00:00'),
-(46, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #46 hiện đang ở trạng thái CANCELLED.', 'bcast-user-46', 'BOOKING', 0, '2026-05-23 03:00:00'),
-(47, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #47 hiện đang ở trạng thái COMPLETED.', 'bcast-user-47', 'BOOKING', 0, '2026-05-10 03:00:00'),
-(48, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #48 hiện đang ở trạng thái COMPLETED.', 'bcast-user-48', 'BOOKING', 0, '2026-05-11 05:00:00'),
-(49, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #49 hiện đang ở trạng thái CANCELLED.', 'bcast-user-49', 'BOOKING', 0, '2026-05-03 11:00:00'),
-(50, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #50 hiện đang ở trạng thái CANCELLED.', 'bcast-user-50', 'BOOKING', 0, '2026-05-21 04:00:00'),
-(51, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #51 hiện đang ở trạng thái COMPLETED.', 'bcast-user-51', 'BOOKING', 0, '2026-06-26 06:00:00'),
-(52, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #52 hiện đang ở trạng thái COMPLETED.', 'bcast-user-52', 'BOOKING', 0, '2026-06-25 04:00:00'),
-(53, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #53 hiện đang ở trạng thái COMPLETED.', 'bcast-user-53', 'BOOKING', 0, '2026-06-10 09:00:00'),
-(54, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #54 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-54', 'BOOKING', 0, '2026-05-29 10:00:00'),
-(55, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #55 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-55', 'BOOKING', 0, '2026-06-02 05:00:00'),
-(56, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #56 hiện đang ở trạng thái COMPLETED.', 'bcast-user-56', 'BOOKING', 0, '2026-06-12 06:00:00'),
-(57, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #57 hiện đang ở trạng thái CANCELLED.', 'bcast-user-57', 'BOOKING', 0, '2026-06-21 06:00:00'),
-(58, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #58 hiện đang ở trạng thái COMPLETED.', 'bcast-user-58', 'BOOKING', 0, '2026-06-11 06:00:00'),
-(59, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #59 hiện đang ở trạng thái CANCELLED.', 'bcast-user-59', 'BOOKING', 0, '2026-06-22 06:00:00'),
-(60, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #60 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-60', 'BOOKING', 0, '2026-06-07 11:00:00'),
-(61, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #61 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-61', 'BOOKING', 0, '2026-06-02 10:00:00'),
-(62, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #62 hiện đang ở trạng thái CANCELLED.', 'bcast-user-62', 'BOOKING', 0, '2026-06-14 01:00:00'),
-(63, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #63 hiện đang ở trạng thái COMPLETED.', 'bcast-user-63', 'BOOKING', 0, '2026-05-30 05:00:00'),
-(64, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #64 hiện đang ở trạng thái CANCELLED.', 'bcast-user-64', 'BOOKING', 0, '2026-06-25 05:00:00'),
-(65, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #65 hiện đang ở trạng thái COMPLETED.', 'bcast-user-65', 'BOOKING', 0, '2026-05-31 02:00:00'),
-(66, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #66 hiện đang ở trạng thái COMPLETED.', 'bcast-user-66', 'BOOKING', 0, '2026-06-27 01:00:00'),
-(67, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #67 hiện đang ở trạng thái COMPLETED.', 'bcast-user-67', 'BOOKING', 0, '2026-06-27 11:00:00'),
-(68, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #68 hiện đang ở trạng thái COMPLETED.', 'bcast-user-68', 'BOOKING', 0, '2026-05-31 07:00:00'),
-(69, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #69 hiện đang ở trạng thái COMPLETED.', 'bcast-user-69', 'BOOKING', 0, '2026-06-24 07:00:00'),
-(70, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #70 hiện đang ở trạng thái COMPLETED.', 'bcast-user-70', 'BOOKING', 0, '2026-05-30 03:00:00'),
-(71, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #71 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-71', 'BOOKING', 0, '2026-06-03 01:00:00'),
-(72, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #72 hiện đang ở trạng thái COMPLETED.', 'bcast-user-72', 'BOOKING', 0, '2026-06-22 10:00:00'),
-(73, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #73 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-73', 'BOOKING', 0, '2026-06-25 08:00:00'),
-(74, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #74 hiện đang ở trạng thái CANCELLED.', 'bcast-user-74', 'BOOKING', 0, '2026-06-12 09:00:00'),
-(75, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #75 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-75', 'BOOKING', 0, '2026-05-31 03:00:00'),
-(76, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #76 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-76', 'BOOKING', 0, '2026-06-24 09:00:00'),
-(77, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #77 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-77', 'BOOKING', 0, '2026-06-16 02:00:00'),
-(78, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #78 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-78', 'BOOKING', 0, '2026-06-09 01:00:00'),
-(79, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #79 hiện đang ở trạng thái COMPLETED.', 'bcast-user-79', 'BOOKING', 0, '2026-06-16 10:00:00'),
-(80, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #80 hiện đang ở trạng thái COMPLETED.', 'bcast-user-80', 'BOOKING', 0, '2026-06-06 05:00:00'),
-(81, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #81 hiện đang ở trạng thái CANCELLED.', 'bcast-user-81', 'BOOKING', 0, '2026-06-23 10:00:00'),
-(82, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #82 hiện đang ở trạng thái CANCELLED.', 'bcast-user-82', 'BOOKING', 0, '2026-06-25 06:00:00'),
-(83, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #83 hiện đang ở trạng thái COMPLETED.', 'bcast-user-83', 'BOOKING', 0, '2026-05-31 10:00:00'),
-(84, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #84 hiện đang ở trạng thái COMPLETED.', 'bcast-user-84', 'BOOKING', 0, '2026-06-24 03:00:00'),
-(85, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #85 hiện đang ở trạng thái COMPLETED.', 'bcast-user-85', 'BOOKING', 0, '2026-06-01 07:00:00'),
-(86, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #86 hiện đang ở trạng thái COMPLETED.', 'bcast-user-86', 'BOOKING', 0, '2026-06-12 05:00:00'),
-(87, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #87 hiện đang ở trạng thái CANCELLED.', 'bcast-user-87', 'BOOKING', 0, '2026-06-15 06:00:00'),
-(88, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #88 hiện đang ở trạng thái COMPLETED.', 'bcast-user-88', 'BOOKING', 0, '2026-06-01 09:00:00'),
-(89, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #89 hiện đang ở trạng thái COMPLETED.', 'bcast-user-89', 'BOOKING', 0, '2026-06-24 10:00:00'),
-(90, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #90 hiện đang ở trạng thái CANCELLED.', 'bcast-user-90', 'BOOKING', 0, '2026-05-31 01:00:00'),
-(91, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #91 hiện đang ở trạng thái CANCELLED.', 'bcast-user-91', 'BOOKING', 0, '2026-06-09 09:00:00'),
-(92, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #92 hiện đang ở trạng thái COMPLETED.', 'bcast-user-92', 'BOOKING', 0, '2026-06-08 04:00:00'),
-(93, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #93 hiện đang ở trạng thái COMPLETED.', 'bcast-user-93', 'BOOKING', 0, '2026-06-11 10:00:00'),
-(94, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #94 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-94', 'BOOKING', 0, '2026-06-25 11:00:00'),
-(95, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #95 hiện đang ở trạng thái COMPLETED.', 'bcast-user-95', 'BOOKING', 0, '2026-06-07 08:00:00'),
-(96, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #96 hiện đang ở trạng thái COMPLETED.', 'bcast-user-96', 'BOOKING', 0, '2026-06-24 01:00:00'),
-(97, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #97 hiện đang ở trạng thái COMPLETED.', 'bcast-user-97', 'BOOKING', 0, '2026-06-15 10:00:00'),
-(98, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #98 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-98', 'BOOKING', 0, '2026-06-02 10:00:00'),
-(99, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #99 hiện đang ở trạng thái CANCELLED.', 'bcast-user-99', 'BOOKING', 0, '2026-06-25 05:00:00'),
-(100, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #100 hiện đang ở trạng thái COMPLETED.', 'bcast-user-100', 'BOOKING', 0, '2026-06-22 01:00:00'),
-(101, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #101 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-101', 'BOOKING', 0, '2026-07-01 08:00:00'),
-(102, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #102 hiện đang ở trạng thái CANCELLED.', 'bcast-user-102', 'BOOKING', 0, '2026-07-02 08:00:00'),
-(103, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #103 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-103', 'BOOKING', 0, '2026-07-26 05:00:00'),
-(104, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #104 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-104', 'BOOKING', 0, '2026-06-28 07:00:00'),
-(105, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #105 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-105', 'BOOKING', 0, '2026-07-19 10:00:00'),
-(106, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #106 hiện đang ở trạng thái CANCELLED.', 'bcast-user-106', 'BOOKING', 0, '2026-07-05 09:00:00'),
-(107, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #107 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-107', 'BOOKING', 0, '2026-07-20 03:00:00'),
-(108, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #108 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-108', 'BOOKING', 0, '2026-07-08 11:00:00'),
-(109, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #109 hiện đang ở trạng thái COMPLETED.', 'bcast-user-109', 'BOOKING', 0, '2026-07-13 11:00:00'),
-(110, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #110 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-110', 'BOOKING', 0, '2026-07-20 01:00:00'),
-(111, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #111 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-111', 'BOOKING', 0, '2026-07-17 09:00:00'),
-(112, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #112 hiện đang ở trạng thái CANCELLED.', 'bcast-user-112', 'BOOKING', 0, '2026-07-06 09:00:00'),
-(113, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #113 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-113', 'BOOKING', 0, '2026-07-19 06:00:00'),
-(114, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #114 hiện đang ở trạng thái COMPLETED.', 'bcast-user-114', 'BOOKING', 0, '2026-07-04 11:00:00'),
-(115, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #115 hiện đang ở trạng thái COMPLETED.', 'bcast-user-115', 'BOOKING', 0, '2026-06-28 09:00:00'),
-(116, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #116 hiện đang ở trạng thái COMPLETED.', 'bcast-user-116', 'BOOKING', 0, '2026-07-04 02:00:00'),
-(117, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #117 hiện đang ở trạng thái CANCELLED.', 'bcast-user-117', 'BOOKING', 0, '2026-07-04 09:00:00'),
-(118, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #118 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-118', 'BOOKING', 0, '2026-07-24 07:00:00'),
-(119, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #119 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-119', 'BOOKING', 0, '2026-07-24 11:00:00'),
-(120, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #120 hiện đang ở trạng thái CANCELLED.', 'bcast-user-120', 'BOOKING', 0, '2026-07-09 10:00:00'),
-(121, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #121 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-121', 'BOOKING', 0, '2026-07-14 01:00:00'),
-(122, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #122 hiện đang ở trạng thái CANCELLED.', 'bcast-user-122', 'BOOKING', 0, '2026-07-11 01:00:00'),
-(123, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #123 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-123', 'BOOKING', 0, '2026-07-17 08:00:00'),
-(124, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #124 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-124', 'BOOKING', 0, '2026-07-15 05:00:00'),
-(125, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #125 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-125', 'BOOKING', 0, '2026-07-19 01:00:00'),
-(126, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #126 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-126', 'BOOKING', 0, '2026-07-27 09:00:00'),
-(127, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #127 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-127', 'BOOKING', 0, '2026-06-29 06:00:00'),
-(128, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #128 hiện đang ở trạng thái COMPLETED.', 'bcast-user-128', 'BOOKING', 0, '2026-07-10 11:00:00'),
-(129, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #129 hiện đang ở trạng thái COMPLETED.', 'bcast-user-129', 'BOOKING', 0, '2026-06-28 09:00:00'),
-(130, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #130 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-130', 'BOOKING', 0, '2026-07-27 11:00:00'),
-(131, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #131 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-131', 'BOOKING', 0, '2026-07-15 07:00:00'),
-(132, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #132 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-132', 'BOOKING', 0, '2026-07-22 08:00:00'),
-(133, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #133 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-133', 'BOOKING', 0, '2026-07-25 04:00:00'),
-(134, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #134 hiện đang ở trạng thái COMPLETED.', 'bcast-user-134', 'BOOKING', 0, '2026-07-09 04:00:00'),
-(135, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #135 hiện đang ở trạng thái COMPLETED.', 'bcast-user-135', 'BOOKING', 0, '2026-06-28 09:00:00'),
-(136, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #136 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-136', 'BOOKING', 0, '2026-07-22 05:00:00'),
-(137, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #137 hiện đang ở trạng thái COMPLETED.', 'bcast-user-137', 'BOOKING', 0, '2026-07-11 09:00:00'),
-(138, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #138 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-138', 'BOOKING', 0, '2026-07-22 09:00:00'),
-(139, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #139 hiện đang ở trạng thái COMPLETED.', 'bcast-user-139', 'BOOKING', 0, '2026-06-29 07:00:00'),
-(140, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #140 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-140', 'BOOKING', 0, '2026-07-20 05:00:00'),
-(141, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #141 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-141', 'BOOKING', 0, '2026-07-17 07:00:00'),
-(142, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #142 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-142', 'BOOKING', 0, '2026-07-19 06:00:00'),
-(143, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #143 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-143', 'BOOKING', 0, '2026-07-20 05:00:00'),
-(144, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #144 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-144', 'BOOKING', 0, '2026-07-17 06:00:00'),
-(145, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #145 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-145', 'BOOKING', 0, '2026-07-17 04:00:00'),
-(146, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #146 hiện đang ở trạng thái IN_PROGRESS.', 'bcast-user-146', 'BOOKING', 0, '2026-07-04 06:00:00'),
-(147, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #147 hiện đang ở trạng thái CANCELLED.', 'bcast-user-147', 'BOOKING', 0, '2026-07-14 09:00:00'),
-(148, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #148 hiện đang ở trạng thái COMPLETED.', 'bcast-user-148', 'BOOKING', 0, '2026-07-09 10:00:00'),
-(149, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #149 hiện đang ở trạng thái COMPLETED.', 'bcast-user-149', 'BOOKING', 0, '2026-07-01 06:00:00'),
-(150, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #150 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-150', 'BOOKING', 0, '2026-07-27 10:00:00'),
-(151, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #151 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-151', 'BOOKING', 0, '2026-08-07 11:00:00'),
-(152, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #152 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-152', 'BOOKING', 0, '2026-08-18 10:00:00'),
-(153, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #153 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-153', 'BOOKING', 0, '2026-08-20 09:00:00'),
-(154, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #154 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-154', 'BOOKING', 0, '2026-08-01 02:00:00'),
-(155, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #155 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-155', 'BOOKING', 0, '2026-08-05 02:00:00'),
-(156, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #156 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-156', 'BOOKING', 0, '2026-08-02 10:00:00'),
-(157, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #157 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-157', 'BOOKING', 0, '2026-08-17 09:00:00'),
-(158, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #158 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-158', 'BOOKING', 0, '2026-08-18 10:00:00'),
-(159, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #159 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-159', 'BOOKING', 0, '2026-08-05 01:00:00'),
-(160, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #160 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-160', 'BOOKING', 0, '2026-08-19 08:00:00'),
-(161, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #161 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-161', 'BOOKING', 0, '2026-08-05 04:00:00'),
-(162, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #162 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-162', 'BOOKING', 0, '2026-08-09 04:00:00'),
-(163, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #163 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-163', 'BOOKING', 0, '2026-08-17 05:00:00'),
-(164, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #164 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-164', 'BOOKING', 0, '2026-08-20 09:00:00'),
-(165, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #165 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-165', 'BOOKING', 0, '2026-07-31 04:00:00'),
-(166, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #166 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-166', 'BOOKING', 0, '2026-08-04 10:00:00'),
-(167, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #167 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-167', 'BOOKING', 0, '2026-08-15 01:00:00'),
-(168, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #168 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-168', 'BOOKING', 0, '2026-08-12 10:00:00'),
-(169, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #169 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-169', 'BOOKING', 0, '2026-08-02 01:00:00'),
-(170, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #170 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-170', 'BOOKING', 0, '2026-08-14 05:00:00'),
-(171, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #171 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-171', 'BOOKING', 0, '2026-08-26 08:00:00'),
-(172, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #172 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-172', 'BOOKING', 0, '2026-08-15 09:00:00'),
-(173, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #173 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-173', 'BOOKING', 0, '2026-08-25 08:00:00'),
-(174, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #174 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-174', 'BOOKING', 0, '2026-08-25 03:00:00'),
-(175, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #175 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-175', 'BOOKING', 0, '2026-08-09 09:00:00'),
-(176, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #176 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-176', 'BOOKING', 0, '2026-08-18 11:00:00'),
-(177, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #177 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-177', 'BOOKING', 0, '2026-08-10 02:00:00'),
-(178, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #178 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-178', 'BOOKING', 0, '2026-08-20 04:00:00'),
-(179, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #179 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-179', 'BOOKING', 0, '2026-08-13 05:00:00'),
-(180, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #180 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-180', 'BOOKING', 0, '2026-08-23 10:00:00'),
-(181, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #181 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-181', 'BOOKING', 0, '2026-08-15 03:00:00'),
-(182, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #182 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-182', 'BOOKING', 0, '2026-08-19 10:00:00'),
-(183, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #183 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-183', 'BOOKING', 0, '2026-08-01 11:00:00'),
-(184, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #184 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-184', 'BOOKING', 0, '2026-08-14 08:00:00'),
-(185, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #185 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-185', 'BOOKING', 0, '2026-08-18 02:00:00'),
-(186, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #186 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-186', 'BOOKING', 0, '2026-08-20 08:00:00'),
-(187, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #187 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-187', 'BOOKING', 0, '2026-08-19 06:00:00'),
-(188, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #188 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-188', 'BOOKING', 0, '2026-08-11 08:00:00'),
-(189, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #189 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-189', 'BOOKING', 0, '2026-08-20 05:00:00'),
-(190, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #190 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-190', 'BOOKING', 0, '2026-08-04 09:00:00'),
-(191, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #191 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-191', 'BOOKING', 0, '2026-08-25 02:00:00'),
-(192, 108, 'Cập nhật đơn hàng', 'Đơn đặt lịch #192 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-192', 'BOOKING', 0, '2026-08-14 02:00:00'),
-(193, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #193 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-193', 'BOOKING', 0, '2026-08-16 01:00:00'),
-(194, 104, 'Cập nhật đơn hàng', 'Đơn đặt lịch #194 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-194', 'BOOKING', 0, '2026-08-02 03:00:00'),
-(195, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #195 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-195', 'BOOKING', 0, '2026-08-11 08:00:00'),
-(196, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #196 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-196', 'BOOKING', 0, '2026-08-23 10:00:00'),
-(197, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #197 hiện đang ở trạng thái CONFIRMED.', 'bcast-user-197', 'BOOKING', 0, '2026-08-13 07:00:00'),
-(198, 106, 'Cập nhật đơn hàng', 'Đơn đặt lịch #198 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-198', 'BOOKING', 0, '2026-08-12 08:00:00'),
-(199, 105, 'Cập nhật đơn hàng', 'Đơn đặt lịch #199 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-199', 'BOOKING', 0, '2026-08-12 08:00:00'),
-(200, 107, 'Cập nhật đơn hàng', 'Đơn đặt lịch #200 hiện đang ở trạng thái PENDING_PAYMENT.', 'bcast-user-200', 'BOOKING', 0, '2026-08-17 04:00:00');
+-- ============================================================================
+-- REVIEWS (cho COMPLETED bookings)
+-- ============================================================================
+INSERT INTO review (id, shop_id, user_id, service_id, rating, comment, created_at, reply, replied_at) VALUES
+(1, 1, 5, 1, 5,
+   'Mochi được chăm sóc rất tốt! Nhân viên nhẹ nhàng, chuyên nghiệp. Lông bé sáng và mềm hơn hẳn.',
+   '2026-07-05 11:00:00',
+   'Cảm ơn chị đã tin tưởng Mèo Kute Spa! Mochi thật đáng yêu, hẹn gặp lại chị và bé nhé ^^',
+   '2026-07-05 14:00:00'),
+(2, 1, 5, 3, 5,
+   'Buddy được spa rất kỹ, mùi thơm mà không hắc. Bé vui vẻ khi về nhà, không bị stress.',
+   '2026-07-10 16:00:00',
+   'Cảm ơn anh/chị! Buddy rất ngoan trong suốt buổi spa. Hẹn gặp lại!',
+   '2026-07-11 09:00:00'),
+(3, 2, 6, 5, 5,
+   'Bác sĩ rất tận tình, giải thích rõ ràng tình trạng sức khỏe của Luna. Phòng khám sạch sẽ, thoáng mát.',
+   '2026-07-12 10:00:00', NULL, NULL),
+(4, 2, 7, 5, 4,
+   'Khám nhanh và chuyên nghiệp. Chỉ hơi đông nên chờ lâu một chút. Bác sĩ giải thích về khớp của Max rất chi tiết.',
+   '2026-07-20 12:00:00',
+   'Cảm ơn anh đã phản hồi! Chúng tôi đang cải thiện thời gian chờ. Hẹn gặp lại Max!',
+   '2026-07-20 15:00:00'),
+(5, 1, 8, 1, 4,
+   'Nhân viên thân thiện, Coco được tắm sạch. Hơi nhỏ so với giá nhưng chất lượng ổn.',
+   '2026-07-28 13:00:00', NULL, NULL);
 
-INSERT INTO `message` (`id`, `shop_id`, `channel_type`, `sender_email`, `recipient_email`, `target_id`, `sender_role`, `content`, `created_at`, `is_read`) VALUES
-(1, 10, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Bé nhà mình hơi nhát người lạ, không biết shop có nhận không?', '2026-07-07 14:58:24', 1),
-(2, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ bên mình các bạn nhân viên đều rất kiên nhẫn và có kinh nghiệm ạ.', '2026-07-07 15:16:08', 1),
-(3, 10, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Vậy thì yên tâm quá, mình sẽ mang bé qua thử', '2026-07-07 15:36:39', 1),
-(4, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ bạn cứ yên tâm nhé, các bé đến shop đều được làm quen trước ạ.', '2026-07-07 15:54:12', 1),
-(5, 10, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Cảm ơn shop nhiều nha', '2026-07-07 16:02:23', 1),
-(6, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ không có gì ạ, mong sớm được đón bé!', '2026-07-07 16:12:12', 1),
-(7, 11, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 15:00:47', 1),
-(8, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 15:24:12', 1),
-(9, 11, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:45:49', 1),
-(10, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 16:01:01', 1),
-(11, 11, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 16:16:02', 1),
-(12, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 16:24:36', 1),
-(13, 12, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 14:54:27', 1),
-(14, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 15:07:20', 1),
-(15, 12, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:21:14', 1),
-(16, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 15:38:10', 1),
-(17, 12, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 15:56:19', 1),
-(18, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 16:06:54', 1),
-(19, 13, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Chào shop, mình muốn hỏi về dịch vụ bên mình', '2026-07-07 14:44:31', 1),
-(20, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ shop chào bạn, bạn cần tư vấn dịch vụ nào ạ?', '2026-07-07 15:12:57', 1),
-(21, 13, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Mình muốn tham khảo gói cơ bản', '2026-07-07 15:32:09', 1),
-(22, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ gói cơ bản bên mình đang có giá rất ưu đãi ạ, bạn xem chi tiết trên app nhé.', '2026-07-07 15:46:24', 1),
-(23, 13, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Ok shop, để mình xem thử', '2026-07-07 16:03:12', 1),
-(24, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Vâng ạ, bạn cần hỗ trợ thêm cứ nhắn shop nha!', '2026-07-07 16:18:34', 1),
-(25, 14, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Chào shop, mình muốn hỏi về dịch vụ bên mình', '2026-07-07 14:48:20', 1),
-(26, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ shop chào bạn, bạn cần tư vấn dịch vụ nào ạ?', '2026-07-07 15:11:52', 1),
-(27, 14, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Mình muốn tham khảo gói cơ bản', '2026-07-07 15:25:58', 1),
-(28, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Dạ gói cơ bản bên mình đang có giá rất ưu đãi ạ, bạn xem chi tiết trên app nhé.', '2026-07-07 15:55:27', 1),
-(29, 14, 'CUSTOMER_CHAT', 'huyhoang15032k4@gmail.com', 'huyhoang15032k4@gmail.com', 104, 'USER', 'Ok shop, để mình xem thử', '2026-07-07 15:57:46', 1),
-(30, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'huyhoang15032k4@gmail.com', 104, 'SHOP_OWNER', 'Vâng ạ, bạn cần hỗ trợ thêm cứ nhắn shop nha!', '2026-07-07 16:05:06', 1),
-(31, 10, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Bé nhà mình hơi nhát người lạ, không biết shop có nhận không?', '2026-07-07 14:40:00', 1),
-(32, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ bên mình các bạn nhân viên đều rất kiên nhẫn và có kinh nghiệm ạ.', '2026-07-07 15:00:29', 1),
-(33, 10, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Vậy thì yên tâm quá, mình sẽ mang bé qua thử', '2026-07-07 15:20:23', 1),
-(34, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ bạn cứ yên tâm nhé, các bé đến shop đều được làm quen trước ạ.', '2026-07-07 15:44:51', 1),
-(35, 10, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Cảm ơn shop nhiều nha', '2026-07-07 16:12:28', 1),
-(36, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ không có gì ạ, mong sớm được đón bé!', '2026-07-07 16:35:57', 1),
-(37, 11, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 14:55:40', 1),
-(38, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 14:59:36', 1),
-(39, 11, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:27:47', 1),
-(40, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 15:51:18', 1),
-(41, 11, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 16:08:31', 1),
-(42, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 16:20:59', 1),
-(43, 12, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Chào shop, mình muốn hỏi về dịch vụ bên mình', '2026-07-07 14:46:49', 1),
-(44, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ shop chào bạn, bạn cần tư vấn dịch vụ nào ạ?', '2026-07-07 15:13:57', 1),
-(45, 12, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Mình muốn tham khảo gói cơ bản', '2026-07-07 15:32:01', 1),
-(46, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ gói cơ bản bên mình đang có giá rất ưu đãi ạ, bạn xem chi tiết trên app nhé.', '2026-07-07 15:59:38', 1),
-(47, 12, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Ok shop, để mình xem thử', '2026-07-07 16:06:49', 1),
-(48, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Vâng ạ, bạn cần hỗ trợ thêm cứ nhắn shop nha!', '2026-07-07 16:33:06', 1),
-(49, 13, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 14:39:55', 1),
-(50, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 15:00:50', 1),
-(51, 13, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:09:23', 1),
-(52, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 15:27:46', 1),
-(53, 13, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 15:47:45', 1),
-(54, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 15:56:03', 1),
-(55, 14, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 15:03:40', 1),
-(56, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 15:18:33', 1),
-(57, 14, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:44:00', 1),
-(58, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 16:00:34', 1),
-(59, 14, 'CUSTOMER_CHAT', 'hoangdhse180422@fpt.edu.vn', 'hoangdhse180422@fpt.edu.vn', 105, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 16:13:01', 1),
-(60, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'hoangdhse180422@fpt.edu.vn', 105, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 16:25:53', 1),
-(61, 10, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Chào shop, mình muốn hỏi về dịch vụ bên mình', '2026-07-07 14:51:56', 1),
-(62, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ shop chào bạn, bạn cần tư vấn dịch vụ nào ạ?', '2026-07-07 14:59:46', 1),
-(63, 10, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Mình muốn tham khảo gói cơ bản', '2026-07-07 15:26:19', 1),
-(64, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ gói cơ bản bên mình đang có giá rất ưu đãi ạ, bạn xem chi tiết trên app nhé.', '2026-07-07 15:44:25', 1),
-(65, 10, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Ok shop, để mình xem thử', '2026-07-07 15:50:19', 1),
-(66, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Vâng ạ, bạn cần hỗ trợ thêm cứ nhắn shop nha!', '2026-07-07 15:55:42', 1),
-(67, 11, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Bé nhà mình hơi nhát người lạ, không biết shop có nhận không?', '2026-07-07 14:48:32', 1),
-(68, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ bên mình các bạn nhân viên đều rất kiên nhẫn và có kinh nghiệm ạ.', '2026-07-07 15:07:50', 1),
-(69, 11, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Vậy thì yên tâm quá, mình sẽ mang bé qua thử', '2026-07-07 15:33:13', 1),
-(70, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ bạn cứ yên tâm nhé, các bé đến shop đều được làm quen trước ạ.', '2026-07-07 15:48:24', 1),
-(71, 11, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Cảm ơn shop nhiều nha', '2026-07-07 16:06:44', 1),
-(72, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ không có gì ạ, mong sớm được đón bé!', '2026-07-07 16:10:46', 1),
-(73, 12, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Bé nhà mình hơi nhát người lạ, không biết shop có nhận không?', '2026-07-07 14:55:30', 1),
-(74, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ bên mình các bạn nhân viên đều rất kiên nhẫn và có kinh nghiệm ạ.', '2026-07-07 15:17:41', 1),
-(75, 12, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Vậy thì yên tâm quá, mình sẽ mang bé qua thử', '2026-07-07 15:28:55', 1),
-(76, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ bạn cứ yên tâm nhé, các bé đến shop đều được làm quen trước ạ.', '2026-07-07 15:41:04', 1),
-(77, 12, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Cảm ơn shop nhiều nha', '2026-07-07 15:58:36', 1),
-(78, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ không có gì ạ, mong sớm được đón bé!', '2026-07-07 16:02:23', 1),
-(79, 13, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Bé nhà mình hơi nhát người lạ, không biết shop có nhận không?', '2026-07-07 14:43:36', 1),
-(80, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ bên mình các bạn nhân viên đều rất kiên nhẫn và có kinh nghiệm ạ.', '2026-07-07 14:46:53', 1),
-(81, 13, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Vậy thì yên tâm quá, mình sẽ mang bé qua thử', '2026-07-07 15:04:03', 1),
-(82, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ bạn cứ yên tâm nhé, các bé đến shop đều được làm quen trước ạ.', '2026-07-07 15:30:28', 1),
-(83, 13, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Cảm ơn shop nhiều nha', '2026-07-07 15:41:58', 1),
-(84, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ không có gì ạ, mong sớm được đón bé!', '2026-07-07 15:48:27', 1),
-(85, 14, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Chào shop, mình muốn hỏi về dịch vụ bên mình', '2026-07-07 15:03:20', 1),
-(86, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ shop chào bạn, bạn cần tư vấn dịch vụ nào ạ?', '2026-07-07 15:09:05', 1),
-(87, 14, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Mình muốn tham khảo gói cơ bản', '2026-07-07 15:20:32', 1),
-(88, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Dạ gói cơ bản bên mình đang có giá rất ưu đãi ạ, bạn xem chi tiết trên app nhé.', '2026-07-07 15:50:27', 1),
-(89, 14, 'CUSTOMER_CHAT', 'khachhang1@gmail.com', 'khachhang1@gmail.com', 106, 'USER', 'Ok shop, để mình xem thử', '2026-07-07 16:18:28', 1),
-(90, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang1@gmail.com', 106, 'SHOP_OWNER', 'Vâng ạ, bạn cần hỗ trợ thêm cứ nhắn shop nha!', '2026-07-07 16:43:20', 1),
-(91, 10, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 14:55:02', 1),
-(92, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 15:10:18', 1),
-(93, 10, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:28:57', 1),
-(94, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 15:44:39', 1),
-(95, 10, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 15:50:36', 1),
-(96, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 16:01:03', 1),
-(97, 11, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Bé nhà mình hơi nhát người lạ, không biết shop có nhận không?', '2026-07-07 14:51:05', 1),
-(98, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ bên mình các bạn nhân viên đều rất kiên nhẫn và có kinh nghiệm ạ.', '2026-07-07 15:00:44', 1),
-(99, 11, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Vậy thì yên tâm quá, mình sẽ mang bé qua thử', '2026-07-07 15:15:19', 1),
-(100, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ bạn cứ yên tâm nhé, các bé đến shop đều được làm quen trước ạ.', '2026-07-07 15:37:28', 1),
-(101, 11, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Cảm ơn shop nhiều nha', '2026-07-07 15:46:46', 1),
-(102, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ không có gì ạ, mong sớm được đón bé!', '2026-07-07 15:58:27', 1),
-(103, 12, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 14:56:00', 1),
-(104, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 15:15:47', 1),
-(105, 12, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:24:47', 1),
-(106, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 15:39:49', 1),
-(107, 12, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 16:03:21', 1),
-(108, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 16:05:35', 1),
-(109, 13, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Chào shop, mình muốn hỏi về dịch vụ bên mình', '2026-07-07 14:40:42', 1),
-(110, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ shop chào bạn, bạn cần tư vấn dịch vụ nào ạ?', '2026-07-07 14:48:13', 1),
-(111, 13, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Mình muốn tham khảo gói cơ bản', '2026-07-07 14:53:17', 1),
-(112, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ gói cơ bản bên mình đang có giá rất ưu đãi ạ, bạn xem chi tiết trên app nhé.', '2026-07-07 15:09:38', 1),
-(113, 13, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Ok shop, để mình xem thử', '2026-07-07 15:15:32', 1),
-(114, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Vâng ạ, bạn cần hỗ trợ thêm cứ nhắn shop nha!', '2026-07-07 15:21:10', 1),
-(115, 14, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Bé nhà mình hơi nhát người lạ, không biết shop có nhận không?', '2026-07-07 14:52:22', 1),
-(116, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ bên mình các bạn nhân viên đều rất kiên nhẫn và có kinh nghiệm ạ.', '2026-07-07 15:15:21', 1),
-(117, 14, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Vậy thì yên tâm quá, mình sẽ mang bé qua thử', '2026-07-07 15:29:10', 1),
-(118, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ bạn cứ yên tâm nhé, các bé đến shop đều được làm quen trước ạ.', '2026-07-07 15:43:21', 1),
-(119, 14, 'CUSTOMER_CHAT', 'khachhang2@gmail.com', 'khachhang2@gmail.com', 107, 'USER', 'Cảm ơn shop nhiều nha', '2026-07-07 15:50:10', 1),
-(120, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang2@gmail.com', 107, 'SHOP_OWNER', 'Dạ không có gì ạ, mong sớm được đón bé!', '2026-07-07 16:00:32', 1),
-(121, 10, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Chào shop, mình muốn hỏi về dịch vụ bên mình', '2026-07-07 14:56:35', 1),
-(122, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ shop chào bạn, bạn cần tư vấn dịch vụ nào ạ?', '2026-07-07 15:13:45', 1),
-(123, 10, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Mình muốn tham khảo gói cơ bản', '2026-07-07 15:39:32', 1),
-(124, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ gói cơ bản bên mình đang có giá rất ưu đãi ạ, bạn xem chi tiết trên app nhé.', '2026-07-07 15:47:17', 1),
-(125, 10, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Ok shop, để mình xem thử', '2026-07-07 16:14:22', 1),
-(126, 10, 'CUSTOMER_CHAT', 'huyacsp1@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Vâng ạ, bạn cần hỗ trợ thêm cứ nhắn shop nha!', '2026-07-07 16:32:15', 1),
-(127, 11, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 14:54:14', 1),
-(128, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 15:11:22', 1),
-(129, 11, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:20:55', 1),
-(130, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 15:44:00', 1),
-(131, 11, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 16:08:22', 1),
-(132, 11, 'CUSTOMER_CHAT', 'huyacsp3@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 16:20:15', 1),
-(133, 12, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Shop ơi, cuối tuần này còn lịch trống không?', '2026-07-07 14:42:41', 1),
-(134, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ cuối tuần này shop còn trống vài slot buổi chiều ạ.', '2026-07-07 15:03:23', 1),
-(135, 12, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Tuyệt quá, mình sẽ đặt lịch qua app nhé.', '2026-07-07 15:09:56', 1),
-(136, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ vâng, shop cảm ơn bạn ạ!', '2026-07-07 15:33:30', 1),
-(137, 12, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Chút nữa mình đặt xong shop xác nhận giúp nha', '2026-07-07 16:00:41', 1),
-(138, 12, 'CUSTOMER_CHAT', 'huyacsp4@gmail.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ shop sẽ theo dõi và xác nhận ngay ạ.', '2026-07-07 16:11:36', 1),
-(139, 13, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Bé nhà mình hơi nhát người lạ, không biết shop có nhận không?', '2026-07-07 14:49:40', 1),
-(140, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ bên mình các bạn nhân viên đều rất kiên nhẫn và có kinh nghiệm ạ.', '2026-07-07 15:12:52', 1),
-(141, 13, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Vậy thì yên tâm quá, mình sẽ mang bé qua thử', '2026-07-07 15:32:36', 1),
-(142, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ bạn cứ yên tâm nhé, các bé đến shop đều được làm quen trước ạ.', '2026-07-07 15:47:21', 1),
-(143, 13, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Cảm ơn shop nhiều nha', '2026-07-07 16:15:09', 1),
-(144, 13, 'CUSTOMER_CHAT', 'shop4@peteye.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ không có gì ạ, mong sớm được đón bé!', '2026-07-07 16:28:28', 1),
-(145, 14, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Chào shop, mình muốn hỏi về dịch vụ bên mình', '2026-07-07 14:51:35', 1),
-(146, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ shop chào bạn, bạn cần tư vấn dịch vụ nào ạ?', '2026-07-07 15:12:58', 1),
-(147, 14, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Mình muốn tham khảo gói cơ bản', '2026-07-07 15:41:46', 1),
-(148, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Dạ gói cơ bản bên mình đang có giá rất ưu đãi ạ, bạn xem chi tiết trên app nhé.', '2026-07-07 15:57:26', 1),
-(149, 14, 'CUSTOMER_CHAT', 'khachhang3@gmail.com', 'khachhang3@gmail.com', 108, 'USER', 'Ok shop, để mình xem thử', '2026-07-07 16:12:12', 1),
-(150, 14, 'CUSTOMER_CHAT', 'shop5@peteye.com', 'khachhang3@gmail.com', 108, 'SHOP_OWNER', 'Vâng ạ, bạn cần hỗ trợ thêm cứ nhắn shop nha!', '2026-07-07 16:17:23', 1);
+-- ============================================================================
+-- NOTIFICATIONS
+-- ============================================================================
+INSERT INTO notification (id, user_id, title, content, notification_type, is_read, created_at) VALUES
+-- BOOKING
+(1,  5, 'Đặt lịch thành công', 'Lịch Spa Toàn Thân cho Buddy vào 14:00 ngày 09/05 đã được xác nhận.', 'BOOKING', 1, '2026-07-09 18:36:00'),
+(2,  5, 'Hoàn thành dịch vụ',  'Buddy đã hoàn thành dịch vụ Spa Toàn Thân. Hãy để lại đánh giá cho chúng tôi!', 'BOOKING', 1, '2026-07-10 15:40:00'),
+(3,  6, 'Đặt lịch thành công', 'Lịch Khám Tổng Quát cho Luna vào 08:30 ngày 12/05 đã được xác nhận.', 'BOOKING', 1, '2026-07-11 21:06:00'),
+(4,  7, 'Đặt lịch thành công', 'Lịch Khám + Xét nghiệm cho Max vào 10:00 ngày 20/05 đã được xác nhận.', 'BOOKING', 1, '2026-07-19 15:06:00'),
+(5,  5, 'Chờ shop xác nhận',   'Lịch Spa Toàn Thân cho Mochi vào 09:00 ngày 20/06 đang chờ xác nhận từ Mèo Kute Spa.', 'BOOKING', 0, '2026-08-17 10:36:00'),
+(6,  6, 'Chờ shop xác nhận',   'Lịch Tắm & Sấy cho Luna vào 14:00 ngày 21/06 đang chờ xác nhận từ Mèo Kute Spa.', 'BOOKING', 0, '2026-08-17 15:06:00'),
+(7,  2, 'Đặt lịch mới',        'Phạm Anh Thư đặt Spa Toàn Thân cho Mochi vào 09:00 ngày 20/06. Vui lòng xác nhận.', 'BOOKING', 0, '2026-08-17 10:36:00'),
+(8,  2, 'Đặt lịch mới',        'Nguyễn Bình Minh đặt Tắm & Sấy cho Luna vào 14:00 ngày 21/06. Vui lòng xác nhận.', 'BOOKING', 0, '2026-08-17 15:06:00'),
+(9,  5, 'Dịch vụ đang bắt đầu','Buddy đang được cắt tỉa lông tại Mèo Kute Spa. Dự kiến hoàn thành lúc 10:30.', 'BOOKING', 0, '2026-08-18 09:10:00'),
+(10, 6, 'Dịch vụ đang bắt đầu','Luna đang được xét nghiệm tại Thú Y An Tâm.', 'BOOKING', 0, '2026-08-18 08:40:00'),
+
+-- GENERAL
+(11, 5, 'Chào mừng bạn đến với Pet Eye', 'Cảm ơn bạn đã đăng ký! Khám phá hàng trăm spa và bệnh viện thú y uy tín gần bạn.', 'GENERAL', 1, '2026-07-01 09:00:00'),
+(12, 6, 'Cập nhật phiên bản mới', 'Pet Eye vừa ra mắt phiên bản 2.0 với tính năng đặt lịch nhanh và theo dõi lịch sử khám bệnh.', 'GENERAL', 1, '2026-07-15 10:00:00'),
+(13, 7, 'Thông báo nghỉ lễ', 'Các shop đối tác sẽ nghỉ lễ 02/09. Vui lòng đặt lịch sớm để tránh giai đoạn cao điểm.', 'GENERAL', 0, '2026-08-15 08:00:00'),
+
+-- PROMOTION
+(14, 5, 'Ưu đãi 20% dịch vụ Spa', 'Nhận mã giảm giá SPA20 cho lần đặt lịch Spa Toàn Thân tiếp theo, áp dụng đến 30/06.', 'PROMOTION', 0, '2026-08-10 09:00:00'),
+(15, 6, 'Chương trình thành viên mới', 'Tích điểm mỗi lần sử dụng dịch vụ để đổi quà tặng hấp dẫn từ Thú Y An Tâm.', 'PROMOTION', 0, '2026-08-12 14:00:00'),
+(16, 7, 'Khuyến mãi mùa hè', 'Giảm 15% gói Khám Tổng Quát cho thú cưng trong tháng 6. Đặt lịch ngay để không bỏ lỡ!', 'PROMOTION', 0, '2026-08-16 11:00:00'),
+
+-- REMINDER
+(17, 5, 'Nhắc lịch hẹn', 'Lịch Spa Toàn Thân cho Mochi vào 09:00 ngày mai (20/06) tại Mèo Kute Spa. Đừng quên nhé!', 'REMINDER', 0, '2026-08-19 18:00:00'),
+(18, 6, 'Nhắc thanh toán', 'Đơn đặt lịch Spa Toàn Thân cho Luna ngày 25/06 đang chờ thanh toán. Vui lòng hoàn tất trong 30 phút.', 'REMINDER', 0, '2026-08-18 09:31:00'),
+(19, 7, 'Nhắc tiêm phòng định kỳ', 'Max đã đến hạn tiêm phòng nhắc lại. Hãy đặt lịch tại Thú Y An Tâm để được kiểm tra sớm.', 'REMINDER', 0, '2026-08-17 08:00:00'),
+
+-- SYSTEM
+(20, 5, 'Mật khẩu đã được thay đổi', 'Mật khẩu tài khoản của bạn vừa được cập nhật thành công. Nếu không phải bạn, hãy liên hệ hỗ trợ ngay.', 'SYSTEM', 1, '2026-08-05 20:15:00'),
+(21, 2, 'Xác thực tài khoản thành công', 'Hồ sơ đối tác Mèo Kute Spa đã được xác thực và kích hoạt trên hệ thống.', 'SYSTEM', 1, '2026-06-20 10:00:00'),
+(22, 6, 'Bảo trì hệ thống', 'Hệ thống sẽ bảo trì từ 23:00 - 01:00 ngày 22/06. Một số chức năng có thể bị ảnh hưởng.', 'SYSTEM', 0, '2026-08-18 12:00:00');
+
+-- ============================================================================
+-- BOOKING HISTORY
+-- ============================================================================
+INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, changed_by) VALUES
+(1, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-04 20:05:00', 'SYSTEM'),
+(1, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-07-04 21:00:00', 'owner.spa@peteye.vn'),
+(1, 'CONFIRMED',             'IN_PROGRESS',            '2026-07-05 09:10:00', 'staff1.spa@peteye.vn'),
+(1, 'IN_PROGRESS',           'COMPLETED',              '2026-07-05 10:10:00', 'staff1.spa@peteye.vn'),
+(2, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-09 18:35:00', 'SYSTEM'),
+(2, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-07-09 19:00:00', 'owner.spa@peteye.vn'),
+(2, 'CONFIRMED',             'IN_PROGRESS',            '2026-07-10 14:05:00', 'staff2.spa@peteye.vn'),
+(2, 'IN_PROGRESS',           'COMPLETED',              '2026-07-10 15:35:00', 'staff2.spa@peteye.vn'),
+(3, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-11 21:05:00', 'SYSTEM'),
+(3, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-07-11 21:30:00', 'SYSTEM'),
+(3, 'CONFIRMED',             'IN_PROGRESS',            '2026-07-12 08:40:00', 'staff.clinic@peteye.vn'),
+(3, 'IN_PROGRESS',           'COMPLETED',              '2026-07-12 09:10:00', 'staff.clinic@peteye.vn'),
+(4, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-19 15:05:00', 'SYSTEM'),
+(4, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-07-19 15:30:00', 'SYSTEM'),
+(4, 'CONFIRMED',             'IN_PROGRESS',            '2026-07-20 10:05:00', 'staff.clinic@peteye.vn'),
+(4, 'IN_PROGRESS',           'COMPLETED',              '2026-07-20 11:05:00', 'staff.clinic@peteye.vn'),
+(5, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-27 10:05:00', 'SYSTEM'),
+(5, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-07-27 10:30:00', 'owner.spa@peteye.vn'),
+(5, 'CONFIRMED',             'IN_PROGRESS',            '2026-07-28 11:15:00', 'staff1.spa@peteye.vn'),
+(5, 'IN_PROGRESS',           'COMPLETED',              '2026-07-28 12:05:00', 'staff1.spa@peteye.vn'),
+(6, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-14 10:05:00', 'SYSTEM'),
+(6, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-14 10:09:00', 'anhthu@gmail.com'),
+(7, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-21 08:05:00', 'SYSTEM'),
+(7, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-21 08:10:00', 'binhminh@gmail.com'),
+(8, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-30 19:05:00', 'SYSTEM'),
+(8, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-30 19:29:00', 'owner.hotel@peteye.vn'),
+(9, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-08-04 09:05:00', 'SYSTEM'),
+(9, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-08-04 09:08:00', 'ducmanh@gmail.com'),
+(10, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 10:35:00', 'SYSTEM'),
+(11, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 15:05:00', 'SYSTEM'),
+(12, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-18 07:05:00', 'SYSTEM'),
+(13, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-18 08:35:00', 'SYSTEM'),
+(14, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-15 09:05:00', 'SYSTEM'),
+(14, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-15 10:00:00', 'SYSTEM'),
+(15, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-16 10:05:00', 'SYSTEM'),
+(15, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-16 10:30:00', 'SYSTEM'),
+(16, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-14 20:05:00', 'SYSTEM'),
+(16, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-14 20:30:00', 'owner.hotel@peteye.vn'),
+(17, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-16 14:05:00', 'SYSTEM'),
+(17, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-16 14:30:00', 'SYSTEM'),
+(18, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-15 11:05:00', 'SYSTEM'),
+(18, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-15 11:30:00', 'owner.hotel@peteye.vn'),
+(19, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 20:05:00', 'SYSTEM'),
+(19, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-17 20:30:00', 'owner.spa@peteye.vn'),
+(19, 'CONFIRMED',            'IN_PROGRESS',            '2026-08-18 09:10:00', 'staff1.spa@peteye.vn'),
+(20, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 21:05:00', 'SYSTEM'),
+(20, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-17 21:20:00', 'SYSTEM'),
+(20, 'CONFIRMED',            'IN_PROGRESS',            '2026-08-18 08:40:00', 'staff.clinic@peteye.vn'),
+(21, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 18:05:00', 'SYSTEM'),
+(21, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-17 18:30:00', 'owner.spa@peteye.vn'),
+(21, 'CONFIRMED',            'IN_PROGRESS',            '2026-08-18 10:15:00', 'staff2.spa@peteye.vn'),
+(22, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-16 09:05:00', 'SYSTEM'),
+(22, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-16 09:30:00', 'owner.hotel@peteye.vn'),
+(22, 'CONFIRMED',            'IN_PROGRESS',            '2026-08-17 12:10:00', 'staff.hotel@peteye.vn'),
+(32, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-18 11:05:00', 'SYSTEM'),
+(32, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-18 11:30:00', 'owner.hotel@peteye.vn');
+
+-- ============================================================================
+-- CUSTOMER MANAGEMENT DEMO DATA
+-- Bổ sung để demo tính năng "Quản lý Khách Hàng" (Shop Owner mobile app)
+-- Shop 1 (Mèo Kute Spa) sẽ có 5 khách hàng với đủ 4 hạng tier:
+--   BRONZE  → Hoàng Đức Mạnh   (user 8,  200K spent)
+--   SILVER  → Vũ Cẩm Ly        (user 7,  800K spent)
+--             Nguyễn Bình Minh (user 6, 1.5M spent)
+--   GOLD    → Phạm Anh Thư     (user 5, 3.5M spent)
+--   PLATINUM→ Lý Thị Bích Vân  (user 13,  15M spent)
+-- ============================================================================
+
+-- 1. Cập nhật avatar cho 4 khách hàng hiện có (dùng placeholder ảnh thật)
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133307/ym7altp3jejdikztgrrl.jpg' WHERE id = 5;  -- Pham Anh Thu
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133363/ujsaxtio8ga3n9zwzke2.jpg' WHERE id = 6;  -- Nguyen Binh Minh
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133421/i3qkab8jj6meqjmomifc.jpg' WHERE id = 7;  -- Vu Cam Ly
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133392/yknvoflhibainefzwk9p.jpg' WHERE id = 8;  -- Hoang Duc Manh
+
+-- 2. Thêm khách hàng PLATINUM (tier_id=4, 15M spent) để demo filter
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts,avatar) VALUES
+(13, 'vip.customer@gmail.com',
+ '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO',
+ 'Lý Thị Bích Vân', '0912399001', '99 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 1, 1, 4, 15000000, 0,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133497/njn5iovepjn3omaiv8f6.jpg');
+
+UPDATE `user` SET avatar = 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133543/hbtpbln3lsv1van7wjj4.jpg' WHERE id = 13;
+
+INSERT INTO user_roles (user_id, roles_id) VALUES (13, 3);
+
+-- 3. Pets của khách hàng PLATINUM (2 con)
+INSERT INTO pet (id, owner_id, name, species, breed, gender, color, weight, dob, sterilized, health_note, is_active, avatar) VALUES
+(6, 13, 'Diamond', 'DOG', 'Husky Siberia', 'MALE',   'Trắng xám', 18.5, '2020-08-15', 1, 'Khỏe mạnh, cần tập thể dục đều đặn', 1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133028/wmfouirk7zjtsmy49gzw.jpg'),
+(7, 13, 'Ruby',    'CAT', 'Ragdoll',       'FEMALE', 'Trắng kem',  4.2, '2021-12-01', 1, 'Khỏe mạnh, không dị ứng',            1,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784133070/yoremoqhfckmzpw3mos3.webp');
+
+-- 4. Bookings COMPLETED của khách hàng PLATINUM tại shop 1 (IDs 27-30)
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, check_in, check_out,
+                     status, note, payos_order_code, created_at) VALUES
+(27, 13, 1, 6, 1, '2026-06-10 10:00:00', '2026-06-10 10:05:00', '2026-06-10 13:05:00',
+    'COMPLETED', 'Diamond spa toàn thân lần 1',       202604001, '2026-06-09 19:00:00'),
+(28, 13, 1, 7, 1, '2026-06-25 09:00:00', '2026-06-25 09:02:00', '2026-06-25 10:30:00',
+    'COMPLETED', 'Ruby tắm & sấy cơ bản',              202604002, '2026-06-24 20:00:00'),
+(29, 13, 1, 6, 2, '2026-07-08 11:00:00', '2026-07-08 11:05:00', '2026-07-08 14:05:00',
+    'COMPLETED', 'Diamond spa toàn thân + cắt tỉa',   202605010, '2026-07-07 18:00:00'),
+(30, 13, 1, 7, 1, '2026-07-30 14:00:00', '2026-07-30 14:05:00', '2026-07-30 15:10:00',
+    'COMPLETED', NULL,                                202605011, '2026-07-29 16:00:00');
+
+-- 5. Booking CONFIRMED sắp tới của khách hàng PLATINUM (ID 31)
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, status, note, payos_order_code, created_at) VALUES
+(31, 13, 1, 6, 2, '2026-08-28 10:00:00',
+    'CONFIRMED', 'Diamond cắt tỉa định kỳ tháng 6', 202406020, '2026-08-16 11:00:00');
+
+-- 6. Booking services cho bookings 27-31
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(27, 3),   -- Spa Toan Than (350k)
+(28, 1),   -- Tam & Say Co Ban (150k)
+(29, 3),   -- Spa Toan Than (350k)
+(30, 1),   -- Tam & Say Co Ban (150k)
+(31, 2);   -- Cat Tia Long (200k)
+
+-- 7. Payments cho bookings 27-31
+INSERT INTO payment (id, booking_id, amount, method, status, payos_order_code,
+                     gateway_transaction_id, payment_time, description) VALUES
+(27, 27, 350000, 'PAYOS', 'SUCCESS', 202604001, 'TXN-VIP-001', '2026-06-09 19:05:00', 'Thanh toán Spa Toàn Thân'),
+(28, 28, 150000, 'PAYOS', 'SUCCESS', 202604002, 'TXN-VIP-002', '2026-06-24 20:05:00', 'Thanh toán Tắm & Sấy'),
+(29, 29, 350000, 'PAYOS', 'SUCCESS', 202605010, 'TXN-VIP-003', '2026-07-07 18:05:00', 'Thanh toán Spa Toàn Thân'),
+(30, 30, 150000, 'PAYOS', 'SUCCESS', 202605011, 'TXN-VIP-004', '2026-07-29 16:05:00', 'Thanh toán Tắm & Sấy'),
+(31, 31, 200000, 'PAYOS', 'SUCCESS', 202406020, 'TXN-VIP-005', '2026-08-16 11:05:00', 'Thanh toán Cắt Tỉa Lông');
+
+-- 8. Booking history cho bookings 27-31
+INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, changed_by) VALUES
+(27, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-06-09 19:05:00', 'SYSTEM'),
+(27, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-06-09 20:00:00', 'owner.spa@peteye.vn'),
+(27, 'CONFIRMED',            'IN_PROGRESS',            '2026-06-10 10:10:00', 'staff1.spa@peteye.vn'),
+(27, 'IN_PROGRESS',          'COMPLETED',              '2026-06-10 13:05:00', 'staff1.spa@peteye.vn'),
+(28, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-06-24 20:05:00', 'SYSTEM'),
+(28, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-06-24 21:00:00', 'owner.spa@peteye.vn'),
+(28, 'CONFIRMED',            'IN_PROGRESS',            '2026-06-25 09:05:00', 'staff1.spa@peteye.vn'),
+(28, 'IN_PROGRESS',          'COMPLETED',              '2026-06-25 10:30:00', 'staff1.spa@peteye.vn'),
+(29, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-07 18:05:00', 'SYSTEM'),
+(29, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-07 19:00:00', 'owner.spa@peteye.vn'),
+(29, 'CONFIRMED',            'IN_PROGRESS',            '2026-07-08 11:10:00', 'staff2.spa@peteye.vn'),
+(29, 'IN_PROGRESS',          'COMPLETED',              '2026-07-08 14:05:00', 'staff2.spa@peteye.vn'),
+(30, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-29 16:05:00', 'SYSTEM'),
+(30, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-29 17:00:00', 'owner.spa@peteye.vn'),
+(30, 'CONFIRMED',            'IN_PROGRESS',            '2026-07-30 14:10:00', 'staff1.spa@peteye.vn'),
+(30, 'IN_PROGRESS',          'COMPLETED',              '2026-07-30 15:10:00', 'staff1.spa@peteye.vn'),
+(31, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-16 11:05:00', 'SYSTEM'),
+(31, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-16 12:00:00', 'owner.spa@peteye.vn');
+
+-- ============================================================================
+-- 9. BỔ SUNG BOOKING COMPLETED để total_spending (hạng thành viên) KHỚP với
+-- tổng tiền thực tế cộng dồn từ booking_services/pet_service — trước đây total_spending
+-- của 5 khách hàng demo (user 5,6,7,8,13) được set tay, cao hơn hẳn tổng các booking
+-- COMPLETED thực có trong seed (vd user13: total_spending=15.000.000đ nhưng chỉ có
+-- booking COMPLETED tổng 1.000.000đ) — khiến trang "Quản lý khách hàng" (tính lại từ
+-- booking thật) hiện số nhỏ hơn nhiều so với hồ sơ/hạng thành viên. Mỗi user dưới đây
+-- được thêm đúng phần chênh lệch còn thiếu, tại Shop 1, để: total_spending (cột user)
+-- == tổng giá dịch vụ của MỌI booking COMPLETED của user đó cộng lại trên toàn hệ thống.
+-- ============================================================================
+INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
+                          active, camera_enabled, cage_size, room_type,
+                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description,image_url) VALUES
+(15, 1, 'Gói Trị Liệu Chuyên Sâu Cao Cấp', 'SPA', 3000000, 200,
+    'Liệu trình chăm sóc cao cấp dài ngày, phục hồi da lông và thể trạng toàn diện.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131449/w2w8vt5uqi0jcw7nlaco.jpg'),
+(16, 1, 'Gói Chăm Sóc Định Kỳ Nâng Cao', 'SPA', 1300000, 150,
+    'Gói chăm sóc định kỳ hàng tháng: tắm dưỡng, cắt tỉa, kiểm tra sức khỏe cơ bản.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131494/eyaseuiveu7ofamxav6k.jpg'),
+(17, 1, 'Gói Vệ Sinh & Chăm Sóc Cơ Bản Nâng Cao', 'SPA', 300000, 100,
+    'Vệ sinh tai, cắt móng, tắm sấy và chải lông kỹ hơn gói cơ bản.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131530/xfutyogfebyli4qb67kp.jpg'),
+(18, 1, 'Cắt Móng & Vệ Sinh Tai', 'SPA', 50000, 15,
+    'Dịch vụ nhanh: cắt móng và vệ sinh tai cho thú cưng.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131574/opoozh79tzdd2t1cesku.jpg'),
+(19, 1, 'Gói Chăm Sóc VIP Toàn Diện Dài Hạn', 'SPA', 14000000, 300,
+    'Gói chăm sóc VIP trọn gói dài hạn: trị liệu, spa, tư vấn dinh dưỡng và ưu tiên lịch hẹn riêng.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131604/hfpi6oywaftbxtjaew5d.jpg');
+
+INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
+                     appointment_datetime, check_in, check_out,
+                     status, note, payos_order_code, created_at) VALUES
+-- user5 (anhthu, GOLD 3.5M): đã có 500K (booking 1,2) → cộng thêm 3.000.000đ
+(33, 5, 1, 1, 1, '2026-06-15 10:00:00', '2026-06-15 10:05:00', '2026-06-15 13:25:00',
+    'COMPLETED', 'Mochi trị liệu chuyên sâu định kỳ', 202604010, '2026-06-14 18:00:00'),
+-- user6 (binhminh, SILVER 1.5M): đã có 200K (booking 3, tại shop2) → cộng thêm 1.300.000đ tại shop1
+(34, 6, 1, 3, 1, '2026-06-18 09:00:00', '2026-06-18 09:05:00', '2026-06-18 11:35:00',
+    'COMPLETED', 'Luna chăm sóc định kỳ nâng cao', 202604011, '2026-06-17 19:00:00'),
+-- user7 (camly, SILVER 800K): đã có 500K (booking 4, tại shop2) → cộng thêm 300.000đ tại shop1
+(35, 7, 1, 4, 2, '2026-06-20 14:00:00', '2026-06-20 14:05:00', '2026-06-20 15:45:00',
+    'COMPLETED', 'Max vệ sinh & chăm sóc cơ bản nâng cao', 202604012, '2026-06-19 20:00:00'),
+-- user8 (ducmanh, BRONZE 200K): đã có 150K (booking 5) → cộng thêm 50.000đ
+(36, 8, 1, 5, 1, '2026-06-22 11:00:00', '2026-06-22 11:05:00', '2026-06-22 11:20:00',
+    'COMPLETED', 'Coco cắt móng & vệ sinh tai', 202604013, '2026-06-21 09:00:00'),
+-- user13 (vip.customer, PLATINUM 15M): đã có 1.000.000đ (booking 27-30) → cộng thêm 14.000.000đ
+(37, 13, 1, 6, 2, '2026-06-25 09:00:00', '2026-06-25 09:05:00', '2026-06-25 14:05:00',
+    'COMPLETED', 'Diamond gói chăm sóc VIP toàn diện dài hạn', 202604014, '2026-06-24 17:00:00');
+
+INSERT INTO booking_services (booking_id, service_id) VALUES
+(33, 15),
+(34, 16),
+(35, 17),
+(36, 18),
+(37, 19);
+
+INSERT INTO payment (id, booking_id, amount, method, status, payos_order_code,
+                     gateway_transaction_id, payment_time, description) VALUES
+(33, 33, 3000000,  'PAYOS', 'SUCCESS', 202604010, 'TXN-SPA-011', '2026-06-14 18:05:00', 'Thanh toán Gói Trị Liệu Chuyên Sâu Cao Cấp'),
+(34, 34, 1300000,  'PAYOS', 'SUCCESS', 202604011, 'TXN-SPA-012', '2026-06-17 19:05:00', 'Thanh toán Gói Chăm Sóc Định Kỳ Nâng Cao'),
+(35, 35, 300000,   'PAYOS', 'SUCCESS', 202604012, 'TXN-SPA-013', '2026-06-19 20:05:00', 'Thanh toán Gói Vệ Sinh & Chăm Sóc Cơ Bản Nâng Cao'),
+(36, 36, 50000,    'PAYOS', 'SUCCESS', 202604013, 'TXN-SPA-014', '2026-06-21 09:05:00', 'Thanh toán Cắt Móng & Vệ Sinh Tai'),
+(37, 37, 14000000, 'PAYOS', 'SUCCESS', 202604014, 'TXN-VIP-006', '2026-06-24 17:05:00', 'Thanh toán Gói Chăm Sóc VIP Toàn Diện Dài Hạn');
+
+INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, changed_by) VALUES
+(33, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-06-14 18:05:00', 'SYSTEM'),
+(33, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-06-14 19:00:00', 'owner.spa@peteye.vn'),
+(33, 'CONFIRMED',             'IN_PROGRESS',            '2026-06-15 10:10:00', 'staff1.spa@peteye.vn'),
+(33, 'IN_PROGRESS',           'COMPLETED',              '2026-06-15 13:25:00', 'staff1.spa@peteye.vn'),
+(34, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-06-17 19:05:00', 'SYSTEM'),
+(34, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-06-17 20:00:00', 'owner.spa@peteye.vn'),
+(34, 'CONFIRMED',             'IN_PROGRESS',            '2026-06-18 09:10:00', 'staff1.spa@peteye.vn'),
+(34, 'IN_PROGRESS',           'COMPLETED',              '2026-06-18 11:35:00', 'staff1.spa@peteye.vn'),
+(35, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-06-19 20:05:00', 'SYSTEM'),
+(35, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-06-19 21:00:00', 'owner.spa@peteye.vn'),
+(35, 'CONFIRMED',             'IN_PROGRESS',            '2026-06-20 14:10:00', 'staff2.spa@peteye.vn'),
+(35, 'IN_PROGRESS',           'COMPLETED',              '2026-06-20 15:45:00', 'staff2.spa@peteye.vn'),
+(36, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-06-21 09:05:00', 'SYSTEM'),
+(36, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-06-21 10:00:00', 'owner.spa@peteye.vn'),
+(36, 'CONFIRMED',             'IN_PROGRESS',            '2026-06-22 11:10:00', 'staff1.spa@peteye.vn'),
+(36, 'IN_PROGRESS',           'COMPLETED',              '2026-06-22 11:20:00', 'staff1.spa@peteye.vn'),
+(37, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-06-24 17:05:00', 'SYSTEM'),
+(37, 'WAITING_SHOP_APPROVAL', 'CONFIRMED',              '2026-06-24 18:00:00', 'owner.spa@peteye.vn'),
+(37, 'CONFIRMED',             'IN_PROGRESS',            '2026-06-25 09:10:00', 'staff2.spa@peteye.vn'),
+(37, 'IN_PROGRESS',           'COMPLETED',              '2026-06-25 14:05:00', 'staff2.spa@peteye.vn');
+
+-- SET FOREIGN_KEY_CHECKS = 1;  -- disabled: seed data is consistent by design
+
+-- ============================================================================
+-- VOUCHER & MEMBERSHIP TIER DEMO DATA
+-- Dùng để test toàn bộ luồng voucher trên app
+-- ============================================================================
+
+-- ============================================================================
+-- VOUCHERS (4 loại để cover đủ test cases)
+-- ============================================================================
+INSERT INTO voucher (id, code, discount_type, discount_value, min_order_value,
+                     max_discount_amount, valid_days, issue_quantity, target_tier_id, is_active) VALUES
+-- V1: GOLD tier, PERCENTAGE 10%, cap 35.000đ, min 200.000đ — dùng cho booking 350K → giảm 35K
+(1, 'GOLD_WELCOME',    'PERCENTAGE',   10,     200000, 35000,  30, 2, 3, 1),
+-- V2: SILVER tier, FIXED 30.000đ, min 150.000đ
+(2, 'SILVER_FIXED30',  'FIXED_AMOUNT', 30000,  150000, NULL,   14, 1, 2, 1),
+-- V3: PLATINUM tier, PERCENTAGE 15%, cap 50.000đ, min 300.000đ
+(3, 'PLATINUM_15PCT',  'PERCENTAGE',   15,     300000, 50000,  60, 3, 4, 1),
+-- V4: GOLD tier, PERCENTAGE 50%, cap 30.000đ — để test cap thực sự chặn
+(4, 'GOLD_BIG50',      'PERCENTAGE',   50,     100000, 30000,  30, 1, 3, 1),
+-- V5: BRONZE tier (hạng thấp nhất) — trước đây bộ seed không có voucher nào nhắm BRONZE
+(5, 'BRONZE_HELLO',    'FIXED_AMOUNT', 20000,  100000, NULL,   60, 1, 1, 1),
+-- V6: SILVER tier, đã bị admin VÔ HIỆU HÓA sẵn (is_active=0) — test hiển thị "đã ngừng áp dụng"
+(6, 'SILVER_REVOKED',  'FIXED_AMOUNT', 25000,  100000, NULL,   30, 1, 2, 0);
+
+-- ============================================================================
+-- USER_VOUCHER (pre-seed để test ngay, không cần trigger upgrade)
+-- ============================================================================
+INSERT INTO user_voucher (id, user_id, voucher_id, is_used, expires_at, used_at) VALUES
+-- user5 (Phạm Anh Thư, GOLD): có 2x GOLD_WELCOME (chưa dùng)
+(1,  5, 1, 0, DATE_ADD(NOW(), INTERVAL 25 DAY), NULL),
+(2,  5, 1, 0, DATE_ADD(NOW(), INTERVAL 25 DAY), NULL),
+-- user5: có 1x GOLD_BIG50 (chưa dùng) — test cap 30K trên booking 350K → giảm đúng 30K
+(3,  5, 4, 0, DATE_ADD(NOW(), INTERVAL 20 DAY), NULL),
+-- user5: có 1x GOLD_WELCOME đã DÙNG RỒI — test reject reuse
+(4,  5, 1, 1, DATE_ADD(NOW(), INTERVAL 25 DAY), NOW()),
+-- user5: có 1x GOLD_WELCOME HẾT HẠN — test reject expired
+(5,  5, 1, 0, '2026-01-01 00:00:00',            NULL),
+-- user6 (Nguyễn Bình Minh, SILVER): có 1x SILVER_FIXED30
+(6,  6, 2, 0, DATE_ADD(NOW(), INTERVAL 10 DAY), NULL),
+-- user7 (Vũ Cẩm Ly, SILVER): có 1x SILVER_FIXED30 đã dùng — empty valid list
+(7,  7, 2, 1, DATE_ADD(NOW(), INTERVAL 10 DAY), NOW()),
+-- user8 (Hoàng Đức Mạnh, BRONZE): không có voucher gì — test empty state
+-- user13 (Lý Thị Bích Vân, PLATINUM): 3x PLATINUM_15PCT
+(8,  13, 3, 0, DATE_ADD(NOW(), INTERVAL 55 DAY), NULL),
+(9,  13, 3, 0, DATE_ADD(NOW(), INTERVAL 55 DAY), NULL),
+(10, 13, 3, 0, DATE_ADD(NOW(), INTERVAL 55 DAY), NULL),
+-- user6: có thêm voucher sắp hết hạn (< 7 ngày) — test warning color trên app
+(11, 6, 1, 0, DATE_ADD(NOW(), INTERVAL 3 DAY),  NULL),
+-- user13: có thêm 1x SILVER_REVOKED (voucher template đã bị vô hiệu hóa từ trước) — vẫn giữ trong ví
+-- nhưng phải hiện rõ trạng thái "đã ngừng áp dụng", không được chọn khi đặt lịch
+(12, 13, 6, 0, DATE_ADD(NOW(), INTERVAL 55 DAY), NULL),
+-- user6: 1x SILVER_FIXED30 ĐÃ DÙNG, gắn với booking 11 (WAITING_SHOP_APPROVAL) bên dưới —
+-- dùng để test luồng "shop từ chối → voucher được hoàn lại"
+(13, 6, 2, 1, DATE_ADD(NOW(), INTERVAL 10 DAY), NOW());
+
+-- ============================================================================
+-- Gắn voucher đã dùng vào booking 11 (WAITING_SHOP_APPROVAL, Tắm & Sấy 150.000đ, user6)
+-- để có thể test ngay "shop từ chối → user_voucher.is_used quay lại 0" mà không cần
+-- tự đặt lịch mới từ đầu. min_order_value của SILVER_FIXED30 là 150.000đ nên vừa đủ áp dụng.
+-- ============================================================================
+UPDATE booking SET voucher_id = 2, applied_user_voucher_id = 13, discount_amount = 30000
+WHERE id = 11;
+UPDATE payment SET amount = 120000, description = 'Thanh toán Tắm & Sấy (đã áp SILVER_FIXED30 -30.000đ)'
+WHERE id = 11;
+
+-- ============================================================================
+-- SUMMARY
+-- Users    : 17 (1 admin, 7 owners, 6 customers, 4 staff)
+-- Shops    : 7  (SPA_GROOMING/MANUAL, CLINIC/AUTO, BOARDING+SPA_GROOMING/OPEN_POOL, SPA_GROOMING/MANUAL x2, CLINIC/AUTO, SPA_GROOMING/MANUAL)
+--   Shop 3 (Pet Hotel 5 Sao) có cả dịch vụ BOARDING (9,10,11) và SPA_GROOMING
+--   (12,13) để test đặt lịch/thanh toán gộp 2 loại dịch vụ khác nhau (xem booking 32).
+--   Shop 4 (rating thấp 3.5), Shop 5 (giá cao), Shop 6 (Hà Nội), Shop 7 (La Gi) để test filter.
+-- Services : 30
+-- Pets     : 7  (5 gốc + 2 của VIP customer)
+-- Bookings : 32
+--   COMPLETED            : 9  (IDs  1-5, 27-30)
+--   CANCELLED            : 4  (IDs  6-9)
+--   WAITING_SHOP_APPROVAL: 4  (IDs 10-13) - Shop1 MANUAL
+--   CONFIRMED            : 7  (IDs 14-18, 31, 32) - booking 32 gộp Lưu Trú + Spa
+--   IN_PROGRESS          : 4  (IDs 19-22)
+--   PENDING_PAYMENT      : 4  (IDs 23-26)
+-- Payments : 32 (SUCCESS / REFUNDED / PENDING)
+-- Reviews  : 5  (one per completed booking gốc)
+-- Customer tiers tại Shop 1 (demo quản lý KH):
+--   BRONZE  : Hoàng Đức Mạnh (user 8)
+--   SILVER  : Vũ Cẩm Ly (7), Nguyễn Bình Minh (6)
+--   GOLD    : Phạm Anh Thư (5)
+--   PLATINUM: Lý Thị Bích Vân (13)
+-- Vouchers : 6 (V1-V4 gốc + V5 BRONZE_HELLO + V6 SILVER_REVOKED [is_active=0, giữ bởi user13])
+--   Booking 11 (WAITING_SHOP_APPROVAL) đã gắn sẵn voucher SILVER_FIXED30 đã dùng (user6)
+--   để test "shop từ chối → voucher hoàn lại" ngay không cần thao tác tay từ đầu.
+-- All passwords: 12345678
+-- LƯU Ý: cần khởi động lại backend một lần (Hibernate ddl-auto=update) để tạo cột
+-- booking.applied_user_voucher_id TRƯỚC KHI chạy script này, nếu không UPDATE cuối sẽ lỗi.
+-- ============================================================================
+
+-- ============================================================================
+-- BỘ LỌC KHÁM PHÁ: khoảng cách GPS / mức giá / số sao tối thiểu
+-- 3 shop gốc (1-3) đều rating 4.6-4.8 và ở cùng khu vực gần nhau (TP.HCM, cách
+-- nhau vài km) nên không đủ để kiểm thử rõ ràng việc LOẠI TRỪ theo rating/giá/
+-- khoảng cách. Thêm 3 shop mới (owner 14-16) để mỗi bộ lọc đều có ít nhất 1 shop
+-- "trượt" rõ ràng khi áp dụng, dùng cho checklist test bên dưới.
+-- ============================================================================
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
+(14, 'owner4@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Đỗ Thanh Hà',        '0901111004', '15 Nguyễn Văn Đậu, Quận Bình Thạnh, TP. Hồ Chí Minh', 1, 1, 1, 0, 0),
+(15, 'owner5@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Ngô Quốc Bảo',       '0901111005', '200 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh',           1, 1, 1, 0, 0),
+(16, 'owner6@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Bùi Thị Thanh Trúc', '0901111006', '10 Hàng Bài, Hoàn Kiếm, Hà Nội',                       1, 1, 1, 0, 0);
+
+INSERT INTO user_roles (user_id, roles_id) VALUES
+(14, 2), (15, 2), (16, 2);
+
+-- Owner 17 + Shop 7: gần "24 Ỷ Lan, Tân An, La Gi, Lâm Đồng" — thêm riêng để bạn test
+-- bằng vị trí GPS THẬT của mình (không cần giả lập tọa độ TP.HCM) khi không ở HCM.
+-- Tọa độ dưới đây là ước lượng trung tâm phường Tân An/La Gi (không phải geocode chính
+-- xác tới số nhà), đủ để test bán kính vài km quanh khu vực đó.
+INSERT INTO `user` (id, email, password, full_name, phone, address, active, email_verified, tier_id, total_spending, failed_login_attempts) VALUES
+(17, 'owner7@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Trần Văn Lộc', '0901111007', '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 1, 1, 1, 0, 0),
+(18, 'owner8@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Nguyễn Thị Tám', '0901111008', '123 Cầu Giấy, Hà Nội', 1, 1, 1, 0, 0),
+(19, 'owner9@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Lê Văn Chín', '0901111009', '456 Đống Đa, Hà Nội', 1, 1, 1, 0, 0),
+(20, 'owner10@peteye.vn', '$2a$10$9uurETzMx/LPgDYIodiRm.65/zfb7aJK5asJc.6wC1Nn26QfzNRcO', 'Phạm Mười', '0901111010', '789 Ba Đình, Hà Nội', 1, 1, 1, 0, 0);
+
+INSERT INTO user_roles (user_id, roles_id) VALUES 
+(17, 2), (18, 2), (19, 2), (20, 2);
+
+-- Shop 4: rating THẤP (3.5) + giá RẺ toàn bộ + cách Shop 1 khoảng 1.3km
+--   → dùng để test minRating loại shop này, và test radius hẹp vẫn thấy (gần).
+-- Shop 5: rating CAO (4.9) + giá ĐẮT toàn bộ (900k-1.5M) + cách Shop 1 khoảng 4.7km
+--   → dùng để test maxPrice loại shop này dù rating/khoảng cách đạt.
+-- Shop 6: ở Hà Nội (cách TP.HCM ~1150km), rating/giá đều đạt điều kiện thông thường
+--   → dùng để test bộ lọc khoảng cách loại shop này dù các filter khác đều pass.
+INSERT INTO shop (id, owner_id, shop_name, shop_type, email, phone, address, city, latitude, longitude,
+                  description, license_number, logo_url, open_time, close_time, working_days,
+                  rating_avg, is_verified, status, assignment_mode, late_grace_period,
+                  off_days, created_at) VALUES
+(4, 14, 'Pet Care Bình Dân', 'SPA',
+   'contact@petcarebinhdan.vn', '02812345004',
+   '15 Nguyễn Văn Đậu, Phường 5, Quận Bình Thạnh, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
+   10.7860, 106.7010,
+   'Tiệm chăm sóc thú cưng giá bình dân, phù hợp túi tiền sinh viên.',
+   'GPKD-004-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131888/v8oatrctazrhj3htgnzg.png', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   3.5, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
+
+(5, 15, 'Luxury Paws Spa', 'SPA',
+   'contact@luxurypaws.vn', '02812345005',
+   '200 Hai Bà Trưng, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh', 'TP. Hồ Chí Minh',
+   10.7480, 106.7250,
+   'Spa cao cấp 5 sao cho thú cưng, dịch vụ trọn gói sang trọng.',
+   'GPKD-005-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131943/ogscuecijacpuvrkj3hh.png', '09:00', '21:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.9, 1, 'APPROVED', 'MANUAL', 15, NULL, NOW()),
+
+(6, 16, 'Phòng Khám Thú Y Hà Nội', 'CLINIC',
+   'contact@thuyhanoi.vn', '02412345006',
+   '10 Hàng Bài, Hoàn Kiếm, Hà Nội', 'Hà Nội',
+   21.0285, 105.8542,
+   'Phòng khám thú y uy tín tại Hà Nội, hơn 10 năm kinh nghiệm.',
+   'GPKD-006-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132001/bmpiqd2wklwq1wlfkvkq.jpg', '07:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT',
+   4.7, 1, 'PENDING', 'AUTO', 10, NULL, NOW()),
+
+(7, 17, 'Thú Cưng La Gi', 'SPA',
+   'contact@thucunglagi.vn', '02523456007',
+   '24 Ỷ Lan, Tân An, La Gi, Lâm Đồng', 'Lâm Đồng',
+   10.6907, 107.7802,
+   'Tiệm chăm sóc thú cưng địa phương tại La Gi, phục vụ tận tâm, giá hợp lý.',
+   'GPKD-007-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132047/kl4r68j3klp7jur12hcc.webp', '08:00', '19:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   4.6, 1, 'PENDING', 'MANUAL', 15, NULL, NOW()),
+
+(8, 18, 'Cầu Giấy Pet Spa', 'SPA',
+   'contact@caugiaypetspa.vn', '02412345008',
+   '123 Cầu Giấy, Hà Nội', 'Hà Nội',
+   21.0333, 105.7958,
+   'Dịch vụ spa làm đẹp toàn diện cho thú cưng tại khu vực Cầu Giấy.',
+   'GPKD-008-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132235/hhgc6m3zybjbmu3jt2jk.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'PENDING', 'MANUAL', 15, NULL, NOW()),
+
+(9, 19, 'Phòng Khám Thú Y Đống Đa', 'CLINIC',
+   'contact@thuyidongda.vn', '02412345009',
+   '456 Đống Đa, Hà Nội', 'Hà Nội',
+   21.0125, 105.8239,
+   'Chuyên khám chữa bệnh, tiêm phòng cho chó mèo uy tín.',
+   'GPKD-009-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132173/mvxzfszyaueskttgmpsj.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'REJECTED', 'MANUAL', 15, NULL, NOW()),
+
+(10, 20, 'Khách Sạn Thú Cưng Ba Đình', 'BOARDING',
+   'contact@badinhpethotel.vn', '02412345010',
+   '789 Ba Đình, Hà Nội', 'Hà Nội',
+   21.0357, 105.8361,
+   'Dịch vụ lưu chuồng an toàn, sạch sẽ, có sân chơi rộng rãi cho các bé.',
+   'GPKD-010-2024', 'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784132292/njbnvqcxpvxdcdnyvf3c.jpg', '08:00', '20:00', 'MON,TUE,WED,THU,FRI,SAT,SUN',
+   0.0, 0, 'REJECTED', 'MANUAL', 15, NULL, NOW());
+
+INSERT INTO shop_wallet (id, shop_id, frozen_balance, available_balance, total_earned, total_withdrawn) VALUES
+(4, 4, 0.00, 0.00, 0.00, 0.00),
+(5, 5, 0.00, 0.00, 0.00, 0.00),
+(6, 6, 0.00, 0.00, 0.00, 0.00),
+(7, 7, 0.00, 0.00, 0.00, 0.00),
+(8, 8, 0.00, 0.00, 0.00, 0.00),
+(9, 9, 0.00, 0.00, 0.00, 0.00),
+(10, 10, 0.00, 0.00, 0.00, 0.00);
+
+INSERT INTO pet_service (id, shop_id, service_name, category, price, duration_minutes, description,
+                          active, camera_enabled, cage_size, room_type,
+                          camera_tiers, camera_tier_prices, camera_tier_labels, camera_description,image_url) VALUES
+-- Shop 4: toàn bộ dịch vụ giá rẻ (30k - 100k)
+(20, 4, 'Cắt Móng', 'SPA', 30000, 15,
+   'Cắt móng nhanh gọn cho thú cưng.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130859/fzggqa87cbmnfvqf5fsx.jpg'),
+(21, 4, 'Tắm Cơ Bản', 'SPA', 70000, 45,
+   'Tắm nhanh giá rẻ, phù hợp túi tiền sinh viên.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130933/e75lk7kxqgbuanzuak7f.jpg'),
+(22, 4, 'Tắm & Vệ Sinh Tai', 'SPA', 100000, 50,
+   'Gói tắm kèm vệ sinh tai giá rẻ.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784130995/bs61iewzfmtlxkevjdgs.jpg'),
+-- Shop 5: toàn bộ dịch vụ giá cao (900k - 1.5tr)
+(23, 5, 'Gói Spa Luxury Toàn Thân', 'SPA', 900000, 150,
+   'Spa cao cấp trọn gói, sản phẩm nhập khẩu.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131038/cjaexv3nrmpryqmoifou.jpg'),
+(24, 5, 'Gói Trị Liệu Massage 5 Sao', 'SPA', 1200000, 120,
+   'Massage trị liệu chuyên sâu 5 sao.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131089/d46r8ebvnyud7mn1caac.png'),
+(25, 5, 'Gói Chăm Sóc VIP Trọn Gói', 'SPA', 1500000, 180,
+   'Chăm sóc toàn diện cao cấp nhất.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131131/hzoqtzs1lykdrssmgo8c.jpg'),
+-- Shop 6: giá vừa phải, ở Hà Nội
+(26, 6, 'Khám Tổng Quát', 'CLINIC', 180000, 30,
+   'Khám sức khỏe tổng quát cho thú cưng.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131186/beg2xjgwkegei3nytkce.jpg'),
+(27, 6, 'Tiêm Phòng', 'CLINIC', 150000, 20,
+   'Tiêm vaccine phòng bệnh dại và các bệnh thường gặp.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131224/c5gagcfwppfdip2usbud.jpg'),
+-- Shop 7 (La Gi): giá vừa phải, dùng để test bằng vị trí GPS thật
+(28, 7, 'Tắm & Sấy', 'SPA', 100000, 60,
+   'Tắm sạch, sấy khô và chải lông cho thú cưng.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131282/hkdilvmgnhityea13b5f.jpg'),
+(29, 7, 'Cắt Tỉa Lông', 'SPA', 150000, 75,
+   'Cắt tỉa lông theo yêu cầu.',
+   1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131323/hnglgrfvwr0fptt81sg2.jpg'),
+(30, 7, 'Spa Toàn Thân', 'SPA', 280000, 100,
+   'Tắm thảo dược, massage, cắt móng và vệ sinh tai.',
+    1, 0, NULL, NULL, NULL, NULL, NULL, NULL,'http://res.cloudinary.com/dfp44sbsj/image/upload/v1784131354/vzddirqdwabzgc4zyvch.jpg');
+-- ============================================================================
 
 SET FOREIGN_KEY_CHECKS = 1;
