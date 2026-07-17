@@ -244,12 +244,12 @@ INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
                      payos_order_code, created_at) VALUES
 (6, 5, 2, 1, 3, '2026-07-15 09:00:00',
    'CANCELLED', NULL, 'Khách hủy: mèo bị ốm không thể đến khám', 202405006, '2026-07-14 10:00:00'),
-(7, 6, 1, 3, 1, '2026-07-22 15:00:00',
-   'CANCELLED', NULL, 'Khách hủy: bận đột xuất', 202405007, '2026-07-21 08:00:00'),
-(8, 7, 3, 4, 4, '2026-08-01 12:00:00',
-   'CANCELLED', 'Phòng riêng cho Max', 'Shop hủy: hết phòng loại LARGE', 202406001, '2026-07-30 19:00:00'),
-(9, 8, 2, 5, 3, '2026-08-05 09:30:00',
-   'CANCELLED', NULL, 'Khách hủy: thay đổi kế hoạch', 202406002, '2026-08-04 09:00:00');
+(7, 6, 1, 3, 1, '2026-07-12 15:00:00',
+   'CANCELLED', NULL, 'Khách hủy: bận đột xuất', 202405007, '2026-07-11 08:00:00'),
+(8, 7, 3, 4, 4, '2026-07-17 12:00:00',
+   'CANCELLED', 'Phòng riêng cho Max', 'Shop hủy: hết phòng loại LARGE', 202406001, '2026-07-15 19:00:00'),
+(9, 8, 2, 5, 3, '2026-07-05 09:30:00',
+   'CANCELLED', NULL, 'Khách hủy: thay đổi kế hoạch', 202406002, '2026-07-04 09:00:00');
 
 INSERT INTO booking_services (booking_id, service_id) VALUES
 (6, 5),
@@ -260,10 +260,10 @@ INSERT INTO booking_services (booking_id, service_id) VALUES
 -- 3. WAITING_SHOP_APPROVAL (4) -- booking IDs 10-13, Shop1 MANUAL
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
                      appointment_datetime, status, note, payos_order_code, created_at) VALUES
-(10, 5, 1, 1, NULL, '2026-08-20 09:00:00', 'WAITING_SHOP_APPROVAL', 'Mochi cần spa nhẹ nhàng', 202406003, '2026-08-17 10:30:00'),
-(11, 6, 1, 3, NULL, '2026-08-21 14:00:00', 'WAITING_SHOP_APPROVAL', NULL, 202406004, '2026-08-17 15:00:00'),
-(12, 7, 1, 4, NULL, '2026-08-22 10:00:00', 'WAITING_SHOP_APPROVAL', 'Max cần nhân viên có kinh nghiệm với chó lớn', 202406005, '2026-08-18 07:00:00'),
-(13, 8, 1, 5, NULL, '2026-08-23 11:00:00', 'WAITING_SHOP_APPROVAL', NULL, 202406006, '2026-08-18 08:30:00');
+(10, 5, 1, 1, NULL, '2026-07-20 09:00:00', 'WAITING_SHOP_APPROVAL', 'Mochi cần spa nhẹ nhàng', 202406003, '2026-07-17 10:30:00'),
+(11, 6, 1, 3, NULL, '2026-07-21 14:00:00', 'WAITING_SHOP_APPROVAL', NULL, 202406004, '2026-07-17 15:00:00'),
+(12, 7, 1, 4, NULL, '2026-07-22 10:00:00', 'WAITING_SHOP_APPROVAL', 'Max cần nhân viên có kinh nghiệm với chó lớn', 202406005, '2026-07-18 07:00:00'),
+(13, 8, 1, 5, NULL, '2026-07-23 11:00:00', 'WAITING_SHOP_APPROVAL', NULL, 202406006, '2026-07-18 08:30:00');
 
 INSERT INTO booking_services (booking_id, service_id) VALUES
 (10, 3),
@@ -274,11 +274,11 @@ INSERT INTO booking_services (booking_id, service_id) VALUES
 -- 4. CONFIRMED (5) -- booking IDs 14-18
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
                      appointment_datetime, status, note, payos_order_code, created_at) VALUES
-(14, 5, 2, 2, 3, '2026-08-20 08:30:00', 'CONFIRMED', 'Buddy cần tiêm nhắc lại vaccine dại', 202406007, '2026-08-15 09:00:00'),
-(15, 6, 2, 3, 3, '2026-08-21 09:00:00', 'CONFIRMED', NULL, 202406008, '2026-08-16 10:00:00'),
-(16, 5, 3, 1, 4, '2026-08-25 14:00:00', 'CONFIRMED', 'Mochi lưu trú 3 ngày, cần phòng yên tĩnh', 202406009, '2026-08-14 20:00:00'),
-(17, 7, 2, 4, 3, '2026-08-24 10:00:00', 'CONFIRMED', 'Max siêu âm theo lịch tái khám', 202406010, '2026-08-16 14:00:00'),
-(18, 8, 3, 5, 4, '2026-08-26 10:00:00', 'CONFIRMED', 'Coco lưu trú 2 ngày cuối tuần', 202406011, '2026-08-15 11:00:00');
+(14, 5, 2, 2, 3, '2026-07-20 08:30:00', 'CONFIRMED', 'Buddy cần tiêm nhắc lại vaccine dại', 202406007, '2026-07-15 09:00:00'),
+(15, 6, 2, 3, 3, '2026-07-21 09:00:00', 'CONFIRMED', NULL, 202406008, '2026-07-16 10:00:00'),
+(16, 5, 3, 1, 4, '2026-07-25 14:00:00', 'CONFIRMED', 'Mochi lưu trú 3 ngày, cần phòng yên tĩnh', 202406009, '2026-07-14 20:00:00'),
+(17, 7, 2, 4, 3, '2026-07-24 10:00:00', 'CONFIRMED', 'Max siêu âm theo lịch tái khám', 202406010, '2026-07-16 14:00:00'),
+(18, 8, 3, 5, 4, '2026-07-26 10:00:00', 'CONFIRMED', 'Coco lưu trú 2 ngày cuối tuần', 202406011, '2026-07-15 11:00:00');
 
 INSERT INTO booking_services (booking_id, service_id) VALUES
 (14, 6),
@@ -291,14 +291,14 @@ INSERT INTO booking_services (booking_id, service_id) VALUES
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
                      appointment_datetime, check_in, service_start_datetime,
                      status, note, payos_order_code, created_at) VALUES
-(19, 5, 1, 2, 1, '2026-08-18 09:00:00', '2026-08-18 09:05:00', '2026-08-18 09:10:00',
-    'IN_PROGRESS', NULL, 202406012, '2026-08-17 20:00:00'),
-(20, 6, 2, 3, 3, '2026-08-18 08:30:00', '2026-08-18 08:32:00', '2026-08-18 08:40:00',
-    'IN_PROGRESS', 'Luna cần xét nghiệm máu định kỳ', 202406013, '2026-08-17 21:00:00'),
-(21, 7, 1, 4, 2, '2026-08-18 10:00:00', '2026-08-18 10:03:00', '2026-08-18 10:15:00',
-    'IN_PROGRESS', 'Max cần spa toàn thân', 202406014, '2026-08-17 18:00:00'),
-(22, 8, 3, 5, 4, '2026-08-17 12:00:00', '2026-08-17 12:05:00', '2026-08-17 12:10:00',
-    'IN_PROGRESS', 'Coco lưu trú 2 ngày', 202406015, '2026-08-16 09:00:00');
+(19, 5, 1, 2, 1, '2026-07-18 09:00:00', '2026-07-18 09:05:00', '2026-07-18 09:10:00',
+    'IN_PROGRESS', NULL, 202406012, '2026-07-17 20:00:00'),
+(20, 6, 2, 3, 3, '2026-07-18 08:30:00', '2026-07-18 08:32:00', '2026-07-18 08:40:00',
+    'IN_PROGRESS', 'Luna cần xét nghiệm máu định kỳ', 202406013, '2026-07-17 21:00:00'),
+(21, 7, 1, 4, 2, '2026-07-18 10:00:00', '2026-07-18 10:03:00', '2026-07-18 10:15:00',
+    'IN_PROGRESS', 'Max cần spa toàn thân', 202406014, '2026-07-17 18:00:00'),
+(22, 8, 3, 5, 4, '2026-07-17 12:00:00', '2026-07-17 12:05:00', '2026-07-17 12:10:00',
+    'IN_PROGRESS', 'Coco lưu trú 2 ngày', 202406015, '2026-07-16 09:00:00');
 
 INSERT INTO booking_services (booking_id, service_id) VALUES
 (19, 2),
@@ -309,10 +309,10 @@ INSERT INTO booking_services (booking_id, service_id) VALUES
 -- 6. PENDING_PAYMENT (4) -- booking IDs 23-26, vua tao
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
                      appointment_datetime, status, note, payos_order_code, created_at) VALUES
-(23, 5, 3, 1, NULL, '2026-08-27 14:00:00', 'PENDING_PAYMENT', 'Mochi lưu trú phòng VIP 2 ngày', 202406016, '2026-08-18 09:00:00'),
-(24, 6, 1, 3, NULL, '2026-08-25 15:00:00', 'PENDING_PAYMENT', NULL, 202406017, '2026-08-18 09:30:00'),
-(25, 7, 2, 4, NULL, '2026-08-26 09:00:00', 'PENDING_PAYMENT', 'Khám tổng quát và xét nghiệm máu', 202406018, '2026-08-18 10:00:00'),
-(26, 8, 2, 5, NULL, '2026-08-28 10:00:00', 'PENDING_PAYMENT', NULL, 202406019, '2026-08-18 10:30:00');
+(23, 5, 3, 1, NULL, '2026-07-27 14:00:00', 'PENDING_PAYMENT', 'Mochi lưu trú phòng VIP 2 ngày', 202406016, '2026-07-18 09:00:00'),
+(24, 6, 1, 3, NULL, '2026-07-25 15:00:00', 'PENDING_PAYMENT', NULL, 202406017, '2026-07-18 09:30:00'),
+(25, 7, 2, 4, NULL, '2026-07-26 09:00:00', 'PENDING_PAYMENT', 'Khám tổng quát và xét nghiệm máu', 202406018, '2026-07-18 10:00:00'),
+(26, 8, 2, 5, NULL, '2026-07-28 10:00:00', 'PENDING_PAYMENT', NULL, 202406019, '2026-07-18 10:30:00');
 
 INSERT INTO booking_services (booking_id, service_id) VALUES
 (23, 11),
@@ -323,7 +323,7 @@ INSERT INTO booking_services (booking_id, service_id) VALUES
 -- 7. CONFIRMED, gộp LƯU TRÚ + SPA cùng 1 booking (test thanh toán 2 dịch vụ khác loại) -- booking ID 32
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
                      appointment_datetime, status, note, payos_order_code, created_at) VALUES
-(32, 6, 3, 3, 4, '2026-08-29 09:00:00', 'CONFIRMED', 'Luna lưu trú phòng riêng kèm gói spa toàn thân', 202406021, '2026-08-18 11:00:00');
+(32, 6, 3, 3, 4, '2026-07-29 09:00:00', 'CONFIRMED', 'Luna lưu trú phòng riêng kèm gói spa toàn thân', 202406021, '2026-07-18 11:00:00');
 
 INSERT INTO booking_services (booking_id, service_id) VALUES
 (32, 10), (32, 13);
@@ -341,32 +341,32 @@ INSERT INTO payment (id, booking_id, amount, method, status, payos_order_code,
 (5,  5,  150000, 'PAYOS', 'SUCCESS', 202405005, 'TXN-SPA-003', '2026-07-27 10:05:00', 'Thanh toán Tắm & Sấy'),
 -- CANCELLED → REFUNDED
 (6,  6,  200000, 'PAYOS', 'REFUNDED', 202405006, 'TXN-CLI-003', '2026-07-14 10:05:00', 'Hoàn tiền hủy lịch'),
-(7,  7,  200000, 'PAYOS', 'REFUNDED', 202405007, 'TXN-SPA-004', '2026-07-21 08:05:00', 'Hoàn tiền hủy lịch'),
-(8,  8,  350000, 'PAYOS', 'REFUNDED', 202406001, 'TXN-HOT-001', '2026-07-30 19:05:00', 'Hoàn tiền hủy phòng'),
-(9,  9,  150000, 'PAYOS', 'REFUNDED', 202406002, 'TXN-CLI-004', '2026-08-04 09:05:00', 'Hoàn tiền hủy lịch'),
+(7,  7,  200000, 'PAYOS', 'REFUNDED', 202405007, 'TXN-SPA-004', '2026-07-11 08:05:00', 'Hoàn tiền hủy lịch'),
+(8,  8,  350000, 'PAYOS', 'REFUNDED', 202406001, 'TXN-HOT-001', '2026-07-15 19:05:00', 'Hoàn tiền hủy phòng'),
+(9,  9,  150000, 'PAYOS', 'REFUNDED', 202406002, 'TXN-CLI-004', '2026-07-04 09:05:00', 'Hoàn tiền hủy lịch'),
 -- WAITING_SHOP_APPROVAL → SUCCESS (da thanh toan, cho shop duyet)
-(10, 10, 350000, 'PAYOS', 'SUCCESS', 202406003, 'TXN-SPA-005', '2026-08-17 10:35:00', 'Thanh toán Spa Toàn Thân'),
-(11, 11, 150000, 'PAYOS', 'SUCCESS', 202406004, 'TXN-SPA-006', '2026-08-17 15:05:00', 'Thanh toán Tắm & Sấy'),
-(12, 12, 200000, 'PAYOS', 'SUCCESS', 202406005, 'TXN-SPA-007', '2026-08-18 07:05:00', 'Thanh toán Cắt Tỉa Lông'),
-(13, 13, 150000, 'PAYOS', 'SUCCESS', 202406006, 'TXN-SPA-008', '2026-08-18 08:35:00', 'Thanh toán Tắm & Sấy'),
+(10, 10, 350000, 'PAYOS', 'SUCCESS', 202406003, 'TXN-SPA-005', '2026-07-17 10:35:00', 'Thanh toán Spa Toàn Thân'),
+(11, 11, 150000, 'PAYOS', 'SUCCESS', 202406004, 'TXN-SPA-006', '2026-07-17 15:05:00', 'Thanh toán Tắm & Sấy'),
+(12, 12, 200000, 'PAYOS', 'SUCCESS', 202406005, 'TXN-SPA-007', '2026-07-18 07:05:00', 'Thanh toán Cắt Tỉa Lông'),
+(13, 13, 150000, 'PAYOS', 'SUCCESS', 202406006, 'TXN-SPA-008', '2026-07-18 08:35:00', 'Thanh toán Tắm & Sấy'),
 -- CONFIRMED → SUCCESS
-(14, 14, 150000, 'PAYOS', 'SUCCESS', 202406007, 'TXN-CLI-005', '2026-08-15 09:05:00', 'Thanh toán Tiêm Phòng'),
-(15, 15, 350000, 'PAYOS', 'SUCCESS', 202406008, 'TXN-CLI-006', '2026-08-16 10:05:00', 'Thanh toán Khám + Tiêm'),
-(16, 16, 200000, 'PAYOS', 'SUCCESS', 202406009, 'TXN-HOT-002', '2026-08-14 20:05:00', 'Thanh toán Lưu Trú'),
-(17, 17, 400000, 'PAYOS', 'SUCCESS', 202406010, 'TXN-CLI-007', '2026-08-16 14:05:00', 'Thanh toán Siêu Âm'),
-(18, 18, 200000, 'PAYOS', 'SUCCESS', 202406011, 'TXN-HOT-003', '2026-08-15 11:05:00', 'Thanh toán Lưu Trú'),
+(14, 14, 150000, 'PAYOS', 'SUCCESS', 202406007, 'TXN-CLI-005', '2026-07-15 09:05:00', 'Thanh toán Tiêm Phòng'),
+(15, 15, 350000, 'PAYOS', 'SUCCESS', 202406008, 'TXN-CLI-006', '2026-07-16 10:05:00', 'Thanh toán Khám + Tiêm'),
+(16, 16, 200000, 'PAYOS', 'SUCCESS', 202406009, 'TXN-HOT-002', '2026-07-14 20:05:00', 'Thanh toán Lưu Trú'),
+(17, 17, 400000, 'PAYOS', 'SUCCESS', 202406010, 'TXN-CLI-007', '2026-07-16 14:05:00', 'Thanh toán Siêu Âm'),
+(18, 18, 200000, 'PAYOS', 'SUCCESS', 202406011, 'TXN-HOT-003', '2026-07-15 11:05:00', 'Thanh toán Lưu Trú'),
 -- IN_PROGRESS → SUCCESS
-(19, 19, 200000, 'PAYOS', 'SUCCESS', 202406012, 'TXN-SPA-009', '2026-08-17 20:05:00', 'Thanh toán Cắt Tỉa Lông'),
-(20, 20, 300000, 'PAYOS', 'SUCCESS', 202406013, 'TXN-CLI-008', '2026-08-17 21:05:00', 'Thanh toán Xét Nghiệm Máu'),
-(21, 21, 350000, 'PAYOS', 'SUCCESS', 202406014, 'TXN-SPA-010', '2026-08-17 18:05:00', 'Thanh toán Spa Toàn Thân'),
-(22, 22, 200000, 'PAYOS', 'SUCCESS', 202406015, 'TXN-HOT-004', '2026-08-16 09:05:00', 'Thanh toán Lưu Trú'),
+(19, 19, 200000, 'PAYOS', 'SUCCESS', 202406012, 'TXN-SPA-009', '2026-07-17 20:05:00', 'Thanh toán Cắt Tỉa Lông'),
+(20, 20, 300000, 'PAYOS', 'SUCCESS', 202406013, 'TXN-CLI-008', '2026-07-17 21:05:00', 'Thanh toán Xét Nghiệm Máu'),
+(21, 21, 350000, 'PAYOS', 'SUCCESS', 202406014, 'TXN-SPA-010', '2026-07-17 18:05:00', 'Thanh toán Spa Toàn Thân'),
+(22, 22, 200000, 'PAYOS', 'SUCCESS', 202406015, 'TXN-HOT-004', '2026-07-16 09:05:00', 'Thanh toán Lưu Trú'),
 -- PENDING_PAYMENT → PENDING
 (23, 23, 550000, 'PAYOS', 'PENDING', 202406016, NULL, NULL, 'Chờ thanh toán Lưu Trú VIP'),
 (24, 24, 350000, 'PAYOS', 'PENDING', 202406017, NULL, NULL, 'Chờ thanh toán Spa Toàn Thân'),
 (25, 25, 500000, 'PAYOS', 'PENDING', 202406018, NULL, NULL, 'Chờ thanh toán Khám + Xét nghiệm'),
 (26, 26, 150000, 'PAYOS', 'PENDING', 202406019, NULL, NULL, 'Chờ thanh toán Tiêm Phòng'),
 -- CONFIRMED, gop Luu Tru + Spa → SUCCESS
-(32, 32, 700000, 'PAYOS', 'SUCCESS', 202406021, 'TXN-HOT-005', '2026-08-18 11:05:00', 'Thanh toán Lưu Trú Phòng Riêng + Spa Toàn Thân');
+(32, 32, 700000, 'PAYOS', 'SUCCESS', 202406021, 'TXN-HOT-005', '2026-07-18 11:05:00', 'Thanh toán Lưu Trú Phòng Riêng + Spa Toàn Thân');
 
 -- ============================================================================
 -- REVIEWS (cho COMPLETED bookings)
@@ -399,36 +399,36 @@ INSERT INTO review (id, shop_id, user_id, service_id, rating, comment, created_a
 -- ============================================================================
 INSERT INTO notification (id, user_id, title, content, notification_type, is_read, created_at) VALUES
 -- BOOKING
-(1,  5, 'Đặt lịch thành công', 'Lịch Spa Toàn Thân cho Buddy vào 14:00 ngày 09/05 đã được xác nhận.', 'BOOKING', 1, '2026-07-09 18:36:00'),
+(1,  5, 'Đặt lịch thành công', 'Lịch Spa Toàn Thân cho Buddy vào 14:00 ngày 09/07 đã được xác nhận.', 'BOOKING', 1, '2026-07-09 18:36:00'),
 (2,  5, 'Hoàn thành dịch vụ',  'Buddy đã hoàn thành dịch vụ Spa Toàn Thân. Hãy để lại đánh giá cho chúng tôi!', 'BOOKING', 1, '2026-07-10 15:40:00'),
-(3,  6, 'Đặt lịch thành công', 'Lịch Khám Tổng Quát cho Luna vào 08:30 ngày 12/05 đã được xác nhận.', 'BOOKING', 1, '2026-07-11 21:06:00'),
-(4,  7, 'Đặt lịch thành công', 'Lịch Khám + Xét nghiệm cho Max vào 10:00 ngày 20/05 đã được xác nhận.', 'BOOKING', 1, '2026-07-19 15:06:00'),
-(5,  5, 'Chờ shop xác nhận',   'Lịch Spa Toàn Thân cho Mochi vào 09:00 ngày 20/06 đang chờ xác nhận từ Mèo Kute Spa.', 'BOOKING', 0, '2026-08-17 10:36:00'),
-(6,  6, 'Chờ shop xác nhận',   'Lịch Tắm & Sấy cho Luna vào 14:00 ngày 21/06 đang chờ xác nhận từ Mèo Kute Spa.', 'BOOKING', 0, '2026-08-17 15:06:00'),
-(7,  2, 'Đặt lịch mới',        'Phạm Anh Thư đặt Spa Toàn Thân cho Mochi vào 09:00 ngày 20/06. Vui lòng xác nhận.', 'BOOKING', 0, '2026-08-17 10:36:00'),
-(8,  2, 'Đặt lịch mới',        'Nguyễn Bình Minh đặt Tắm & Sấy cho Luna vào 14:00 ngày 21/06. Vui lòng xác nhận.', 'BOOKING', 0, '2026-08-17 15:06:00'),
-(9,  5, 'Dịch vụ đang bắt đầu','Buddy đang được cắt tỉa lông tại Mèo Kute Spa. Dự kiến hoàn thành lúc 10:30.', 'BOOKING', 0, '2026-08-18 09:10:00'),
-(10, 6, 'Dịch vụ đang bắt đầu','Luna đang được xét nghiệm tại Thú Y An Tâm.', 'BOOKING', 0, '2026-08-18 08:40:00'),
+(3,  6, 'Đặt lịch thành công', 'Lịch Khám Tổng Quát cho Luna vào 08:30 ngày 12/07 đã được xác nhận.', 'BOOKING', 1, '2026-07-11 21:06:00'),
+(4,  7, 'Đặt lịch thành công', 'Lịch Khám + Xét nghiệm cho Max vào 10:00 ngày 20/07 đã được xác nhận.', 'BOOKING', 1, '2026-07-17 15:06:00'),
+(5,  5, 'Chờ shop xác nhận',   'Lịch Spa Toàn Thân cho Mochi vào 09:00 ngày 20/07 đang chờ xác nhận từ Mèo Kute Spa.', 'BOOKING', 0, '2026-07-17 10:36:00'),
+(6,  6, 'Chờ shop xác nhận',   'Lịch Tắm & Sấy cho Luna vào 14:00 ngày 21/07 đang chờ xác nhận từ Mèo Kute Spa.', 'BOOKING', 0, '2026-07-17 15:06:00'),
+(7,  2, 'Đặt lịch mới',        'Phạm Anh Thư đặt Spa Toàn Thân cho Mochi vào 09:00 ngày 20/07. Vui lòng xác nhận.', 'BOOKING', 0, '2026-07-17 10:36:00'),
+(8,  2, 'Đặt lịch mới',        'Nguyễn Bình Minh đặt Tắm & Sấy cho Luna vào 14:00 ngày 21/07. Vui lòng xác nhận.', 'BOOKING', 0, '2026-07-17 15:06:00'),
+(9,  5, 'Dịch vụ đang bắt đầu','Buddy đang được cắt tỉa lông tại Mèo Kute Spa. Dự kiến hoàn thành lúc 10:30.', 'BOOKING', 0, '2026-07-18 09:10:00'),
+(10, 6, 'Dịch vụ đang bắt đầu','Luna đang được xét nghiệm tại Thú Y An Tâm.', 'BOOKING', 0, '2026-07-18 08:40:00'),
 
 -- GENERAL
 (11, 5, 'Chào mừng bạn đến với Pet Eye', 'Cảm ơn bạn đã đăng ký! Khám phá hàng trăm spa và bệnh viện thú y uy tín gần bạn.', 'GENERAL', 1, '2026-07-01 09:00:00'),
 (12, 6, 'Cập nhật phiên bản mới', 'Pet Eye vừa ra mắt phiên bản 2.0 với tính năng đặt lịch nhanh và theo dõi lịch sử khám bệnh.', 'GENERAL', 1, '2026-07-15 10:00:00'),
-(13, 7, 'Thông báo nghỉ lễ', 'Các shop đối tác sẽ nghỉ lễ 02/09. Vui lòng đặt lịch sớm để tránh giai đoạn cao điểm.', 'GENERAL', 0, '2026-08-15 08:00:00'),
+(13, 7, 'Thông báo nghỉ lễ', 'Các shop đối tác sẽ nghỉ lễ 02/09. Vui lòng đặt lịch sớm để tránh giai đoạn cao điểm.', 'GENERAL', 0, '2026-07-15 08:00:00'),
 
 -- PROMOTION
-(14, 5, 'Ưu đãi 20% dịch vụ Spa', 'Nhận mã giảm giá SPA20 cho lần đặt lịch Spa Toàn Thân tiếp theo, áp dụng đến 30/06.', 'PROMOTION', 0, '2026-08-10 09:00:00'),
-(15, 6, 'Chương trình thành viên mới', 'Tích điểm mỗi lần sử dụng dịch vụ để đổi quà tặng hấp dẫn từ Thú Y An Tâm.', 'PROMOTION', 0, '2026-08-12 14:00:00'),
-(16, 7, 'Khuyến mãi mùa hè', 'Giảm 15% gói Khám Tổng Quát cho thú cưng trong tháng 6. Đặt lịch ngay để không bỏ lỡ!', 'PROMOTION', 0, '2026-08-16 11:00:00'),
+(14, 5, 'Ưu đãi 20% dịch vụ Spa', 'Nhận mã giảm giá SPA20 cho lần đặt lịch Spa Toàn Thân tiếp theo, áp dụng đến 30/07.', 'PROMOTION', 0, '2026-07-10 09:00:00'),
+(15, 6, 'Chương trình thành viên mới', 'Tích điểm mỗi lần sử dụng dịch vụ để đổi quà tặng hấp dẫn từ Thú Y An Tâm.', 'PROMOTION', 0, '2026-07-12 14:00:00'),
+(16, 7, 'Khuyến mãi mùa hè', 'Giảm 15% gói Khám Tổng Quát cho thú cưng trong tháng 7. Đặt lịch ngay để không bỏ lỡ!', 'PROMOTION', 0, '2026-07-16 11:00:00'),
 
 -- REMINDER
-(17, 5, 'Nhắc lịch hẹn', 'Lịch Spa Toàn Thân cho Mochi vào 09:00 ngày mai (20/06) tại Mèo Kute Spa. Đừng quên nhé!', 'REMINDER', 0, '2026-08-19 18:00:00'),
-(18, 6, 'Nhắc thanh toán', 'Đơn đặt lịch Spa Toàn Thân cho Luna ngày 25/06 đang chờ thanh toán. Vui lòng hoàn tất trong 30 phút.', 'REMINDER', 0, '2026-08-18 09:31:00'),
-(19, 7, 'Nhắc tiêm phòng định kỳ', 'Max đã đến hạn tiêm phòng nhắc lại. Hãy đặt lịch tại Thú Y An Tâm để được kiểm tra sớm.', 'REMINDER', 0, '2026-08-17 08:00:00'),
+(17, 5, 'Nhắc lịch hẹn', 'Lịch Spa Toàn Thân cho Mochi vào 09:00 ngày mai (20/07) tại Mèo Kute Spa. Đừng quên nhé!', 'REMINDER', 0, '2026-07-17 18:00:00'),
+(18, 6, 'Nhắc thanh toán', 'Đơn đặt lịch Spa Toàn Thân cho Luna ngày 25/07 đang chờ thanh toán. Vui lòng hoàn tất trong 30 phút.', 'REMINDER', 0, '2026-07-18 09:31:00'),
+(19, 7, 'Nhắc tiêm phòng định kỳ', 'Max đã đến hạn tiêm phòng nhắc lại. Hãy đặt lịch tại Thú Y An Tâm để được kiểm tra sớm.', 'REMINDER', 0, '2026-07-17 08:00:00'),
 
 -- SYSTEM
-(20, 5, 'Mật khẩu đã được thay đổi', 'Mật khẩu tài khoản của bạn vừa được cập nhật thành công. Nếu không phải bạn, hãy liên hệ hỗ trợ ngay.', 'SYSTEM', 1, '2026-08-05 20:15:00'),
+(20, 5, 'Mật khẩu đã được thay đổi', 'Mật khẩu tài khoản của bạn vừa được cập nhật thành công. Nếu không phải bạn, hãy liên hệ hỗ trợ ngay.', 'SYSTEM', 1, '2026-07-05 20:15:00'),
 (21, 2, 'Xác thực tài khoản thành công', 'Hồ sơ đối tác Mèo Kute Spa đã được xác thực và kích hoạt trên hệ thống.', 'SYSTEM', 1, '2026-06-20 10:00:00'),
-(22, 6, 'Bảo trì hệ thống', 'Hệ thống sẽ bảo trì từ 23:00 - 01:00 ngày 22/06. Một số chức năng có thể bị ảnh hưởng.', 'SYSTEM', 0, '2026-08-18 12:00:00');
+(22, 6, 'Bảo trì hệ thống', 'Hệ thống sẽ bảo trì từ 23:00 - 01:00 ngày 22/07. Một số chức năng có thể bị ảnh hưởng.', 'SYSTEM', 0, '2026-07-18 12:00:00');
 
 -- ============================================================================
 -- BOOKING HISTORY
@@ -456,40 +456,40 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 (5, 'IN_PROGRESS',           'COMPLETED',              '2026-07-28 12:05:00', 'staff1.spa@peteye.vn'),
 (6, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-14 10:05:00', 'SYSTEM'),
 (6, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-14 10:09:00', 'anhthu@gmail.com'),
-(7, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-21 08:05:00', 'SYSTEM'),
-(7, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-21 08:10:00', 'binhminh@gmail.com'),
-(8, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-30 19:05:00', 'SYSTEM'),
-(8, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-30 19:29:00', 'owner.hotel@peteye.vn'),
-(9, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-08-04 09:05:00', 'SYSTEM'),
-(9, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-08-04 09:08:00', 'ducmanh@gmail.com'),
-(10, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 10:35:00', 'SYSTEM'),
-(11, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 15:05:00', 'SYSTEM'),
-(12, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-18 07:05:00', 'SYSTEM'),
-(13, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-18 08:35:00', 'SYSTEM'),
-(14, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-15 09:05:00', 'SYSTEM'),
-(14, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-15 10:00:00', 'SYSTEM'),
-(15, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-16 10:05:00', 'SYSTEM'),
-(15, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-16 10:30:00', 'SYSTEM'),
-(16, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-14 20:05:00', 'SYSTEM'),
-(16, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-14 20:30:00', 'owner.hotel@peteye.vn'),
-(17, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-16 14:05:00', 'SYSTEM'),
-(17, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-16 14:30:00', 'SYSTEM'),
-(18, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-15 11:05:00', 'SYSTEM'),
-(18, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-15 11:30:00', 'owner.hotel@peteye.vn'),
-(19, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 20:05:00', 'SYSTEM'),
-(19, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-17 20:30:00', 'owner.spa@peteye.vn'),
-(19, 'CONFIRMED',            'IN_PROGRESS',            '2026-08-18 09:10:00', 'staff1.spa@peteye.vn'),
-(20, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 21:05:00', 'SYSTEM'),
-(20, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-17 21:20:00', 'SYSTEM'),
-(20, 'CONFIRMED',            'IN_PROGRESS',            '2026-08-18 08:40:00', 'staff.clinic@peteye.vn'),
-(21, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-17 18:05:00', 'SYSTEM'),
-(21, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-17 18:30:00', 'owner.spa@peteye.vn'),
-(21, 'CONFIRMED',            'IN_PROGRESS',            '2026-08-18 10:15:00', 'staff2.spa@peteye.vn'),
-(22, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-16 09:05:00', 'SYSTEM'),
-(22, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-16 09:30:00', 'owner.hotel@peteye.vn'),
-(22, 'CONFIRMED',            'IN_PROGRESS',            '2026-08-17 12:10:00', 'staff.hotel@peteye.vn'),
-(32, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-18 11:05:00', 'SYSTEM'),
-(32, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-18 11:30:00', 'owner.hotel@peteye.vn');
+(7, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-11 08:05:00', 'SYSTEM'),
+(7, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-11 08:10:00', 'binhminh@gmail.com'),
+(8, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-15 19:05:00', 'SYSTEM'),
+(8, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-15 19:29:00', 'owner.hotel@peteye.vn'),
+(9, 'PENDING_PAYMENT',       'WAITING_SHOP_APPROVAL', '2026-07-04 09:05:00', 'SYSTEM'),
+(9, 'WAITING_SHOP_APPROVAL', 'CANCELLED',              '2026-07-04 09:08:00', 'ducmanh@gmail.com'),
+(10, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-17 10:35:00', 'SYSTEM'),
+(11, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-17 15:05:00', 'SYSTEM'),
+(12, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-18 07:05:00', 'SYSTEM'),
+(13, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-18 08:35:00', 'SYSTEM'),
+(14, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-15 09:05:00', 'SYSTEM'),
+(14, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-15 10:00:00', 'SYSTEM'),
+(15, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-16 10:05:00', 'SYSTEM'),
+(15, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-16 10:30:00', 'SYSTEM'),
+(16, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-14 20:05:00', 'SYSTEM'),
+(16, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-14 20:30:00', 'owner.hotel@peteye.vn'),
+(17, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-16 14:05:00', 'SYSTEM'),
+(17, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-16 14:30:00', 'SYSTEM'),
+(18, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-15 11:05:00', 'SYSTEM'),
+(18, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-15 11:30:00', 'owner.hotel@peteye.vn'),
+(19, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-17 20:05:00', 'SYSTEM'),
+(19, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-17 20:30:00', 'owner.spa@peteye.vn'),
+(19, 'CONFIRMED',            'IN_PROGRESS',            '2026-07-18 09:10:00', 'staff1.spa@peteye.vn'),
+(20, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-17 21:05:00', 'SYSTEM'),
+(20, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-17 21:20:00', 'SYSTEM'),
+(20, 'CONFIRMED',            'IN_PROGRESS',            '2026-07-18 08:40:00', 'staff.clinic@peteye.vn'),
+(21, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-17 18:05:00', 'SYSTEM'),
+(21, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-17 18:30:00', 'owner.spa@peteye.vn'),
+(21, 'CONFIRMED',            'IN_PROGRESS',            '2026-07-18 10:15:00', 'staff2.spa@peteye.vn'),
+(22, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-16 09:05:00', 'SYSTEM'),
+(22, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-16 09:30:00', 'owner.hotel@peteye.vn'),
+(22, 'CONFIRMED',            'IN_PROGRESS',            '2026-07-17 12:10:00', 'staff.hotel@peteye.vn'),
+(32, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-18 11:05:00', 'SYSTEM'),
+(32, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-18 11:30:00', 'owner.hotel@peteye.vn');
 
 -- ============================================================================
 -- CUSTOMER MANAGEMENT DEMO DATA
@@ -539,8 +539,8 @@ INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
 -- 5. Booking CONFIRMED sắp tới của khách hàng PLATINUM (ID 31)
 INSERT INTO booking (id, user_id, shop_id, pet_id, staff_id,
                      appointment_datetime, status, note, payos_order_code, created_at) VALUES
-(31, 13, 1, 6, 2, '2026-08-28 10:00:00',
-    'CONFIRMED', 'Diamond cắt tỉa định kỳ tháng 6', 202406020, '2026-08-16 11:00:00');
+(31, 13, 1, 6, 2, '2026-07-28 10:00:00',
+    'CONFIRMED', 'Diamond cắt tỉa định kỳ tháng 7', 202406020, '2026-07-16 11:00:00');
 
 -- 6. Booking services cho bookings 27-31
 INSERT INTO booking_services (booking_id, service_id) VALUES
@@ -557,7 +557,7 @@ INSERT INTO payment (id, booking_id, amount, method, status, payos_order_code,
 (28, 28, 150000, 'PAYOS', 'SUCCESS', 202604002, 'TXN-VIP-002', '2026-06-24 20:05:00', 'Thanh toán Tắm & Sấy'),
 (29, 29, 350000, 'PAYOS', 'SUCCESS', 202605010, 'TXN-VIP-003', '2026-07-07 18:05:00', 'Thanh toán Spa Toàn Thân'),
 (30, 30, 150000, 'PAYOS', 'SUCCESS', 202605011, 'TXN-VIP-004', '2026-07-29 16:05:00', 'Thanh toán Tắm & Sấy'),
-(31, 31, 200000, 'PAYOS', 'SUCCESS', 202406020, 'TXN-VIP-005', '2026-08-16 11:05:00', 'Thanh toán Cắt Tỉa Lông');
+(31, 31, 200000, 'PAYOS', 'SUCCESS', 202406020, 'TXN-VIP-005', '2026-07-16 11:05:00', 'Thanh toán Cắt Tỉa Lông');
 
 -- 8. Booking history cho bookings 27-31
 INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, changed_by) VALUES
@@ -577,8 +577,8 @@ INSERT INTO booking_history (booking_id, old_status, new_status, changed_at, cha
 (30, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-29 17:00:00', 'owner.spa@peteye.vn'),
 (30, 'CONFIRMED',            'IN_PROGRESS',            '2026-07-30 14:10:00', 'staff1.spa@peteye.vn'),
 (30, 'IN_PROGRESS',          'COMPLETED',              '2026-07-30 15:10:00', 'staff1.spa@peteye.vn'),
-(31, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-08-16 11:05:00', 'SYSTEM'),
-(31, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-08-16 12:00:00', 'owner.spa@peteye.vn');
+(31, 'PENDING_PAYMENT',      'WAITING_SHOP_APPROVAL', '2026-07-16 11:05:00', 'SYSTEM'),
+(31, 'WAITING_SHOP_APPROVAL','CONFIRMED',              '2026-07-16 12:00:00', 'owner.spa@peteye.vn');
 
 -- ============================================================================
 -- 9. BỔ SUNG BOOKING COMPLETED để total_spending (hạng thành viên) KHỚP với
