@@ -637,10 +637,10 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public com.sang.sourcepattern.dto.response.PageResponse<ShopResponse> searchVerifiedShopsPaged(String keyword, String city, String shopType,
-            java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Float minRating, int page) {
+            java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice, Float minRating, int page, int size) {
         org.springframework.data.domain.Page<Shop> pageResult =
                 shopRepository.searchVerifiedPaged(keyword, city, shopType, minPrice, maxPrice, minRating,
-                        org.springframework.data.domain.PageRequest.of(page, 10));
+                        org.springframework.data.domain.PageRequest.of(page, size));
         return com.sang.sourcepattern.dto.response.PageResponse.<ShopResponse>builder()
                 .content(pageResult.getContent().stream().map(shopMapper::toShopResponse).toList())
                 .page(pageResult.getNumber())

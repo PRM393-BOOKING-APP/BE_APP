@@ -121,7 +121,7 @@ public class ShopController {
     }
 
     @GetMapping("/public/paged")
-    @Operation(summary = "Search verified shops (public, paginated, 10 per page) — minPrice/maxPrice/minRating are optional")
+    @Operation(summary = "Search verified shops (public, paginated) — minPrice/maxPrice/minRating are optional")
     public ApiResponse<com.sang.sourcepattern.dto.response.PageResponse<ShopResponse>> searchPublicPaged(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String city,
@@ -129,9 +129,10 @@ public class ShopController {
             @RequestParam(required = false) java.math.BigDecimal minPrice,
             @RequestParam(required = false) java.math.BigDecimal maxPrice,
             @RequestParam(required = false) Float minRating,
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         return ApiResponse.<com.sang.sourcepattern.dto.response.PageResponse<ShopResponse>>builder()
-                .result(shopService.searchVerifiedShopsPaged(keyword, city, shopType, minPrice, maxPrice, minRating, page))
+                .result(shopService.searchVerifiedShopsPaged(keyword, city, shopType, minPrice, maxPrice, minRating, page, size))
                 .build();
     }
 
