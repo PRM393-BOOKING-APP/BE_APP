@@ -22,4 +22,5 @@ public class ChatMessageResponse {
 
     LocalDateTime createdAt;
     boolean isRead;
+    boolean isRecalled;
 }

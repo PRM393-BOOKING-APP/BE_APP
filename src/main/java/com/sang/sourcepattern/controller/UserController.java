@@ -152,9 +152,10 @@ public class UserController {
     @GetMapping("/paged")
     @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<PageResponse<UserResponse>> getAllUsersPaged(
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String role) {
         return ApiResponse.<PageResponse<UserResponse>>builder()
-                .result(userService.getAllUsersPaged(page))
+                .result(userService.getAllUsersPaged(page, role))
                 .build();
     }
 

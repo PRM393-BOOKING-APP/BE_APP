@@ -106,10 +106,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public com.sang.sourcepattern.dto.response.PageResponse<UserResponse> getAllUsersPaged(int page) {
-        org.springframework.data.domain.Page<User> pageResult =
-                userRepository.findAll(org.springframework.data.domain.PageRequest.of(page, 10,
-                        org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt")));
+    public com.sang.sourcepattern.dto.response.PageResponse<UserResponse> getAllUsersPaged(int page, String role) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, 10,
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+        
+        org.springframework.data.domain.Page<User> pageResult;
+        if (role != null && !role.trim().isEmpty()) {
+            pageResult = userRepository.findByRoleName(role, pageable);
+        } else {
+            pageResult = userRepository.findAll(pageable);
+        }
         return com.sang.sourcepattern.dto.response.PageResponse.<UserResponse>builder()
                 .content(pageResult.getContent().stream().map(this::mapUserWithVouchers).toList())
                 .page(pageResult.getNumber())

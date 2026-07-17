@@ -17,6 +17,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
     List<User> findByRoleName(@Param("roleName") String roleName);
 
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
+    org.springframework.data.domain.Page<User> findByRoleName(@Param("roleName") String roleName, org.springframework.data.domain.Pageable pageable);
+
     Optional<User> findByFacebookId(String facebookId);
     Optional<User> findByZaloId(String zaloId);
     Optional<User> findByGoogleId(String googleId);
