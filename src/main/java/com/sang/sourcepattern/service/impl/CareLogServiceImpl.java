@@ -79,8 +79,12 @@ public class CareLogServiceImpl implements CareLogService {
 
     private CareLogResponse mapToResponse(CareLog careLog) {
         String staffName = "Unknown";
-        if (careLog.getStaff() != null && careLog.getStaff().getUser() != null) {
-            staffName = careLog.getStaff().getUser().getFullName();
+        if (careLog.getStaff() != null) {
+            if (careLog.getStaff().getFullName() != null) {
+                staffName = careLog.getStaff().getFullName();
+            } else if (careLog.getStaff().getUser() != null) {
+                staffName = careLog.getStaff().getUser().getFullName();
+            }
         }
         return CareLogResponse.builder()
                 .id(careLog.getId())
