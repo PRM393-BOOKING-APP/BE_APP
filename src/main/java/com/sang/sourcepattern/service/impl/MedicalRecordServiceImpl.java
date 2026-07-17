@@ -124,13 +124,20 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     }
 
     private PetMedicalRecordResponse toMedicalResponse(PetMedicalRecord record) {
+        String shopName = null;
+        if (record.getBooking() != null && record.getBooking().getShop() != null) {
+            shopName = record.getBooking().getShop().getShopName();
+        } else if (record.getStaff() != null && record.getStaff().getShop() != null) {
+            shopName = record.getStaff().getShop().getShopName();
+        }
+
         return PetMedicalRecordResponse.builder()
                 .id(record.getId())
                 .petId(record.getPet().getId())
                 .bookingId(record.getBooking() != null ? record.getBooking().getId() : null)
                 .staffId(record.getStaff() != null ? record.getStaff().getId() : null)
                 .staffName(record.getStaff() != null ? record.getStaff().getFullName() : null)
-                .shopName(record.getStaff() != null && record.getStaff().getShop() != null ? record.getStaff().getShop().getShopName() : null)
+                .shopName(shopName)
                 .diagnosis(record.getDiagnosis())
                 .treatment(record.getTreatment())
                 .prescription(record.getPrescription())
@@ -140,13 +147,20 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     }
 
     private PetVaccinationResponse toVaccinationResponse(PetVaccination v) {
+        String shopName = null;
+        if (v.getBooking() != null && v.getBooking().getShop() != null) {
+            shopName = v.getBooking().getShop().getShopName();
+        } else if (v.getStaff() != null && v.getStaff().getShop() != null) {
+            shopName = v.getStaff().getShop().getShopName();
+        }
+
         return PetVaccinationResponse.builder()
                 .id(v.getId())
                 .petId(v.getPet().getId())
                 .bookingId(v.getBooking() != null ? v.getBooking().getId() : null)
                 .staffId(v.getStaff() != null ? v.getStaff().getId() : null)
                 .staffName(v.getStaff() != null ? v.getStaff().getFullName() : null)
-                .shopName(v.getStaff() != null && v.getStaff().getShop() != null ? v.getStaff().getShop().getShopName() : null)
+                .shopName(shopName)
                 .name(v.getName())
                 .drug(v.getDrug())
                 .clinic(v.getClinic())
