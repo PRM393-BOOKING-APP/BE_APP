@@ -51,9 +51,11 @@ public class Message {
     @Builder.Default
     LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(columnDefinition = "boolean default false")
     @Builder.Default
     boolean isRead = false;
 
+    @Column(columnDefinition = "boolean default false")
     @Builder.Default
     boolean isRecalled = false;
 }
