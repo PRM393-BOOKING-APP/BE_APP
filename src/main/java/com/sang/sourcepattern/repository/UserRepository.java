@@ -44,5 +44,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt BETWEEN :start AND :end")
     long countUsersBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
+
+    /** Đếm số user DISTINCT có booking trong khoảng thời gian (dùng cho dashboard filter) */
+    @Query("SELECT COUNT(DISTINCT b.user) FROM Booking b WHERE b.createdAt BETWEEN :start AND :end AND b.status != 'PENDING_PAYMENT'")
+    long countActiveUsersBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
 }
 
